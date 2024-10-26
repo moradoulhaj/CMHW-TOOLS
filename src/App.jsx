@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   const [oldFiles, setOldFiles] = useState([]);
@@ -31,66 +31,52 @@ export default function App() {
       });
     };
 
-    const fileMerges = newFiles.map((newFile) => {
-      const match = newFile.name.match(/file_(\d+)/);
-      const newIndex = match ? parseInt(match[1]) : -1;
-      const oldIndex = newIndex + step;
-      const oldFile = oldFiles.find((file) => {
-        const oldMatch = file.name.match(/file_(\d+)/);
-        return oldMatch && parseInt(oldMatch[1]) === oldIndex;
+    const fileMerges = oldFiles.map((oldFile) => {
+      const match = oldFile.name.match(/file_(\d+)/);
+      const oldIndex = match ? parseInt(match[1]) : -1;
+      const newIndex = oldIndex - step;
+      const newFile = newFiles.find((file) => {
+        const newMatch = file.name.match(/file_(\d+)/);
+        return newMatch && parseInt(newMatch[1]) === newIndex;
       });
 
-      if (!oldFile) {
-        toast.error(`Missing old file at index ${oldIndex}. Merging process stopped.`);
-        throw new Error(`Missing old file at index ${oldIndex}`);
-      }
-
-      return readFileContent(oldFile).then(oldContent => 
-        readFileContent(newFile).then(newContent => ({
+      // If there is a new file, merge; otherwise, retain original content of the old file
+      if (newFile) {
+        return readFileContent(oldFile).then((oldContent) =>
+          readFileContent(newFile).then((newContent) => ({
+            name: oldFile.name,
+            content: oldContent + "\n" + newContent,
+          }))
+        );
+      } else {
+        return readFileContent(oldFile).then((oldContent) => ({
           name: oldFile.name,
-          content: oldContent + "\n" + newContent, // Overwrite old file with new content
-        }))
-      );
+          content: oldContent,
+        }));
+      }
     });
 
     Promise.all(fileMerges)
       .then((results) => {
         setMergedContents(results);
-        // Update old files state to reflect the merged content
-        const updatedOldFiles = oldFiles.map((file) => {
-          const mergedFile = results.find(result => result.name === file.name);
-          return mergedFile ? { name: mergedFile.name, content: mergedFile.content } : { name: file.name, content: "" }; // Initialize with empty content
-        });
-        setOldFiles(updatedOldFiles);
+        setOldFiles(results); // Update oldFiles with the merged contents
       })
       .catch((error) => console.error("Error reading files:", error));
   };
 
   const downloadMergedContent = () => {
-    const allFilesToDownload = oldFiles.map((file) => {
-        const mergedFile = mergedContents.find(result => result.name === file.name);
-        return {
-            name: file.name,
-            content: mergedFile ? mergedFile.content : "", // Set to empty if no change
-        };
+    mergedContents.forEach(({ name, content }) => {
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.click();
+
+      URL.revokeObjectURL(url);
     });
-    
-    allFilesToDownload.forEach(({ name, content }) => {
-        // If content is empty, keep the original content from oldFiles
-        const originalFile = oldFiles.find(original => original.name === name);
-        const finalContent = content === "" && originalFile ? originalFile.content : content;
-
-        const blob = new Blob([finalContent], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = name;
-        a.click();
-
-        URL.revokeObjectURL(url);
-    });
-};
+  };
 
   return (
     <div className="flex flex-col items-center p-8 space-y-4 bg-gray-100 min-h-screen">
