@@ -57,9 +57,9 @@ export default function App() {
       .then((results) => {
         setMergedContents(results);
         // Update old files state to reflect the merged content
-        const updatedOldFiles = oldFiles.map((file, index) => {
+        const updatedOldFiles = oldFiles.map((file) => {
           const mergedFile = results.find(result => result.name === file.name);
-          return mergedFile ? { name: mergedFile.name, content: mergedFile.content } : file;
+          return mergedFile ? { name: mergedFile.name, content: mergedFile.content } : { name: file.name, content: "" }; // Initialize with empty content
         });
         setOldFiles(updatedOldFiles);
       })
@@ -67,7 +67,16 @@ export default function App() {
   };
 
   const downloadMergedContent = () => {
-    mergedContents.forEach(({ name, content }) => {
+    // Combine both merged and unchanged old files for download
+    const allFilesToDownload = oldFiles.map((file) => {
+      const mergedFile = mergedContents.find(result => result.name === file.name);
+      return {
+        name: file.name,
+        content: mergedFile ? mergedFile.content : file.content, // Use merged content if available, otherwise use the original content
+      };
+    });
+
+    allFilesToDownload.forEach(({ name, content }) => {
       const blob = new Blob([content], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
 
