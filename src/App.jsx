@@ -31,6 +31,24 @@ export default function App() {
       });
     };
 
+    // Check if every new file has a corresponding old file
+    for (const newFile of newFiles) {
+      const match = newFile.name.match(/file_(\d+)/);
+      const newIndex = match ? parseInt(match[1]) : -1;
+      const oldIndex = newIndex + step; // Get the corresponding old file index
+
+      const correspondingOldFile = oldFiles.find((file) => {
+        const oldMatch = file.name.match(/file_(\d+)/);
+        return oldMatch && parseInt(oldMatch[1]) === oldIndex;
+      });
+
+      if (!correspondingOldFile) {
+        toast.error(`No corresponding old file found for ${newFile.name}`);
+        return; // Stop the merging process if no corresponding old file
+      }
+    }
+
+    // Proceed to merge files if all checks pass
     const fileMerges = oldFiles.map((oldFile) => {
       const match = oldFile.name.match(/file_(\d+)/);
       const oldIndex = match ? parseInt(match[1]) : -1;
@@ -40,20 +58,19 @@ export default function App() {
         return newMatch && parseInt(newMatch[1]) === newIndex;
       });
 
-      // If there is a new file, merge; otherwise, retain original content of the old file
-      if (newFile) {
-        return readFileContent(oldFile).then((oldContent) =>
-          readFileContent(newFile).then((newContent) => ({
+      // Merge contents of corresponding files
+      return readFileContent(oldFile).then((oldContent) => {
+        if (newFile) {
+          return readFileContent(newFile).then((newContent) => ({
             name: oldFile.name,
             content: oldContent + "\n" + newContent,
-          }))
-        );
-      } else {
-        return readFileContent(oldFile).then((oldContent) => ({
+          }));
+        }
+        return {
           name: oldFile.name,
           content: oldContent,
-        }));
-      }
+        };
+      });
     });
 
     Promise.all(fileMerges)
