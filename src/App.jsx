@@ -67,27 +67,30 @@ export default function App() {
   };
 
   const downloadMergedContent = () => {
-    // Combine both merged and unchanged old files for download
     const allFilesToDownload = oldFiles.map((file) => {
-      const mergedFile = mergedContents.find(result => result.name === file.name);
-      return {
-        name: file.name,
-        content: mergedFile ? mergedFile.content : file.content, // Use merged content if available, otherwise use the original content
-      };
+        const mergedFile = mergedContents.find(result => result.name === file.name);
+        return {
+            name: file.name,
+            content: mergedFile ? mergedFile.content : "", // Set to empty if no change
+        };
     });
-
+    
     allFilesToDownload.forEach(({ name, content }) => {
-      const blob = new Blob([content], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
+        // If content is empty, keep the original content from oldFiles
+        const originalFile = oldFiles.find(original => original.name === name);
+        const finalContent = content === "" && originalFile ? originalFile.content : content;
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = name;
-      a.click();
+        const blob = new Blob([finalContent], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
 
-      URL.revokeObjectURL(url);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        a.click();
+
+        URL.revokeObjectURL(url);
     });
-  };
+};
 
   return (
     <div className="flex flex-col items-center p-8 space-y-4 bg-gray-100 min-h-screen">
