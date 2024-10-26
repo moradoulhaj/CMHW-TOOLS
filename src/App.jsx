@@ -45,16 +45,24 @@ export default function App() {
         throw new Error(`Missing old file at index ${oldIndex}`);
       }
 
-      return Promise.all([readFileContent(newFile), readFileContent(oldFile)]).then(
-        ([newContent, oldContent]) => ({
-          name: `merged_${newFile.name}`,
-          content: oldContent + "\n" + newContent,
-        })
+      return readFileContent(oldFile).then(oldContent => 
+        readFileContent(newFile).then(newContent => ({
+          name: oldFile.name,
+          content: oldContent + "\n" + newContent, // Overwrite old file with new content
+        }))
       );
     });
 
     Promise.all(fileMerges)
-      .then((results) => setMergedContents(results))
+      .then((results) => {
+        setMergedContents(results);
+        // Update old files state to reflect the merged content
+        const updatedOldFiles = oldFiles.map((file, index) => {
+          const mergedFile = results.find(result => result.name === file.name);
+          return mergedFile ? { name: mergedFile.name, content: mergedFile.content } : file;
+        });
+        setOldFiles(updatedOldFiles);
+      })
       .catch((error) => console.error("Error reading files:", error));
   };
 
