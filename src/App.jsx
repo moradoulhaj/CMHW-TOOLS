@@ -8,12 +8,20 @@ export default function App() {
   const [newFiles, setNewFiles] = useState([]);
   const [mergedContents, setMergedContents] = useState([]);
   const [step, setStep] = useState(1);
-  const [delimiter, setDelimiter] = useState("\n"); // Default delimiter
+  const [delimiter, setDelimiter] = useState("AUTO"); // Default to AUTO
 
   const oldFileInputRef = useRef(null);
   const newFileInputRef = useRef(null);
 
-  var separator = ""
+  const readFileContent = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject(e);
+      reader.readAsText(file);
+    });
+  };
+
   const detectSeparator = async () => {
     if (newFiles.length > 0) {
       const fileContent = await readFileContent(newFiles[0]);
@@ -25,43 +33,27 @@ export default function App() {
   };
 
   const handleOldFileUpload = (event) => {
-    const uploadedOldFiles = Array.from(event.target.files);
-    setOldFiles(uploadedOldFiles);
+    setOldFiles(Array.from(event.target.files));
   };
 
   const handleNewFileUpload = (event) => {
-    const uploadedNewFiles = Array.from(event.target.files);
-    setNewFiles(uploadedNewFiles);
+    setNewFiles(Array.from(event.target.files));
   };
 
   const mergeFiles = async () => {
-    if(delimiter == "\\n" || delimiter == "\n"){
-      separator = "\n"
-    }
-    else if(delimiter == ";"){
-      separator = ";"
-    }
-    else if (delimiter == "AUTO"){
+    let separator = delimiter;
+
+    // Use auto-detection if delimiter is set to AUTO
+    if (delimiter === "AUTO") {
       separator = await detectSeparator();
-      console.log(separator);
+      toast.success(separator);
     }
-    
 
-    const readFileContent = (file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = (e) => reject(e);
-        reader.readAsText(file);
-      });
-    };
-    
-
-    // Check if every new file has a corresponding old file
+    // Ensure every new file has a corresponding old file
     for (const newFile of newFiles) {
       const match = newFile.name.match(/file_(\d+)/);
       const newIndex = match ? parseInt(match[1]) : -1;
-      const oldIndex = newIndex + step; // Get the corresponding old file index
+      const oldIndex = newIndex + step; // Get corresponding old file index
 
       const correspondingOldFile = oldFiles.find((file) => {
         const oldMatch = file.name.match(/file_(\d+)/);
@@ -70,11 +62,11 @@ export default function App() {
 
       if (!correspondingOldFile) {
         toast.error(`No corresponding old file found for ${newFile.name}`);
-        return; // Stop the merging process if no corresponding old file
+        return; // Stop merging if no corresponding old file
       }
     }
 
-    // Proceed to merge files if all checks pass
+    // Merge contents of files
     const fileMerges = oldFiles.map((oldFile) => {
       const match = oldFile.name.match(/file_(\d+)/);
       const oldIndex = match ? parseInt(match[1]) : -1;
@@ -84,49 +76,41 @@ export default function App() {
         return newMatch && parseInt(newMatch[1]) === newIndex;
       });
 
-      // Merge contents of corresponding files
       return readFileContent(oldFile).then((oldContent) => {
         if (newFile) {
           return readFileContent(newFile).then((newContent) => ({
             name: oldFile.name,
-            content: oldContent + separator + newContent, // Use selected delimiter
+            content: oldContent + separator + newContent,
           }));
         }
-        return {
-          name: oldFile.name,
-          content: oldContent,
-        };
+        return { name: oldFile.name, content: oldContent };
       });
     });
 
     Promise.all(fileMerges)
       .then((results) => {
         setMergedContents(results);
-        setOldFiles(results); // Update oldFiles with the merged contents
         toast.success("Files merged successfully!");
       })
       .catch((error) => console.error("Error reading files:", error));
   };
 
   const downloadMergedContent = async () => {
-    const zip = new JSZip(); // Create a new ZIP archive
+    const zip = new JSZip();
 
-    // Add each merged file to the ZIP
     mergedContents.forEach(({ name, content }) => {
       zip.file(name, content);
     });
 
-    // Generate the ZIP as a blob
     const blob = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(blob);
 
-    // Create an anchor element to trigger the download
     const a = document.createElement("a");
     a.href = url;
-    a.download = "merged_files.zip"; // Name for the ZIP file
+    a.download = "merged_files.zip";
     a.click();
 
-    URL.revokeObjectURL(url); // Clean up the object URL
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -191,40 +175,36 @@ export default function App() {
         </label>
         <select
           value={delimiter}
-          onChange={(e) => {setDelimiter(e.target.value)}}
+          onChange={(e) => setDelimiter(e.target.value)}
           className="border border-gray-300 rounded-md px-3 py-2 text-center text-gray-700 shadow-sm focus:outline-none focus:border-blue-400"
         >
-          <option value="AUTO" selected>Auto</option>
+          <option value="AUTO">Auto</option>
           <option value="\n">New Line</option>
           <option value=";">Semicolon (;)</option>
         </select>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8 w-full md:justify-center">
+      <div className="flex flex-col md:flex-row gap-8 w-full md:justify-center mt-6">
         <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-md">
           <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
             Uploaded Old Files
           </h3>
-          <ul className="list-disc list-inside space-y-2">
-            {oldFiles.map((file, index) => (
-              <li key={index} className="text-gray-600">
-                {file.name}
-              </li>
-            ))}
-          </ul>
+          <textarea
+            className="w-full h-32 border border-gray-300 rounded-md p-2"
+            value={oldFiles.map((file) => file.name).join("\n")}
+            readOnly
+          />
         </div>
 
         <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-md">
           <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
             Uploaded New Files
           </h3>
-          <ul className="list-disc list-inside space-y-2">
-            {newFiles.map((file, index) => (
-              <li key={index} className="text-gray-600">
-                {file.name}
-              </li>
-            ))}
-          </ul>
+          <textarea
+            className="w-full h-32 border border-gray-300 rounded-md p-2"
+            value={newFiles.map((file) => file.name).join("\n")}
+            readOnly
+          />
         </div>
       </div>
 
