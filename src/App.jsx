@@ -1,6 +1,8 @@
 import React, { useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import JSZip from "jszip";
+
 
 export default function App() {
   const [oldFiles, setOldFiles] = useState([]);
@@ -81,19 +83,27 @@ export default function App() {
       .catch((error) => console.error("Error reading files:", error));
   };
 
-  const downloadMergedContent = () => {
+  const downloadMergedContent = async () => {
+    const zip = new JSZip(); // Create a new ZIP archive
+  
+    // Add each merged file to the ZIP
     mergedContents.forEach(({ name, content }) => {
-      const blob = new Blob([content], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = name;
-      a.click();
-
-      URL.revokeObjectURL(url);
+      zip.file(name, content);
     });
+  
+    // Generate the ZIP as a blob
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+  
+    // Create an anchor element to trigger the download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "merged_files.zip"; // Name for the ZIP file
+    a.click();
+  
+    URL.revokeObjectURL(url); // Clean up the object URL
   };
+  
 
   return (
     <div className="flex flex-col items-center p-8 space-y-4 bg-gray-100 min-h-screen">
