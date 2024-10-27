@@ -1,41 +1,59 @@
 import React, { useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import JSZip from "jszip";
 
 export default function App() {
   const [oldFiles, setOldFiles] = useState([]);
   const [newFiles, setNewFiles] = useState([]);
   const [mergedContents, setMergedContents] = useState([]);
   const [step, setStep] = useState(1);
+  const [delimiter, setDelimiter] = useState("AUTO"); // Default to AUTO
 
   const oldFileInputRef = useRef(null);
   const newFileInputRef = useRef(null);
 
+  const readFileContent = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject(e);
+      reader.readAsText(file);
+    });
+  };
+
+  const detectSeparator = async () => {
+    if (newFiles.length > 0) {
+      const fileContent = await readFileContent(newFiles[0]);
+      const semicolonCount = (fileContent.match(/;/g) || []).length;
+      const newlineCount = (fileContent.match(/\n/g) || []).length;
+      return semicolonCount > newlineCount ? ";" : "\n";
+    }
+    return "\n";
+  };
+
   const handleOldFileUpload = (event) => {
-    const uploadedOldFiles = Array.from(event.target.files);
-    setOldFiles(uploadedOldFiles);
+    setOldFiles(Array.from(event.target.files));
   };
 
   const handleNewFileUpload = (event) => {
-    const uploadedNewFiles = Array.from(event.target.files);
-    setNewFiles(uploadedNewFiles);
+    setNewFiles(Array.from(event.target.files));
   };
 
-  const mergeFiles = () => {
-    const readFileContent = (file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = (e) => reject(e);
-        reader.readAsText(file);
-      });
-    };
+  const mergeFiles = async () => {
+    let separator = delimiter;
 
-    // Check if every new file has a corresponding old file
+    // Use auto-detection if delimiter is set to AUTO
+    if (delimiter === "AUTO") {
+      separator = await detectSeparator();
+      toast.success(separator);
+    }
+
+    // Ensure every new file has a corresponding old file
     for (const newFile of newFiles) {
       const match = newFile.name.match(/file_(\d+)/);
       const newIndex = match ? parseInt(match[1]) : -1;
-      const oldIndex = newIndex + step; // Get the corresponding old file index
+      const oldIndex = newIndex + step; // Get corresponding old file index
 
       const correspondingOldFile = oldFiles.find((file) => {
         const oldMatch = file.name.match(/file_(\d+)/);
@@ -44,11 +62,11 @@ export default function App() {
 
       if (!correspondingOldFile) {
         toast.error(`No corresponding old file found for ${newFile.name}`);
-        return; // Stop the merging process if no corresponding old file
+        return; // Stop merging if no corresponding old file
       }
     }
 
-    // Proceed to merge files if all checks pass
+    // Merge contents of files
     const fileMerges = oldFiles.map((oldFile) => {
       const match = oldFile.name.match(/file_(\d+)/);
       const oldIndex = match ? parseInt(match[1]) : -1;
@@ -58,51 +76,51 @@ export default function App() {
         return newMatch && parseInt(newMatch[1]) === newIndex;
       });
 
-      // Merge contents of corresponding files
       return readFileContent(oldFile).then((oldContent) => {
         if (newFile) {
           return readFileContent(newFile).then((newContent) => ({
             name: oldFile.name,
-            content: oldContent + "\n" + newContent,
+            content: oldContent + separator + newContent,
           }));
         }
-        return {
-          name: oldFile.name,
-          content: oldContent,
-        };
+        return { name: oldFile.name, content: oldContent };
       });
     });
 
     Promise.all(fileMerges)
       .then((results) => {
         setMergedContents(results);
-        setOldFiles(results); // Update oldFiles with the merged contents
+        toast.success("Files merged successfully!");
       })
       .catch((error) => console.error("Error reading files:", error));
   };
 
-  const downloadMergedContent = () => {
+  const downloadMergedContent = async () => {
+    const zip = new JSZip();
+
     mergedContents.forEach(({ name, content }) => {
-      const blob = new Blob([content], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = name;
-      a.click();
-
-      URL.revokeObjectURL(url);
+      zip.file(name, content);
     });
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "merged_files.zip";
+    a.click();
+
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="flex flex-col items-center p-8 space-y-4 bg-gray-100 min-h-screen">
+    <div className="flex flex-col items-center p-8 space-y-6 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 min-h-screen">
       <ToastContainer />
-      <h2 className="text-2xl font-bold text-gray-800">
+      <h2 className="text-3xl font-bold text-blue-700 drop-shadow-md">
         Merge Old and New Text Files
       </h2>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row gap-6">
         <div>
           <input
             type="file"
@@ -113,7 +131,7 @@ export default function App() {
             style={{ display: "none" }}
           />
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="bg-blue-500 text-white px-5 py-3 rounded-md shadow-md hover:bg-blue-600 transition-colors duration-200"
             onClick={() => oldFileInputRef.current.click()}
           >
             Upload Old Files
@@ -130,7 +148,7 @@ export default function App() {
             style={{ display: "none" }}
           />
           <button
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="bg-green-500 text-white px-5 py-3 rounded-md shadow-md hover:bg-green-600 transition-colors duration-200"
             onClick={() => newFileInputRef.current.click()}
           >
             Upload New Files
@@ -138,60 +156,73 @@ export default function App() {
         </div>
       </div>
 
-      <div>
-        <label className="text-gray-700">
-          Enter the step value (e.g., 3 for merging new file_1 with old file_4):
+      <div className="flex flex-col items-center">
+        <label className="text-lg font-medium text-gray-800 mb-1">
+          Step Value (e.g., 3 to merge new file_1 with old file_4):
         </label>
         <input
           type="number"
           value={step}
           onChange={(e) => setStep(Number(e.target.value))}
-          className="border rounded px-2 py-1 ml-2"
+          className="border border-gray-300 rounded-md px-3 py-2 text-center text-gray-700 shadow-sm focus:outline-none focus:border-blue-400"
           min="1"
         />
       </div>
 
-      <div className="flex justify-between gap-6">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-700">
-            Uploaded Old Files:
+      <div className="flex flex-col items-center mt-4">
+        <label className="text-lg font-medium text-gray-800 mb-1">
+          Choose delimiter for merging:
+        </label>
+        <select
+          value={delimiter}
+          onChange={(e) => setDelimiter(e.target.value)}
+          className="border border-gray-300 rounded-md px-3 py-2 text-center text-gray-700 shadow-sm focus:outline-none focus:border-blue-400"
+        >
+          <option value="AUTO">Auto</option>
+          <option value="\n">New Line</option>
+          <option value=";">Semicolon (;)</option>
+        </select>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-8 w-full md:justify-center mt-6">
+        <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-md">
+          <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
+            Uploaded Old Files
           </h3>
-          <ul>
-            {oldFiles.map((file, index) => (
-              <li key={index} className="text-gray-600">
-                {file.name}
-              </li>
-            ))}
-          </ul>
+          <textarea
+            className="w-full h-32 border border-gray-300 rounded-md p-2"
+            value={oldFiles.map((file) => file.name).join("\n")}
+            readOnly
+          />
         </div>
 
-        <div>
-          <h3 className="text-xl font-semibold text-gray-700">
-            Uploaded New Files:
+        <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-md">
+          <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
+            Uploaded New Files
           </h3>
-          <ul>
-            {newFiles.map((file, index) => (
-              <li key={index} className="text-gray-600">
-                {file.name}
-              </li>
-            ))}
-          </ul>
+          <textarea
+            className="w-full h-32 border border-gray-300 rounded-md p-2"
+            value={newFiles.map((file) => file.name).join("\n")}
+            readOnly
+          />
         </div>
       </div>
 
-      <button
-        className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-        onClick={mergeFiles}
-      >
-        Merge Files
-      </button>
-      <button
-        className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-        onClick={downloadMergedContent}
-        disabled={!mergedContents.length}
-      >
-        Download Merged Files
-      </button>
+      <div className="flex gap-4 mt-4">
+        <button
+          className="bg-yellow-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-yellow-600 transition-colors duration-200"
+          onClick={mergeFiles}
+        >
+          Merge Files
+        </button>
+        <button
+          className="bg-purple-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-600 transition-colors duration-200"
+          onClick={downloadMergedContent}
+          disabled={!mergedContents.length}
+        >
+          Download Merged Files
+        </button>
+      </div>
     </div>
   );
 }
