@@ -14,6 +14,15 @@ export default function App() {
   const newFileInputRef = useRef(null);
 
   var separator = ""
+  const detectSeparator = async () => {
+    if (newFiles.length > 0) {
+      const fileContent = await readFileContent(newFiles[0]);
+      const semicolonCount = (fileContent.match(/;/g) || []).length;
+      const newlineCount = (fileContent.match(/\n/g) || []).length;
+      return semicolonCount > newlineCount ? ";" : "\n";
+    }
+    return "\n";
+  };
 
   const handleOldFileUpload = (event) => {
     const uploadedOldFiles = Array.from(event.target.files);
@@ -25,7 +34,7 @@ export default function App() {
     setNewFiles(uploadedNewFiles);
   };
 
-  const mergeFiles = () => {
+  const mergeFiles = async () => {
     if(delimiter == "\\n" || delimiter == "\n"){
       separator = "\n"
     }
@@ -33,7 +42,8 @@ export default function App() {
       separator = ";"
     }
     else if (delimiter == "AUTO"){
-      separator =  detectSeparator();
+      separator = await detectSeparator();
+      console.log(separator);
     }
     
 
