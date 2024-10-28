@@ -8,7 +8,7 @@ const ConfirmModal = ({ isOpen, separator, onConfirm, onCancel }) => {
             <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm mx-auto">
                 <h3 className="text-xl font-semibold text-gray-800">Confirm Separator</h3>
                 <p className="mt-4 text-gray-700">
-                    The auto-detected separator is: <strong className="text-blue-600">{separator == ";" ? "Semicolon" : "New Line"}</strong>
+                    The auto-detected separator is: <strong className="text-blue-700">{separator == ";" ? "Semicolon" : "New Line"}</strong>
                 </p>
                 <div className="mt-6 flex justify-end">
                     <button
