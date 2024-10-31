@@ -24,13 +24,23 @@ export default function RemoveSessions() {
   };
 
   const removeTags = (content, tags) => {
-    // Create a regex pattern to match tags without brackets
-    const tagPattern = new RegExp(
-        tags.map(tag => tag.replace(/^\[|\]$/g, '')).join("|"), // Remove brackets
-        "g"
-    );
-    return content.replace(tagPattern, ""); // Replace matched tags with an empty string
+    tags.forEach((tag) => {
+        // Remove all occurrences of each tag from content
+        content = content.split(tag).join("");
+    });
+
+    // Remove extra whitespace and empty lines
+    const cleanedContent = content
+        .split('\n')
+        .filter(line => line.trim() !== '') // Remove empty lines
+        .join('\n') // Join lines back together
+        .trim(); // Remove trailing newline characters
+
+    return cleanedContent;
 };
+
+
+
 
 
   const processFiles = async () => {
