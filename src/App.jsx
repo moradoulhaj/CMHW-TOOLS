@@ -165,7 +165,7 @@ export default function App() {
                         className="bg-green-500 text-white px-5 py-3 rounded-md shadow-md hover:bg-green-600 transition-colors duration-200"
                         onClick={() => newFileInputRef.current.click()}
                     >
-                        Upload New Files
+                        Upload New Filess
                     </button>
                 </div>
             </div>
