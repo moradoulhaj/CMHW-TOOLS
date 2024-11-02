@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState,useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import JSZip from "jszip";
@@ -15,7 +15,7 @@ export default function AddSessions() {
   
     const oldFileInputRef = useRef(null);
     const newFileInputRef = useRef(null);
-  
+
     const readFileContent = (file) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
