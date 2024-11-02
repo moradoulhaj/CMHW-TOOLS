@@ -32,7 +32,7 @@ export default function AddSessions() {
             const newlineCount = (fileContent.match(/\n/g) || []).length;
             return semicolonCount > newlineCount ? ";" : "\n";
         }
-        return "no_split";
+        return "no_detect";
     };
   
     const handleOldFileUpload = (event) => {
@@ -68,7 +68,7 @@ export default function AddSessions() {
 
         if (delimiter === "AUTO") {
             separator = await detectSeparator();
-            if(separator != "no_split"){
+            if(separator != "no_detect"){
                 setDetectedSeparator(separator);
                 setIsModalOpen(true); // Open the modal for confirmation
             }

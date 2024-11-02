@@ -13,7 +13,6 @@ export default function RemoveSessions() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const oldFileInputRef = useRef(null);
-  
 
   const readFileContent = (file) => {
     return new Promise((resolve, reject) => {
@@ -31,7 +30,7 @@ export default function RemoveSessions() {
       const newlineCount = (fileContent.match(/\n/g) || []).length;
       return semicolonCount > newlineCount ? ";" : "\n";
     }
-    return "no_split";
+    return "no_detect";
   };
   const handleOldFileUpload = (event) => {
     setOldFiles(Array.from(event.target.files));
@@ -40,29 +39,26 @@ export default function RemoveSessions() {
     tagsArray.forEach((tag) => {
       content = content.split(tag).join("");
     });
-  
+
     // Split content by lines to handle empty line removal
     const cleanedContentArray = content
       .split("\n") // Split by lines first
-      .map(line =>
-        line
-          .split(delimiter) // Split by delimiter within each line
-          .map(item => item.trim())
-          .filter(item => item) // Remove empty items
-          .join(delimiter) // Rejoin with delimiter
+      .map(
+        (line) =>
+          line
+            .split(delimiter) // Split by delimiter within each line
+            .map((item) => item.trim())
+            .filter((item) => item) // Remove empty items
+            .join(delimiter) // Rejoin with delimiter
       )
-      .filter(line => line.trim() !== ""); // Remove empty lines
-  
+      .filter((line) => line.trim() !== ""); // Remove empty lines
+
     // Rejoin lines with newline character to preserve line breaks
     const cleanedContent = cleanedContentArray.join("\n");
-  
+
     return cleanedContent.trim();
   };
-  
-  
-  
-  
-  
+
   const handleConfirmSeparator = () => {
     setDelimiter(detectedSeparator); // Set the delimiter to the detected one
     setIsModalOpen(false); // Close the modal
@@ -84,8 +80,10 @@ export default function RemoveSessions() {
     }
     if (delimiter === "AUTO") {
       separator = await detectSeparator();
-      setDetectedSeparator(separator);
-      setIsModalOpen(true); // Open the modal for confirmation
+      if (separator != "no_detect") {
+        setDetectedSeparator(separator);
+        setIsModalOpen(true);
+      } // Open the modal for confirmation
       return;
     }
     const tags = tagsToRemove
@@ -96,7 +94,7 @@ export default function RemoveSessions() {
     const fileProcesses = oldFiles.map((file) =>
       readFileContent(file).then((content) => ({
         name: file.name,
-        content: removeTags(content, tags , delimiter), // Remove tags from each file's content
+        content: removeTags(content, tags, delimiter), // Remove tags from each file's content
       }))
     );
 
