@@ -32,7 +32,7 @@ export default function AddSessions() {
             const newlineCount = (fileContent.match(/\n/g) || []).length;
             return semicolonCount > newlineCount ? ";" : "\n";
         }
-        return "\n";
+        return "no_split";
     };
   
     const handleOldFileUpload = (event) => {
@@ -46,12 +46,7 @@ export default function AddSessions() {
     const mergeFiles = async () => {
         let separator = delimiter;
   
-        if (delimiter === "AUTO") {
-            separator = await detectSeparator();
-            setDetectedSeparator(separator);
-            setIsModalOpen(true); // Open the modal for confirmation
-            return;
-        }
+    
   
         // Ensure every new file has a corresponding old file
         for (const newFile of newFiles) {
@@ -66,8 +61,18 @@ export default function AddSessions() {
   
             if (!correspondingOldFile) {
                 toast.error(`No corresponding old file found for ${newFile.name}`);
-                return; // Stop merging if no corresponding old file
+                return ; // Stop merging if no corresponding old file
             }
+       
+        }
+
+        if (delimiter === "AUTO") {
+            separator = await detectSeparator();
+            if(separator != "no_split"){
+                setDetectedSeparator(separator);
+                setIsModalOpen(true); // Open the modal for confirmation
+            }
+            return;
         }
   
         // Merge contents of files

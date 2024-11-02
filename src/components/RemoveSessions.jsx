@@ -31,7 +31,7 @@ export default function RemoveSessions() {
       const newlineCount = (fileContent.match(/\n/g) || []).length;
       return semicolonCount > newlineCount ? ";" : "\n";
     }
-    return "\n";
+    return "no_split";
   };
   const handleOldFileUpload = (event) => {
     setOldFiles(Array.from(event.target.files));
