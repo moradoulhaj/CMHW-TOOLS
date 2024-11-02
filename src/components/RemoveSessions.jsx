@@ -13,9 +13,7 @@ export default function RemoveSessions() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const oldFileInputRef = useRef(null);
-  useEffect(() => {
-    toast.error(delimiter);
-  }, [delimiter]);
+  
 
   const readFileContent = (file) => {
     return new Promise((resolve, reject) => {
