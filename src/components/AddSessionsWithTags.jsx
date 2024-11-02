@@ -3,10 +3,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import JSZip from "jszip";
 
-export default function RemoveSessions() {
+export default function AddSessionWithTags() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedContents, setProcessedContents] = useState([]); // State to hold processed content
-  const [tagsToRemove, setTagsToRemove] = useState("");
+  const [tagsToAdd, setTagsToAdd] = useState("");
+  const [dropsNbr, setDropsNbr] = useState(1);
 
   const oldFileInputRef = useRef(null);
 
@@ -23,80 +24,23 @@ export default function RemoveSessions() {
     setOldFiles(Array.from(event.target.files));
   };
 
-  const removeTags = (content, tags) => {
-    tags.forEach((tag) => {
-        // Remove all occurrences of each tag from content
-        content = content.split(tag).join("");
-    });
-
-    // Remove extra whitespace and empty lines
-    const cleanedContent = content
-        .split('\n')
-        .filter(line => line.trim() !== '') // Remove empty lines
-        .join('\n') // Join lines back together
-        .trim(); // Remove trailing newline characters
-
-    return cleanedContent;
-};
-
-
-
-
-
   const processFiles = async () => {
-    if (!tagsToRemove) {
-      toast.error("Please specify tags to remove.");
-      return;
-    }else if (!oldFiles.length){
-        toast.error("Please upload files.");
-        return;
-    }
-    const tags = tagsToRemove
+    const tags = tagsToAdd
       .split("\n")
       .map((tag) => tag.trim())
       .filter((tag) => tag); // Split by new line and trim
 
-    const fileProcesses = oldFiles.map((file) =>
-      readFileContent(file).then((content) => ({
-        name: file.name,
-        content: removeTags(content, tags), // Remove tags from each file's content
-      }))
-    );
-
-    Promise.all(fileProcesses)
-      .then((results) => {
-        setProcessedContents(results); // Store processed contents in state
-        toast.success("Tags removed successfully!");
-      })
-      .catch((error) => console.error("Error processing files:", error));
-  };
-
-  const downloadProcessedContent = async () => {
-    const zip = new JSZip();
-
-    processedContents.forEach(({ name, content }) => {
-      zip.file(name, content);
-    });
-
-    const blob = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "processed_files.zip";
-    a.click();
-
-    URL.revokeObjectURL(url);
+    console.log(tags[0]);
   };
 
   return (
     <div className="flex flex-col items-center p-8 space-y-6 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 min-h-screen">
       <ToastContainer />
       <h2 className="text-3xl font-bold text-blue-700 drop-shadow-md">
-        Remove Tags from Uploaded Text Files
+        Remove Tags from Uploaded Text Files - <p className="text-red">Not stable</p>
       </h2>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-10">
         <div>
           <input
             type="file"
@@ -113,6 +57,19 @@ export default function RemoveSessions() {
             Upload Files
           </button>
         </div>
+        <div className="gap-3">
+          <label className="text-lg font-medium text-gray-800 mb-1">
+            Drops Number:
+          </label>&nbsp;
+          <input
+            type="number"
+            value={dropsNbr}
+            onChange={(e) => setDropsNbr(e.target.value)}
+            className="border border-gray-300 rounded-md px-5 py-3 text-center text-gray-700 shadow-sm focus:outline-none focus:border-blue-400"
+            min="1"
+            
+          />
+        </div>
       </div>
 
       <div className="flex flex-col items-center mt-4">
@@ -121,8 +78,8 @@ export default function RemoveSessions() {
             Tags to Remove (enter each tag on a new line):
           </label>
           <textarea
-            value={tagsToRemove}
-            onChange={(e) => setTagsToRemove(e.target.value)}
+            value={tagsToAdd}
+            onChange={(e) => setTagsToAdd(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 text-gray-700 shadow-sm focus:outline-none focus:border-blue-400 w-full h-32"
             placeholder="Enter tags to remove, one per line"
           />
@@ -149,11 +106,7 @@ export default function RemoveSessions() {
         >
           Remove Rdp
         </button>
-        <button
-          className="bg-purple-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-600 transition-colors duration-200"
-          onClick={downloadProcessedContent}
-          disabled={!processedContents.length} // Disable if no processed contents
-        >
+        <button className="bg-purple-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-600 transition-colors duration-200">
           Download Files
         </button>
       </div>

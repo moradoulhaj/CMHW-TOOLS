@@ -193,7 +193,7 @@ export default function AddSessions() {
                     className="border border-gray-300 rounded-md px-3 py-2 text-center text-gray-700 shadow-sm focus:outline-none focus:border-blue-400"
                 >
                     <option value="AUTO">Auto</option>
-                    <option value="\n">New Line</option>
+                    <option value="\n">New Line (\n)</option>
                     <option value=";">Semicolon (;)</option>
                 </select>
             </div>
