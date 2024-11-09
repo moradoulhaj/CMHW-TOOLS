@@ -4,17 +4,25 @@ import "react-toastify/dist/ReactToastify.css";
 import JSZip from "jszip";
 import ConfirmModal from "./ConfirmModal";
 import FileList from "./FilesList";
-import { Download, Trash2, Upload } from "lucide-react";
+import { Download, RotateCcw, Trash2, Upload } from "lucide-react";
 import DelimiterSelector from "./DelimiterSelector";
+import TagsInput from "./TagsInput";
 
 export default function Ok() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedContents, setProcessedContents] = useState([]); // State to hold processed content
   const [tagsToRemove, setTagsToRemove] = useState("");
   const [delimiter, setDelimiter] = useState("AUTO");
-  const [detectedSeparator, setDetectedSeparator] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [separator, setSeparator] = useState("");
+  const HandleReset = () => {
+    setOldFiles([]);
+    setProcessedContents([]);
+    setTagsToRemove("");
+    setDelimiter("AUTO");
+    setIsModalOpen(false);
+    setSeparator("");
+  };
 
   const oldFileInputRef = useRef(null);
   const handleRemoveTags = async () => {
@@ -56,6 +64,7 @@ export default function Ok() {
   };
   const handleOldFileUpload = (event) => {
     setOldFiles(Array.from(event.target.files));
+    setProcessedContents([]);
   };
   const removeTags = async (content, tagsArray, delimiter) => {
     tagsArray.forEach((tag) => {
@@ -152,33 +161,45 @@ export default function Ok() {
             <span className="font-medium">Upload Text Files</span>
           </button>
         </div>
+        <div>
+          <button
+            onClick={HandleReset}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg hover:scale-105 border border-blue-600 transition-transform transition-colors duration-200 font-medium"
+          >
+            <RotateCcw className="w-5 h-5" />
+            Reset
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col items-center mt-4">
-        <DelimiterSelector delimiter={delimiter} setDelimiter={setDelimiter} />
+        <DelimiterSelector delimiter={delimiter} setDelimiter={setDelimiter} setProcessedContents={setProcessedContents}/>
       </div>
 
       <div className="flex flex-col items-center mt-4 w-full max-w-lg">
-        <label className="text-lg font-semibold text-gray-800 mb-2">
-          Tags to Remove (one per line):
-        </label>
-        <textarea
-          value={tagsToRemove}
-          onChange={(e) => setTagsToRemove(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-3 text-gray-700 shadow-md focus:outline-none focus:border-blue-500 w-full h-32 resize-none"
-          placeholder="Enter tags to remove, one per line"
+        <TagsInput
+          tagsToRemove={tagsToRemove}
+          setTagsToRemove={setTagsToRemove}
+          setProcessedContents={setProcessedContents}
         />
       </div>
 
       <div className="flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6">
         {/* Suggested code may be subject to a license. Learn more: ~LicenseLog:2755053658. */}
-        <FileList files={oldFiles} titre={"Uploaded Files"} />
+        <FileList
+          files={oldFiles}
+          titre={"Uploaded Files"}
+          setOldFiles={setOldFiles}
+          setProcessedContents={setProcessedContents}
+        />
       </div>
 
       <div className="flex gap-6 mt-6">
         <button
           onClick={handleRemoveTags}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium"
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
+            processedContents.length ? "hidden" : ""
+          }`}
         >
           <Trash2 className="w-5 h-5" />
           Remove Tags

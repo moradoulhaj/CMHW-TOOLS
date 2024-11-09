@@ -126,92 +126,91 @@ export default function RemoveSessions() {
   };
 
   return (
-  <div className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen">
-  <ToastContainer />
-  <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
-    Remove Tags from Uploaded Text Files
-  </h2>
+    <div className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen">
+      <ToastContainer />
+      <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
+        Remove Tags from Uploaded Text Files
+      </h2>
 
-  <div className="flex flex-col md:flex-row gap-8 items-center">
-    <div>
-      <input
-        type="file"
-        accept=".txt"
-        multiple
-        ref={oldFileInputRef}
-        onChange={handleOldFileUpload}
-        style={{ display: "none" }}
+      <div className="flex flex-col md:flex-row gap-8 items-center">
+        <div>
+          <input
+            type="file"
+            accept=".txt"
+            multiple
+            ref={oldFileInputRef}
+            onChange={handleOldFileUpload}
+            style={{ display: "none" }}
+          />
+          <button
+            className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-200"
+            onClick={() => oldFileInputRef.current.click()}
+          >
+            Upload Files
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center mt-4">
+        <label className="text-lg font-semibold text-gray-800 mb-2">
+          Choose Your Delimiter:
+        </label>
+        <select
+          value={delimiter}
+          onChange={(e) => setDelimiter(e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-2 text-center text-gray-700 shadow-md focus:outline-none focus:border-blue-500"
+        >
+          <option value="AUTO">Auto</option>
+          <option value="\n">New Line (\n)</option>
+          <option value=";">Semicolon (;)</option>
+        </select>
+      </div>
+
+      <div className="flex flex-col items-center mt-4 w-full max-w-lg">
+        <label className="text-lg font-semibold text-gray-800 mb-2">
+          Tags to Remove (one per line):
+        </label>
+        <textarea
+          value={tagsToRemove}
+          onChange={(e) => setTagsToRemove(e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-3 text-gray-700 shadow-md focus:outline-none focus:border-blue-500 w-full h-32 resize-none"
+          placeholder="Enter tags to remove, one per line"
+        />
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6">
+        {/* Suggested code may be subject to a license. Learn more: ~LicenseLog:2755053658. */}
+        <FileList files={oldFiles} titre={"Uploaded Files"} />
+      </div>
+
+      <div className="flex gap-6 mt-6">
+        <button
+          onClick={processFiles}
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
+            !processedContents.length ? "hidden" : ""
+          }`}
+        >
+          <Trash2 className="w-5 h-5" />
+          Remove Tags
+        </button>
+        <button
+          className={`bg-purple-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition-all duration-200 ${
+            !processedContents.length ? "hidden" : ""
+          }`}
+          onClick={downloadProcessedContent}
+          disabled={!processedContents.length} // Disable if no processed contents
+        >
+          <Download className="w-5 h-5" />
+          Download Files
+        </button>
+      </div>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        separator={detectedSeparator}
+        onConfirm={handleConfirmSeparator}
+        onCancel={handleCancelSeparator}
       />
-      <button
-        className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-200"
-        onClick={() => oldFileInputRef.current.click()}
-      >
-        Upload Files
-      </button>
     </div>
-  </div>
-
-  <div className="flex flex-col items-center mt-4">
-    <label className="text-lg font-semibold text-gray-800 mb-2">
-      Choose Your Delimiter:
-    </label>
-    <select
-      value={delimiter}
-      onChange={(e) => setDelimiter(e.target.value)}
-      className="border border-gray-300 rounded-lg px-4 py-2 text-center text-gray-700 shadow-md focus:outline-none focus:border-blue-500"
-    >
-      <option value="AUTO">Auto</option>
-      <option value="\n">New Line (\n)</option>
-      <option value=";">Semicolon (;)</option>
-    </select>
-  </div>
-
-  <div className="flex flex-col items-center mt-4 w-full max-w-lg">
-    <label className="text-lg font-semibold text-gray-800 mb-2">
-      Tags to Remove (one per line):
-    </label>
-    <textarea
-      value={tagsToRemove}
-      onChange={(e) => setTagsToRemove(e.target.value)}
-      className="border border-gray-300 rounded-lg px-4 py-3 text-gray-700 shadow-md focus:outline-none focus:border-blue-500 w-full h-32 resize-none"
-      placeholder="Enter tags to remove, one per line"
-    />
-  </div>
-
-  <div className="flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6">
-{/* Suggested code may be subject to a license. Learn more: ~LicenseLog:2755053658. */}
-  <FileList files={oldFiles} titre={"Uploaded Files"}/>
-  </div>
-
-  <div className="flex gap-6 mt-6">
-  <button
-              onClick={processFiles}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium"
-            >
-              <Trash2 className="w-5 h-5" />
-              
-              Remove Tags
-            </button>
-    <button
-    
-  className={`bg-purple-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition-all duration-200 ${!processedContents.length ? 'hidden' : ''}`}
-  onClick={downloadProcessedContent}
-  disabled={!processedContents.length} // Disable if no processed contents
->
-
-<Download className="w-5 h-5" />
-  Download Files
-</button>
-
-  </div>
-
-  <ConfirmModal
-    isOpen={isModalOpen}
-    separator={detectedSeparator}
-    onConfirm={handleConfirmSeparator}
-    onCancel={handleCancelSeparator}
-  />
-</div>
-
   );
 }
