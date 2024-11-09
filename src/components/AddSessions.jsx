@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import JSZip from "jszip";
 import ConfirmModal from "./ConfirmModal"; // Import the ConfirmModal
 import FileList from "./FilesList";
+import DelimiterSelector from "./DelimiterSelector";
 
 export default function AddSessions() {
     const [oldFiles, setOldFiles] = useState([]);
@@ -189,21 +190,7 @@ export default function AddSessions() {
                 />
             </div>
 
-            <div className="flex flex-col items-center mt-4">
-                <label className="text-lg font-medium text-gray-800 mb-1">
-                    Choose delimiter for merging:
-                </label>
-                <select
-                    value={delimiter}
-                    onChange={(e) => setDelimiter(e.target.value)}
-                    className="border border-gray-300 rounded-md px-3 py-2 text-center text-gray-700 shadow-sm focus:outline-none focus:border-blue-400"
-                >
-                    <option value="AUTO">Auto</option>
-                    <option value="\n">New Line (\n)</option>
-                    <option value=";">Semicolon (;)</option>
-                </select>
-            </div>
-
+           <DelimiterSelector delimiter={delimiter} setDelimiter={setDelimiter} />
             <div className="flex flex-col md:flex-row gap-8 w-full md:justify-center mt-6">
                <FileList files={oldFiles} titre={"Old Files"} />
                <FileList files={newFiles} titre={"New Files"}/>

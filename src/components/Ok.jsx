@@ -4,7 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 import JSZip from "jszip";
 import ConfirmModal from "./ConfirmModal";
 import FileList from "./FilesList";
-import { Download, Trash2 } from "lucide-react";
+import { Download, Trash2, Upload } from "lucide-react";
+import DelimiterSelector from "./DelimiterSelector";
 
 export default function Ok() {
   const [oldFiles, setOldFiles] = useState([]);
@@ -13,7 +14,7 @@ export default function Ok() {
   const [delimiter, setDelimiter] = useState("AUTO");
   const [detectedSeparator, setDetectedSeparator] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [separator , setSeparator] = useState ("")
+  const [separator, setSeparator] = useState("");
 
   const oldFileInputRef = useRef(null);
   const handleRemoveTags = async () => {
@@ -26,14 +27,12 @@ export default function Ok() {
     }
     if (delimiter === "AUTO") {
       setIsModalOpen(true);
-      setSeparator(await detectSeparator()) ;
-      return ;
-
-    }else {
+      setSeparator(await detectSeparator());
+      return;
+    } else {
       processFiles(delimiter);
     }
-    
-  }
+  };
 
   const readFileContent = (file) => {
     return new Promise((resolve, reject) => {
@@ -50,7 +49,7 @@ export default function Ok() {
       const fileContent = await readFileContent(oldFiles[0]);
       const semicolonCount = (fileContent.match(/;/g) || []).length;
       const newlineCount = (fileContent.match(/\n/g) || []).length;
-      delimiter  = semicolonCount > newlineCount ? ";" : "\n"
+      delimiter = semicolonCount > newlineCount ? ";" : "\n";
       return delimiter;
     }
     return "no_detect";
@@ -91,8 +90,6 @@ export default function Ok() {
     setIsModalOpen(false); // Close the modal
   };
   const processFiles = async (separatoor) => {
-
- 
     const tags = tagsToRemove
       .split("\n")
       .map((tag) => tag.trim())
@@ -132,7 +129,7 @@ export default function Ok() {
 
   return (
     <div className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen">
-      <ToastContainer />
+      <ToastContainer theme="colored" />
       <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
         Remove Tags from Uploaded Text Files
       </h2>
@@ -148,27 +145,17 @@ export default function Ok() {
             style={{ display: "none" }}
           />
           <button
-            className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-200"
+            className="w-full group relative flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
             onClick={() => oldFileInputRef.current.click()}
           >
-            Upload Files
+            <Upload className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+            <span className="font-medium">Upload Text Files</span>
           </button>
         </div>
       </div>
 
       <div className="flex flex-col items-center mt-4">
-        <label className="text-lg font-semibold text-gray-800 mb-2">
-          Choose Your Delimiter:
-        </label>
-        <select
-          value={delimiter}
-          onChange={(e) => setDelimiter(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 text-center text-gray-700 shadow-md focus:outline-none focus:border-blue-500"
-        >
-          <option value="AUTO">Auto</option>
-          <option value="\n">New Line (\n)</option>
-          <option value=";">Semicolon (;)</option>
-        </select>
+        <DelimiterSelector delimiter={delimiter} setDelimiter={setDelimiter} />
       </div>
 
       <div className="flex flex-col items-center mt-4 w-full max-w-lg">
