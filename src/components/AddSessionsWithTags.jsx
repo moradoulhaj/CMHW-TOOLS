@@ -95,9 +95,7 @@ export default function AddSessionWithTags() {
   return (
     <div className="flex flex-col items-center p-8 space-y-6 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 min-h-screen">
       <ToastContainer />
-      <h2 className="text-3xl font-bold text-blue-700 drop-shadow-md">
-        Remove Tags from Uploaded Text Files -{" "}
-        <p className="text-red">Not stable</p>
+      <h2 className="text-3xl font-bold text-blue-700 drop-shadow-md"> Add Session Using Tags
       </h2>
 
       <div className="flex flex-col md:flex-row gap-10">

@@ -192,8 +192,8 @@ export default function AddSessions() {
 
            <DelimiterSelector delimiter={delimiter} setDelimiter={setDelimiter} />
             <div className="flex flex-col md:flex-row gap-8 w-full md:justify-center mt-6">
-               <FileList files={oldFiles} titre={"Old Files"} />
-               <FileList files={newFiles} titre={"New Files"}/>
+               <FileList files={oldFiles} titre={"Old Files"} setProcessedContents={setMergedContents}/>
+               <FileList files={newFiles} titre={"New Files"} setProcessedContents={setMergedContents}/>
             </div>
 
             <div className="flex gap-4 mt-4">

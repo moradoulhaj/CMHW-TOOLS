@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Navbar from "./components/NavBar";
 import AddSessions from "./components/AddSessions";
-import RemoveSessions from "./components/RemoveSessions";
+import RemoveSessions from "./components/OldRemoveSessions";
 import AddSessionWithTags from "./components/AddSessionsWithTags"; // Import the new component
-import Ok from "./components/Ok";
+import Ok from "./components/RemoveSessions";
 
 export default function App() {
   const [selectedOption, setSelectedOption] = useState("add");

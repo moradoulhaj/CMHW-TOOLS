@@ -4,43 +4,17 @@ import "react-toastify/dist/ReactToastify.css";
 import JSZip from "jszip";
 import ConfirmModal from "./ConfirmModal";
 import FileList from "./FilesList";
-import { Download, RotateCcw, Trash2, Upload } from "lucide-react";
-import DelimiterSelector from "./DelimiterSelector";
-import TagsInput from "./TagsInput";
+import { Download, Trash2 } from "lucide-react";
 
-export default function Ok() {
+export default function RemoveSessions() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedContents, setProcessedContents] = useState([]); // State to hold processed content
   const [tagsToRemove, setTagsToRemove] = useState("");
   const [delimiter, setDelimiter] = useState("AUTO");
+  const [detectedSeparator, setDetectedSeparator] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [separator, setSeparator] = useState("");
-  const HandleReset = () => {
-    setOldFiles([]);
-    setProcessedContents([]);
-    setTagsToRemove("");
-    setDelimiter("AUTO");
-    setIsModalOpen(false);
-    setSeparator("");
-  };
 
   const oldFileInputRef = useRef(null);
-  const handleRemoveTags = async () => {
-    if (!tagsToRemove) {
-      toast.error("Please specify tags to remove.");
-      return;
-    } else if (!oldFiles.length) {
-      toast.error("Please upload files.");
-      return;
-    }
-    if (delimiter === "AUTO") {
-      setIsModalOpen(true);
-      setSeparator(await detectSeparator());
-      return;
-    } else {
-      processFiles(delimiter);
-    }
-  };
 
   const readFileContent = (file) => {
     return new Promise((resolve, reject) => {
@@ -53,18 +27,15 @@ export default function Ok() {
   // function to detect separator
   const detectSeparator = async () => {
     if (oldFiles.length > 0) {
-      let delimiter = "";
       const fileContent = await readFileContent(oldFiles[0]);
       const semicolonCount = (fileContent.match(/;/g) || []).length;
       const newlineCount = (fileContent.match(/\n/g) || []).length;
-      delimiter = semicolonCount > newlineCount ? ";" : "\n";
-      return delimiter;
+      return semicolonCount > newlineCount ? ";" : "\n";
     }
     return "no_detect";
   };
   const handleOldFileUpload = (event) => {
     setOldFiles(Array.from(event.target.files));
-    setProcessedContents([]);
   };
   const removeTags = async (content, tagsArray, delimiter) => {
     tagsArray.forEach((tag) => {
@@ -91,14 +62,32 @@ export default function Ok() {
   };
 
   const handleConfirmSeparator = () => {
+    setDelimiter(detectedSeparator); // Set the delimiter to the detected one
     setIsModalOpen(false); // Close the modal
-    processFiles(separator); // to remove the tags
+    processFiles(); // to remove the tags
   };
 
   const handleCancelSeparator = () => {
     setIsModalOpen(false); // Close the modal
   };
-  const processFiles = async (separatoor) => {
+  const processFiles = async () => {
+    let separator = delimiter;
+
+    if (!tagsToRemove) {
+      toast.error("Please specify tags to remove.");
+      return;
+    } else if (!oldFiles.length) {
+      toast.error("Please upload files.");
+      return;
+    }
+    if (delimiter === "AUTO") {
+      separator = await detectSeparator();
+      if (separator != "no_detect") {
+        setDetectedSeparator(separator);
+        setIsModalOpen(true);
+      } // Open the modal for confirmation
+      return;
+    }
     const tags = tagsToRemove
       .split("\n")
       .map((tag) => tag.trim())
@@ -107,7 +96,7 @@ export default function Ok() {
     const fileProcesses = oldFiles.map((file) =>
       readFileContent(file).then((content) => ({
         name: file.name,
-        content: removeTags(content, tags, separatoor), // Remove tags from each file's content
+        content: removeTags(content, tags, delimiter), // Remove tags from each file's content
       }))
     );
 
@@ -138,7 +127,7 @@ export default function Ok() {
 
   return (
     <div className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen">
-      <ToastContainer theme="colored" />
+      <ToastContainer />
       <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
         Remove Tags from Uploaded Text Files
       </h2>
@@ -154,58 +143,59 @@ export default function Ok() {
             style={{ display: "none" }}
           />
           <button
-            className="w-full group relative flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
+            className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-200"
             onClick={() => oldFileInputRef.current.click()}
           >
-            <Upload className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-            <span className="font-medium">Upload Text Files</span>
-          </button>
-        </div>
-        <div>
-          <button
-            onClick={HandleReset}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg hover:scale-105 border border-blue-600 transition-transform transition-colors duration-200 font-medium"
-          >
-            <RotateCcw className="w-5 h-5" />
-            Reset
+            Upload Files
           </button>
         </div>
       </div>
 
       <div className="flex flex-col items-center mt-4">
-        <DelimiterSelector delimiter={delimiter} setDelimiter={setDelimiter} setProcessedContents={setProcessedContents}/>
+        <label className="text-lg font-semibold text-gray-800 mb-2">
+          Choose Your Delimiter:
+        </label>
+        <select
+          value={delimiter}
+          onChange={(e) => setDelimiter(e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-2 text-center text-gray-700 shadow-md focus:outline-none focus:border-blue-500"
+        >
+          <option value="AUTO">Auto</option>
+          <option value="\n">New Line (\n)</option>
+          <option value=";">Semicolon (;)</option>
+        </select>
       </div>
 
       <div className="flex flex-col items-center mt-4 w-full max-w-lg">
-        <TagsInput
-          tagsToRemove={tagsToRemove}
-          setTagsToRemove={setTagsToRemove}
-          setProcessedContents={setProcessedContents}
+        <label className="text-lg font-semibold text-gray-800 mb-2">
+          Tags to Remove (one per line):
+        </label>
+        <textarea
+          value={tagsToRemove}
+          onChange={(e) => setTagsToRemove(e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-3 text-gray-700 shadow-md focus:outline-none focus:border-blue-500 w-full h-32 resize-none"
+          placeholder="Enter tags to remove, one per line"
         />
       </div>
 
       <div className="flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6">
         {/* Suggested code may be subject to a license. Learn more: ~LicenseLog:2755053658. */}
-        <FileList
-          files={oldFiles}
-          titre={"Uploaded Files"}
-          setOldFiles={setOldFiles}
-          setProcessedContents={setProcessedContents}
-        />
+{/* Suggested code may be subject to a license. Learn more: ~LicenseLog:4077227204. */}
+        <FileList files={oldFiles} titre={"Uploaded Files"} setProcessedContents={setProcessedContents} />
       </div>
 
       <div className="flex gap-6 mt-6">
         <button
-          onClick={handleRemoveTags}
+          onClick={processFiles}
           className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
-            processedContents.length ? "hidden" : ""
+            !processedContents.length ? "hidden" : ""
           }`}
         >
           <Trash2 className="w-5 h-5" />
           Remove Tags
         </button>
         <button
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`bg-purple-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-purple-600 transition-all duration-200 ${
             !processedContents.length ? "hidden" : ""
           }`}
           onClick={downloadProcessedContent}
@@ -218,7 +208,7 @@ export default function Ok() {
 
       <ConfirmModal
         isOpen={isModalOpen}
-        separator={separator}
+        separator={detectedSeparator}
         onConfirm={handleConfirmSeparator}
         onCancel={handleCancelSeparator}
       />
