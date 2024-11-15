@@ -63,80 +63,108 @@ export default function AddSessionWithTags() {
     toast.success("Tags added successfully!");
   };
   
- 
 
   return (
-    <div className="flex flex-col items-center p-8 space-y-6 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 min-h-screen">
-      <ToastContainer />
-      <h2 className="text-3xl font-bold text-blue-700 drop-shadow-md"> Add Session Using Tags
+    <div
+      className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen"
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragging(true);
+      }}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={handleDrop}
+    >
+      <ToastContainer theme="colored" />
+      <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
+        Remove Tags from Uploaded Text Files
       </h2>
 
-      <div className="flex flex-col md:flex-row gap-10">
+      <div className="flex flex-col md:flex-row gap-8 items-center">
         <div>
           <input
             type="file"
             accept=".txt"
             multiple
             ref={oldFileInputRef}
-            onChange={handleOldFileUpload}
+            onChange={(e) => {
+              handleOldFileUpload(e);
+              setOldFiles(Array.from(e.target.files)); // Replace dropped files with uploaded files
+            }}
             style={{ display: "none" }}
           />
           <button
-            className="bg-blue-500 text-white px-5 py-3 rounded-md shadow-md hover:bg-blue-600 transition-colors duration-200"
+            className="w-full group relative flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
             onClick={() => oldFileInputRef.current.click()}
           >
-            Upload Files
+            <Upload className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+            <span className="font-medium">Upload Text Files</span>
           </button>
         </div>
-        <div className="gap-3">
-          <label className="text-lg font-medium text-gray-800 mb-1">
-            Drops Number:
-          </label>
-          &nbsp;
-          <input
-            type="number"
-            value={startingDropNbr}
-            onChange={(e) => setStartingDropNbr(e.target.value)}
-            className="border border-gray-300 rounded-md px-5 py-3 text-center text-gray-700 shadow-sm focus:outline-none focus:border-blue-400"
-            min="1"
-          />
+        <div>
+          <button
+            onClick={HandleReset}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg hover:scale-105 border border-blue-600 transition-transform transition-colors duration-200 font-medium"
+          >
+            <RotateCcw className="w-5 h-5" />
+            Reset
+          </button>
         </div>
       </div>
 
       <div className="flex flex-col items-center mt-4">
-        <div>
-          
-        <TagsInput
-          tagsToRemove={tagsToAdd}
-          setTagsToRemove={setTagsToAdd}
-          setProcessedContents={setprocessedFiles}
+        <DelimiterSelector
+          delimiter={delimiter}
+          setDelimiter={setDelimiter}
+          setProcessedContents={setProcessedContents}
         />
-        </div>
+      </div>
 
-        <div className={`flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6 ${isDragging ? "border-2 border-blue-500" : ""}`}>
+      <div className="flex flex-col items-center mt-4 w-full max-w-lg">
+        <TagsInput
+          tagsToRemove={tagsToRemove}
+          setTagsToRemove={setTagsToRemove}
+          setProcessedContents={setProcessedContents}
+        />
+      </div>
+
+      <div className={`flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6 ${isDragging ? "border-2 border-blue-500" : ""}`}>
         <FileList
           files={oldFiles}
           titre={"Uploaded Files"}
           setOldFiles={setOldFiles}
-          setProcessedContents={setprocessedFiles}
+          setProcessedContents={setProcessedContents}
         />
       </div>
-      </div>
 
-      <div className="flex gap-4 mt-4">
+      <div className="flex gap-6 mt-6">
         <button
-          className="bg-yellow-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-yellow-600 transition-colors duration-200"
-          onClick={processFiles}
+          onClick={handleRemoveTags}
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
+            processedContents.length ? "hidden" : ""
+          }`}
         >
-          Remove Rdp
+          <Trash2 className="w-5 h-5" />
+          Remove Tags
         </button>
         <button
-          className="bg-purple-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-600 transition-colors duration-200"
-          onClick={()=>{downloadProcessedContent(processedFiles)}}
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
+            !processedContents.length ? "hidden" : ""
+          }`}
+          
+          onClick={()=>{downloadProcessedContent(processedContents)}}
+          disabled={!processedContents.length}
         >
+          <Download className="w-5 h-5" />
           Download Files
         </button>
       </div>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        separator={separator}
+        onConfirm={handleConfirmSeparator}
+        onCancel={handleCancelSeparator}
+      />
     </div>
   );
 }

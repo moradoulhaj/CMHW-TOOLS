@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Navbar from "./components/NavBar";
 import AddSessions from "./components/AddSessions";
-import RemoveSessions from "./components/OldRemoveSessions";
-import AddSessionWithTags from "./components/AddSessionsWithTags"; // Import the new component
-import Ok from "./components/RemoveSessions";
+import RemoveSessions from "./components/RemoveSessions";
+import AddSessionWithTags from "./components/AddSessionsWithTags";
+import Offers from "./components/Offers";
 
 export default function App() {
   const [selectedOption, setSelectedOption] = useState("add");
@@ -11,9 +11,9 @@ export default function App() {
   const renderContent = () => {
     switch (selectedOption) {
       case "add":
-        return <AddSessions />;
+        return <Offers />;
       case "remove":
-        return <Ok />;
+        return <RemoveSessions />;
       case "addWithTags":
         return <AddSessionWithTags />;
       default:
