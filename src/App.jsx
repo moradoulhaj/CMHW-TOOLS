@@ -16,8 +16,9 @@ export default function App() {
         return <RemoveSessions />;
       case "addWithTags":
         return <AddSessionWithTags />;
+        
       default:
-        return <FileList />;
+        return <Offers />;
     }
   };
 
