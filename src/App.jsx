@@ -10,14 +10,15 @@ export default function App() {
 
   const renderContent = () => {
     switch (selectedOption) {
-      case "add":
+      case "readAndShow":
         return <Offers />;
       case "remove":
         return <RemoveSessions />;
       case "addWithTags":
         return <AddSessionWithTags />;
+        
       default:
-        return <FileList />;
+        return <Offers />;
     }
   };
 

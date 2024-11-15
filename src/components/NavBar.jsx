@@ -7,10 +7,9 @@ export default function Navbar({ selectedOption, onOptionChange }) {
         className={`py-2 px-4 rounded-md ${
           selectedOption === "add" ? "bg-blue-500" : "bg-blue-700 hover:bg-blue-600"
         }`}
-        onClick={() => onOptionChange("add")}
+        onClick={() => onOptionChange("readAndShow")}
       >
-        Add Sessions
-      </button>
+Read & show      </button>
       
       <button
         className={`py-2 px-4 rounded-md ${
