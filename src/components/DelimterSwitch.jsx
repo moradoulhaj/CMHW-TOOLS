@@ -3,22 +3,20 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmModal from "./ConfirmModal";
 import FileList from "./FilesList";
-import { Eye, RotateCcw, Upload } from "lucide-react";
+import { Eye, RefreshCcw, RotateCcw, Upload } from "lucide-react";
 import DelimiterSelector from "./DelimiterSelector";
-import {
-  detectSeparator,
-  readFileContent,
-} from "../scripts/scripts";
+import { detectSeparator, readFileContent } from "../scripts/scripts";
 import FileViewer from "./FileViewer";
+import JSZip from "jszip";
 
-export default function Offers() {
+export default function DelimterSwitch() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedContents, setProcessedContents] = useState([]);
   const [delimiter, setDelimiter] = useState("AUTO");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [separator, setSeparator] = useState("");
   const [isDragging, setIsDragging] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0); // For single file display
+  const [currentPage, setCurrentPage] = useState(0);
   const oldFileInputRef = useRef(null);
 
   const HandleReset = () => {
@@ -30,7 +28,7 @@ export default function Offers() {
     setCurrentPage(0);
   };
 
-  const handleDisplayTags = async () => {
+  const handleCovertDelimter = async () => {
     if (!oldFiles.length) {
       toast.error("Please upload files.");
       return;
@@ -67,10 +65,12 @@ export default function Offers() {
   };
 
   const processFiles = async (separator) => {
+    const converted = separator === "\n" ? ";" : "\n";
+
     const fileProcesses = oldFiles.map((file) =>
       readFileContent(file).then((content) => ({
         name: file.name,
-        content: content.replace(/;/g, '\n'), // Replaces all ';' with '\n'
+        content: content.replace(new RegExp(separator, "g"), converted),
       }))
     );
 
@@ -82,15 +82,28 @@ export default function Offers() {
       .catch((error) => console.error("Error processing files:", error));
   };
 
-  // Handle file navigation
-  const totalFiles = processedContents.length;
+  const downloadZippedFiles = async () => {
+    if (processedContents.length === 0) {
+      toast.error("No processed files to download.");
+      return;
+    }
 
-  const handleNextFile = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalFiles - 1));
-  };
+    const zip = new JSZip();
+    processedContents.forEach((file) => {
+      zip.file(file.name, file.content);
+    });
 
-  const handlePreviousFile = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 0));
+    try {
+      const content = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(content);
+      link.download = "processed_files.zip";
+      link.click();
+      toast.success("Files downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating zip:", error);
+      toast.error("Failed to download files.");
+    }
   };
 
   return (
@@ -105,7 +118,7 @@ export default function Offers() {
     >
       <ToastContainer theme="colored" />
       <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
-        Read And Display File's Content
+        Delimiter Switch
       </h2>
 
       <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -145,8 +158,7 @@ export default function Offers() {
           delimiter={delimiter}
           setDelimiter={setDelimiter}
           setProcessedContents={setProcessedContents}
-          name={"normal"}
-
+          name={"DelimiterSwitch"}
         />
       </div>
 
@@ -165,25 +177,20 @@ export default function Offers() {
 
       <div className="flex gap-6 mt-6">
         <button
-          onClick={handleDisplayTags}
+          onClick={handleCovertDelimter}
           className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
             processedContents.length ? "hidden" : ""
           }`}
         >
-          <Eye className="w-5 h-5" />
-          Read Files
+          <RefreshCcw className="w-5 h-5" />
+          Convert Separator
         </button>
-      </div>
-
-      {/* Display single file content with pagination */}
-      <div className="w-full max-w-4xl mt-6 p-4 border border-gray-300 rounded-lg">
-      <FileViewer
-        processedContents={processedContents}
-        currentPage={currentPage}
-        handlePreviousFile={handlePreviousFile}
-        handleNextFile={handleNextFile}
-      />
-    
+        <button
+          onClick={downloadZippedFiles}
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium"
+        >
+          Download Zipped Files
+        </button>
       </div>
 
       <ConfirmModal
