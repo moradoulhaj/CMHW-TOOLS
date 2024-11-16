@@ -6,7 +6,11 @@ import FileList from "./FilesList";
 import { Download, RotateCcw, Trash2, Upload } from "lucide-react";
 import DelimiterSelector from "./DelimiterSelector";
 import TagsInput from "./TagsInput";
-import { detectSeparator, downloadProcessedContent, readFileContent } from "../scripts/scripts";
+import {
+  detectSeparator,
+  downloadProcessedContent,
+  readFileContent,
+} from "../scripts/scripts";
 
 export default function RemoveSessions() {
   const [oldFiles, setOldFiles] = useState([]);
@@ -63,13 +67,12 @@ export default function RemoveSessions() {
 
     const cleanedContentArray = content
       .split("\n")
-      .map(
-        (line) =>
-          line
-            .split(delimiter)
-            .map((item) => item.trim())
-            .filter((item) => item)
-            .join(delimiter)
+      .map((line) =>
+        line
+          .split(delimiter)
+          .map((item) => item.trim())
+          .filter((item) => item)
+          .join(delimiter)
       )
       .filter((line) => line.trim() !== "");
 
@@ -105,8 +108,6 @@ export default function RemoveSessions() {
       })
       .catch((error) => console.error("Error processing files:", error));
   };
-
- 
 
   return (
     <div
@@ -160,6 +161,7 @@ export default function RemoveSessions() {
           delimiter={delimiter}
           setDelimiter={setDelimiter}
           setProcessedContents={setProcessedContents}
+          name={"normal"}
         />
       </div>
 
@@ -171,7 +173,11 @@ export default function RemoveSessions() {
         />
       </div>
 
-      <div className={`flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6 ${isDragging ? "border-2 border-blue-500" : ""}`}>
+      <div
+        className={`flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6 ${
+          isDragging ? "border-2 border-blue-500" : ""
+        }`}
+      >
         <FileList
           files={oldFiles}
           titre={"Uploaded Files"}
@@ -194,8 +200,9 @@ export default function RemoveSessions() {
           className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
             !processedContents.length ? "hidden" : ""
           }`}
-          
-          onClick={()=>{downloadProcessedContent(processedContents)}}
+          onClick={() => {
+            downloadProcessedContent(processedContents);
+          }}
           disabled={!processedContents.length}
         >
           <Download className="w-5 h-5" />
