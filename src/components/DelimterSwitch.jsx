@@ -63,17 +63,20 @@ export default function DelimterSwitch() {
   const handleCancelSeparator = () => {
     setIsModalOpen(false);
   };
+ const split = (content , separator) => {
+  content.split
 
+ }
   const processFiles = async (separator) => {
     const converted = separator === "\n" ? ";" : "\n";
-
+  
     const fileProcesses = oldFiles.map((file) =>
       readFileContent(file).then((content) => ({
         name: file.name,
-        content: content.replace(new RegExp(separator, "g"), converted),
+        content: split(content , separator , converted )
       }))
     );
-
+  
     Promise.all(fileProcesses)
       .then((results) => {
         setProcessedContents(results);
@@ -81,7 +84,7 @@ export default function DelimterSwitch() {
       })
       .catch((error) => console.error("Error processing files:", error));
   };
-
+  
   const downloadZippedFiles = async () => {
     if (processedContents.length === 0) {
       toast.error("No processed files to download.");
