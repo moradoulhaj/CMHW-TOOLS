@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { downloadProcessedContent, readFileContent } from "../scripts/scripts";
 import FileList from "./FilesList";
 import TagsInput from "./TagsInput";
-export default function AddSessionWithTags() {
+export default function AddSessionUsingTags() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedFiles, setprocessedFiles] = useState([]); // State to hold processed content
   const [tagsToAdd, setTagsToAdd] = useState("");
