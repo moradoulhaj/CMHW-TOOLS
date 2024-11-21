@@ -77,6 +77,7 @@ export default function AddSessionUsingTags() {
     setProfilesByDrop(profilesByDropp);
     setprocessedFiles(modifiedFiles);
     toast.success("Tags added successfully!");
+    console.log(profilesByDrop ,startingDropTime, timeBetweenDrops);
     updateAndDownloadExcel(profilesByDrop ,startingDropTime, timeBetweenDrops )
   };
 

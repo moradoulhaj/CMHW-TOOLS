@@ -52,7 +52,7 @@ export const downloadProcessedContent = async (processedContents) => {
     return { profiles, tags };
   }
 
-  export const updateAndDownloadExcel = async (profilesByDrop, startingDropTime, timeBetweenDrops) => {
+  export const updateAndDownloadExcel = async (profilesByDrop, userStartTime, timeBetweenDrops) => {
     try {
       // Load the template from the public folder
       const response = await fetch("/merger/template.xlsx"); // Ensure the path is correct
@@ -63,6 +63,25 @@ export const downloadProcessedContent = async (processedContents) => {
   
       // Access the first worksheet (or adjust to your template sheet name)
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  
+      // Get today's date
+      const today = new Date();
+  
+      // Format the date as DD/MM/YYYY (or adjust the format as needed)
+      const predefinedDate = today.toLocaleDateString("en-GB"); // UK format: DD/MM/YYYY
+      const [hours, minutes] = userStartTime.split(":");
+  
+      // Manually format the date string into a valid format (MM/DD/YYYY HH:mm:ss)
+      const formattedDate = `${predefinedDate.split('/').reverse().join('/')} ${hours}:${minutes}:00`;
+  
+      // Create the starting time by parsing the formatted date string
+      const startingDropTime = new Date(formattedDate);
+  
+      if (isNaN(startingDropTime)) {
+        throw new Error("Invalid Date: The date string format may be incorrect.");
+      }
+  
+      console.log("Starting Drop Time: ", startingDropTime); // This will print the start time
   
       // Convert startingDropTime to a Date object
       let currentStartTime = new Date(startingDropTime);
@@ -94,5 +113,6 @@ export const downloadProcessedContent = async (processedContents) => {
       toast.error("Error updating Excel template.");
     }
   };
+  
   
   
