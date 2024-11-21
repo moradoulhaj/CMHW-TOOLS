@@ -36,3 +36,17 @@ export const downloadProcessedContent = async (processedContents) => {
 
     URL.revokeObjectURL(url);
   };
+  export const  separateNumbersAndTags = (input) =>  {
+    const lines = input.trim().split('\n'); // Split the input by lines
+    const profiles = [];
+    const tags = [];
+  
+    lines.forEach(line => {
+      const [profile, tag] = line.split('\t'); // Split each line by tab
+      if (profile && tag) {
+        profiles.push(profile.trim());
+        tags.push(tag.trim()); // Keep square brackets on the tags
+      }
+    });
+    return { profiles, tags };
+  }

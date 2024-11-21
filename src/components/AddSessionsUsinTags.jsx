@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { downloadProcessedContent, readFileContent } from "../scripts/scripts";
+import {
+  downloadProcessedContent,
+  readFileContent,
+  separateNumbersAndTags,
+} from "../scripts/scripts";
 import FileList from "./FilesList";
 import TagsInput from "./TagsInput";
 import Modal from "./Modal";
@@ -17,17 +21,14 @@ export default function AddSessionUsingTags() {
   const HandleOpenSettings = () => {
     setIsSettingsOpen(true);
   };
-useEffect(()=>{console.log(isSettingsOpen);},[isSettingsOpen])
   const handleOldFileUpload = (event) => {
     setOldFiles(Array.from(event.target.files));
   };
 
   const processFiles = async () => {
-    const tags = tagsToAdd
-      .split("\n")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag); // Split by new line and trim
-
+    const { profiles, tags } = separateNumbersAndTags(tagsToAdd);
+    // console.log("profiles", profiles);
+    // console.log("tags", tags);
     let lastFile = oldFiles.at(-1);
     const match = lastFile.name.match(/file_(\d+)/);
     const lastFileIndex = match ? parseInt(match[1]) : -1;
@@ -38,15 +39,22 @@ useEffect(()=>{console.log(isSettingsOpen);},[isSettingsOpen])
     const remainder = tags.length % dropsToAdd;
 
     // Array to store tags for each drop
+
     const tagsByDrop = [];
+    const profilesByDrop = [];
     let startIndex = 0;
+
     for (let i = 0; i < dropsToAdd; i++) {
       const endIndex =
         startIndex + tagsPerDrop + (i === dropsToAdd - 1 ? remainder : 0); // Add remainder to the last drop
       const dropTags = tags.slice(startIndex, endIndex);
+      const profileTags = profiles.slice(startIndex, endIndex);
+      // add the tags and their profiles number to the tables
       tagsByDrop.push(dropTags);
+      profilesByDrop.push(profileTags);
       startIndex = endIndex;
     }
+    // Calling the function that adds the tags the the files
     const modifiedFiles = await Promise.all(
       oldFiles.map(async (file, index) => {
         const match = file.name.match(/file_(\d+)/);
@@ -59,6 +67,7 @@ useEffect(()=>{console.log(isSettingsOpen);},[isSettingsOpen])
           const indexToAdd = fileIndex - startingDropNbr;
           const tagsToAppend = tagsByDrop[indexToAdd] || []; // Get tags for the current drop
           const modifiedContent = `${content}\n${tagsToAppend.join("\n")}`; // Append tags to content
+
           return { name: file.name, content: modifiedContent };
         }
       })
@@ -67,8 +76,46 @@ useEffect(()=>{console.log(isSettingsOpen);},[isSettingsOpen])
     toast.success("Tags added successfully!");
   };
 
+  //     let lastFile = oldFiles.at(-1);
+  //     const match = lastFile.name.match(/file_(\d+)/);
+  //     const lastFileIndex = match ? parseInt(match[1]) : -1;
+  //     let dropsToAdd = lastFileIndex - startingDropNbr + 1;
+
+  //     // Split tags across each drop for each file
+  //     const tagsPerDrop = Math.floor(tags.length / dropsToAdd);
+  //     const remainder = tags.length % dropsToAdd;
+
+  //     // Array to store tags for each drop
+  //     const tagsByDrop = [];
+  //     let startIndex = 0;
+  //     for (let i = 0; i < dropsToAdd; i++) {
+  //       const endIndex =
+  //         startIndex + tagsPerDrop + (i === dropsToAdd - 1 ? remainder : 0); // Add remainder to the last drop
+  //       const dropTags = tags.slice(startIndex, endIndex);
+  //       tagsByDrop.push(dropTags);
+  //       startIndex = endIndex;
+  //     }
+  //     const modifiedFiles = await Promise.all(
+  //       oldFiles.map(async (file, index) => {
+  //         const match = file.name.match(/file_(\d+)/);
+  //         const fileIndex = match ? parseInt(match[1]) : -1;
+  //         if (fileIndex < startingDropNbr) {
+  //           const content = await readFileContent(file);
+  //           return { name: file.name, content: content };
+  //         } else {
+  //           const content = await readFileContent(file);
+  //           const indexToAdd = fileIndex - startingDropNbr;
+  //           const tagsToAppend = tagsByDrop[indexToAdd] || []; // Get tags for the current drop
+  //           const modifiedContent = `${content}\n${tagsToAppend.join("\n")}`; // Append tags to content
+  //           return { name: file.name, content: modifiedContent };
+  //         }
+  //       })
+  //     );
+  //     setprocessedFiles(modifiedFiles);
+  //     toast.success("Tags added successfully!");
+  //   };
+
   return (
-    
     <div className="flex flex-col items-center p-8 space-y-6 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 min-h-screen">
       <ToastContainer />
       <h2 className="text-4xl font-extrabold text-blue-700 drop-shadow-md tracking-wide">
@@ -93,7 +140,7 @@ useEffect(()=>{console.log(isSettingsOpen);},[isSettingsOpen])
           </button>
         </div>
         <div className="flex items-center">
-          <button type="button" onClick={()=>setIsSettingsOpen(true)}>
+          <button type="button" onClick={() => setIsSettingsOpen(true)}>
             Settings
           </button>
         </div>
@@ -138,7 +185,12 @@ useEffect(()=>{console.log(isSettingsOpen);},[isSettingsOpen])
           Download Files
         </button>
       </div>
-      <Modal isModalOpen={isSettingsOpen} setIsModalOpen={setIsSettingsOpen} startingDropNbr={startingDropNbr} setStartingDropNbr={setStartingDropNbr} />
+      <Modal
+        isModalOpen={isSettingsOpen}
+        setIsModalOpen={setIsSettingsOpen}
+        startingDropNbr={startingDropNbr}
+        setStartingDropNbr={setStartingDropNbr}
+      />
     </div>
   );
 }
