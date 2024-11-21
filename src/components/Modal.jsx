@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 
-export default function Modal({ isModalOpen, setIsModalOpen, onSave , setStartingDropNbr ,startingDropNbr  }) {
+export default function Modal({
+  isModalOpen,
+  setIsModalOpen,
+  onSave,
+  setStartingDropNbr,
+  startingDropNbr,
+}) {
   // Local states to store the input values
   const [startingDropTime, setStartingDropTime] = useState("");
   const [timeBetweenDrops, setTimeBetweenDrops] = useState("");
@@ -35,10 +41,9 @@ export default function Modal({ isModalOpen, setIsModalOpen, onSave , setStartin
               Starting Drop Time
             </label>
             <input
-              type="number"
+              type="time"
               value={startingDropTime}
               onChange={(e) => setStartingDropTime(e.target.value)}
-              min="0"
               className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
               placeholder="11:00"
             />
@@ -71,8 +76,8 @@ export default function Modal({ isModalOpen, setIsModalOpen, onSave , setStartin
           <button
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
             onClick={() => {
-              onSave(startingDropNbr, startingDropTime, timeBetweenDrops);
               setIsModalOpen(false);
+              onSave(startingDropTime, timeBetweenDrops);
             }}
           >
             Save

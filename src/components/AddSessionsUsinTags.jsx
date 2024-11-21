@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {
   downloadProcessedContent,
   readFileContent,
-  separateNumbersAndTags,
+  separateNumbersAndTags,updateAndDownloadExcel
 } from "../scripts/scripts";
 import FileList from "./FilesList";
 import TagsInput from "./TagsInput";
@@ -16,8 +16,10 @@ export default function AddSessionUsingTags() {
   const [startingDropNbr, setStartingDropNbr] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
+  const [profilesByDrop, setProfilesByDrop] = useState([]);
   const oldFileInputRef = useRef(null);
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:1145596097.
+//   useEffect(()=>{console.log("profilesByDrop",profilesByDrop);},[profilesByDrop])
   const HandleOpenSettings = () => {
     setIsSettingsOpen(true);
   };
@@ -25,7 +27,7 @@ export default function AddSessionUsingTags() {
     setOldFiles(Array.from(event.target.files));
   };
 
-  const processFiles = async () => {
+  const processFiles = async (startingDropTime, timeBetweenDrops) => {
     const { profiles, tags } = separateNumbersAndTags(tagsToAdd);
     // console.log("profiles", profiles);
     // console.log("tags", tags);
@@ -41,7 +43,7 @@ export default function AddSessionUsingTags() {
     // Array to store tags for each drop
 
     const tagsByDrop = [];
-    const profilesByDrop = [];
+    const profilesByDropp = [];
     let startIndex = 0;
 
     for (let i = 0; i < dropsToAdd; i++) {
@@ -51,7 +53,7 @@ export default function AddSessionUsingTags() {
       const profileTags = profiles.slice(startIndex, endIndex);
       // add the tags and their profiles number to the tables
       tagsByDrop.push(dropTags);
-      profilesByDrop.push(profileTags);
+      profilesByDropp.push(profileTags);
       startIndex = endIndex;
     }
     // Calling the function that adds the tags the the files
@@ -72,11 +74,12 @@ export default function AddSessionUsingTags() {
         }
       })
     );
+    setProfilesByDrop(profilesByDropp);
     setprocessedFiles(modifiedFiles);
     toast.success("Tags added successfully!");
+    updateAndDownloadExcel(profilesByDrop ,startingDropTime, timeBetweenDrops )
   };
 
-  //     let lastFile = oldFiles.at(-1);
   //     const match = lastFile.name.match(/file_(\d+)/);
   //     const lastFileIndex = match ? parseInt(match[1]) : -1;
   //     let dropsToAdd = lastFileIndex - startingDropNbr + 1;
@@ -139,11 +142,11 @@ export default function AddSessionUsingTags() {
             Upload Files
           </button>
         </div>
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <button type="button" onClick={() => setIsSettingsOpen(true)}>
             Settings
           </button>
-        </div>
+        </div> */}
       </div>
 
       <div className="flex flex-col items-center mt-6 w-full">
@@ -172,15 +175,14 @@ export default function AddSessionUsingTags() {
       <div className="flex gap-6 mt-8">
         <button
           className="px-6 py-3 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 transition-all duration-200 font-medium"
-          onClick={processFiles}
+          onClick={HandleOpenSettings}
         >
           Remove Rdp
         </button>
         <button
           className="px-6 py-3 bg-purple-500 text-white rounded-lg shadow-md hover:bg-purple-600 transition-all duration-200 font-medium"
-          onClick={() => {
-            downloadProcessedContent(processedFiles);
-          }}
+          onClick={()=>updateAndDownloadExcel(profilesByDrop)
+          }
         >
           Download Files
         </button>
@@ -190,6 +192,7 @@ export default function AddSessionUsingTags() {
         setIsModalOpen={setIsSettingsOpen}
         startingDropNbr={startingDropNbr}
         setStartingDropNbr={setStartingDropNbr}
+        onSave ={processFiles}
       />
     </div>
   );

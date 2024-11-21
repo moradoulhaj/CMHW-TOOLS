@@ -1,6 +1,7 @@
 import JSZip from "jszip";
-
-
+import { BookTemplate } from "lucide-react";
+import * as XLSX from "xlsx";
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:1752201820.
 export const readFileContent = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -50,3 +51,48 @@ export const downloadProcessedContent = async (processedContents) => {
     });
     return { profiles, tags };
   }
+
+  export const updateAndDownloadExcel = async (profilesByDrop, startingDropTime, timeBetweenDrops) => {
+    try {
+      // Load the template from the public folder
+      const response = await fetch("/merger/template.xlsx"); // Ensure the path is correct
+      const arrayBuffer = await response.arrayBuffer();
+      
+      // Read the workbook from the array buffer (without modifying styles)
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+  
+      // Access the first worksheet (or adjust to your template sheet name)
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  
+      // Convert startingDropTime to a Date object
+      let currentStartTime = new Date(startingDropTime);
+  
+      // Loop through the profiles and update data while keeping formatting intact
+      profilesByDrop.forEach((profileGroup, index) => {
+        const rowIndex = index + 2;  // Adjusting for row 2 onwards
+        
+        // Modify the profile data in column D
+        worksheet[`D${rowIndex}`] = { v: profileGroup.join("|") };
+  
+        // Calculate start and end times for each drop
+        const startTime = currentStartTime.toLocaleString(); // Format to your preference
+        currentStartTime = new Date(currentStartTime.getTime() + timeBetweenDrops * 60000); // Add the time between drops (in minutes)
+        const endTime = currentStartTime.toLocaleString();  // Format the end time similarly
+  
+        // Set start and end times in columns E and F
+        worksheet[`E${rowIndex}`] = { v: startTime }; // Start Time
+        worksheet[`F${rowIndex}`] = { v: endTime };   // End Time
+      });
+  
+      // Write the updated workbook to a file (preserving styles)
+      XLSX.writeFile(workbook, "Updated_Template.xlsx");
+  
+      toast.success("Excel updated successfully!");
+  
+    } catch (error) {
+      console.error("Error updating Excel template:", error);
+      toast.error("Error updating Excel template.");
+    }
+  };
+  
+  
