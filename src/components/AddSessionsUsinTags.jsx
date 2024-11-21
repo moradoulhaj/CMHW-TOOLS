@@ -26,8 +26,7 @@ export default function AddSessionUsingTags() {
   const handleOldFileUpload = (event) => {
     setOldFiles(Array.from(event.target.files));
   };
-
-  const processFiles = async (startingDropTime, timeBetweenDrops) => {
+  const processFiles = async (startingDropTime, timeBetweenDrops ,sessionName,configName,scriptName) => {
     const { profiles, tags } = separateNumbersAndTags(tagsToAdd);
     // console.log("profiles", profiles);
     // console.log("tags", tags);
@@ -78,7 +77,7 @@ export default function AddSessionUsingTags() {
     setprocessedFiles(modifiedFiles);
     toast.success("Tags added successfully!");
     console.log(profilesByDrop ,startingDropTime, timeBetweenDrops);
-    updateAndDownloadExcel(profilesByDrop ,startingDropTime, timeBetweenDrops )
+    updateAndDownloadExcel(profilesByDrop ,startingDropTime, timeBetweenDrops ,sessionName,configName,scriptName )
   };
 
   //     const match = lastFile.name.match(/file_(\d+)/);

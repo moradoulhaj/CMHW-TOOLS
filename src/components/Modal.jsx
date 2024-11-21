@@ -10,6 +10,9 @@ export default function Modal({
   // Local states to store the input values
   const [startingDropTime, setStartingDropTime] = useState("");
   const [timeBetweenDrops, setTimeBetweenDrops] = useState("");
+  const [sessionName, setSessionName] = useState("");
+  const [configName, setConfigName] = useState("");
+  const [scriptName, setScriptName] = useState("");
 
   return (
     <div
@@ -21,6 +24,44 @@ export default function Modal({
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Drop Settings
         </h2>
+
+        {/* Session Name, Config Name, Script Name Inputs */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Session Name
+          </label>
+          <input
+            type="text"
+            value={sessionName}
+            onChange={(e) => setSessionName(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
+            placeholder="Enter session name"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Config Name
+          </label>
+          <input
+            type="text"
+            value={configName}
+            onChange={(e) => setConfigName(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
+            placeholder="Enter config name"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Script Name
+          </label>
+          <input
+            type="text"
+            value={scriptName}
+            onChange={(e) => setScriptName(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
+            placeholder="Enter script name"
+          />
+        </div>
 
         {/* Starting Drop Number and Time Inputs */}
         <div className="flex gap-4">
@@ -77,7 +118,13 @@ export default function Modal({
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
             onClick={() => {
               setIsModalOpen(false);
-              onSave(startingDropTime, timeBetweenDrops);
+              onSave({
+                startingDropTime,
+                timeBetweenDrops,
+                sessionName,
+                configName,
+                scriptName,
+              });
             }}
           >
             Save
