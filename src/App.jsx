@@ -5,6 +5,7 @@ import RemoveSessions from "./components/RemoveSessions";
 import AddSessionWithTags from "./components/AddSessionsWithTags";
 import Offers from "./components/Offers";
 import LazyLoading from "./components/DelimterSwitch";
+import AddSessionUsingTags from "./components/AddSessionsUsinTags";
 
 export default function App() {
   const [selectedOption, setSelectedOption] = useState("add");
@@ -16,7 +17,8 @@ export default function App() {
       case "remove":
         return <RemoveSessions />;
       case "addWithTags":
-        return <AddSessionWithTags />;
+        
+        return <AddSessionUsingTags />;
       case "delimterSwitch":
         return <LazyLoading />;
         

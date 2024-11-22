@@ -66,77 +66,77 @@ export default function AddSessionWithTags() {
  
 
   return (
-    <div className="flex flex-col items-center p-8 space-y-6 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 min-h-screen">
-      <ToastContainer />
-      <h2 className="text-3xl font-bold text-blue-700 drop-shadow-md"> Add Session Using Tags
-      </h2>
+   <div className="flex flex-col items-center p-8 space-y-6 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 min-h-screen">
+  <ToastContainer />
+  <h2 className="text-4xl font-extrabold text-blue-700 drop-shadow-md tracking-wide">
+    Add Session Using Tags
+  </h2>
 
-      <div className="flex flex-col md:flex-row gap-10">
-        <div>
-          <input
-            type="file"
-            accept=".txt"
-            multiple
-            ref={oldFileInputRef}
-            onChange={handleOldFileUpload}
-            style={{ display: "none" }}
-          />
-          <button
-            className="bg-blue-500 text-white px-5 py-3 rounded-md shadow-md hover:bg-blue-600 transition-colors duration-200"
-            onClick={() => oldFileInputRef.current.click()}
-          >
-            Upload Files
-          </button>
-        </div>
-        <div className="gap-3">
-          <label className="text-lg font-medium text-gray-800 mb-1">
-            Drops Number:
-          </label>
-          &nbsp;
-          <input
-            type="number"
-            value={startingDropNbr}
-            onChange={(e) => setStartingDropNbr(e.target.value)}
-            className="border border-gray-300 rounded-md px-5 py-3 text-center text-gray-700 shadow-sm focus:outline-none focus:border-blue-400"
-            min="1"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col items-center mt-4">
-        <div>
-          
-        <TagsInput
-          tagsToRemove={tagsToAdd}
-          setTagsToRemove={setTagsToAdd}
-          setProcessedContents={setprocessedFiles}
-        />
-        </div>
-
-        <div className={`flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6 ${isDragging ? "border-2 border-blue-500" : ""}`}>
-        <FileList
-          files={oldFiles}
-          titre={"Uploaded Files"}
-          setOldFiles={setOldFiles}
-          setProcessedContents={setprocessedFiles}
-        />
-      </div>
-      </div>
-
-      <div className="flex gap-4 mt-4">
-        <button
-          className="bg-yellow-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-yellow-600 transition-colors duration-200"
-          onClick={processFiles}
-        >
-          Remove Rdp
-        </button>
-        <button
-          className="bg-purple-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-600 transition-colors duration-200"
-          onClick={()=>{downloadProcessedContent(processedFiles)}}
-        >
-          Download Files
-        </button>
-      </div>
+  <div className="flex flex-col md:flex-row gap-10 items-center">
+    <div className="flex flex-col items-center">
+      <input
+        type="file"
+        accept=".txt"
+        multiple
+        ref={oldFileInputRef}
+        onChange={handleOldFileUpload}
+        style={{ display: "none" }}
+      />
+      <button
+        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold"
+        onClick={() => oldFileInputRef.current.click()}
+      >
+        Upload Files
+      </button>
     </div>
+    <div className="flex items-center">
+      <label className="text-lg font-medium text-gray-800 mb-2">
+        Starting from:
+      </label>
+      <input
+        type="number"
+        value={startingDropNbr}
+        onChange={(e) => setStartingDropNbr(e.target.value)}
+        className="w-24 border border-gray-300 rounded-md px-4 py-2 text-center text-gray-700 shadow-md focus:outline-none focus:border-blue-400"
+        min="1"
+      />
+    </div>
+  </div>
+
+  <div className="flex flex-col items-center mt-6 w-full">
+    <div className="w-full max-w-lg">
+      <TagsInput
+        tagsToRemove={tagsToAdd}
+        setTagsToRemove={setTagsToAdd}
+        setProcessedContents={setprocessedFiles}
+      />
+    </div>
+
+    <div className={`flex flex-col md:flex-row gap-10 w-full max-w-lg mt-8 ${isDragging ? "border-2 border-blue-500 rounded-lg" : ""}`}>
+      <FileList
+        files={oldFiles}
+        titre={"Uploaded Files"}
+        setOldFiles={setOldFiles}
+        setProcessedContents={setprocessedFiles}
+      />
+    </div>
+  </div>
+
+  <div className="flex gap-6 mt-8">
+    <button
+      className="px-6 py-3 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 transition-all duration-200 font-medium"
+      onClick={processFiles}
+    >
+      Remove Rdp
+    </button>
+    <button
+      className="px-6 py-3 bg-purple-500 text-white rounded-lg shadow-md hover:bg-purple-600 transition-all duration-200 font-medium"
+      onClick={() => { downloadProcessedContent(processedFiles); }}
+    >
+      Download Files
+    </button>
+  </div>
+</div>
+
   );
 }
