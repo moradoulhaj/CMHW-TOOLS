@@ -4,7 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 import {
   downloadProcessedContent,
   readFileContent,
-  separateNumbersAndTags,updateAndDownloadExcel
+  separateNumbersAndTags,
+  updateAndDownloadExcel,
 } from "../scripts/scripts";
 import FileList from "./FilesList";
 import TagsInput from "./TagsInput";
@@ -17,16 +18,23 @@ export default function AddSessionUsingTags() {
   const [isDragging, setIsDragging] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [profilesByDrop, setProfilesByDrop] = useState([]);
+  const [excelBlob, setExcelBlob] = useState(null); // State to hold the Excel blob
   const oldFileInputRef = useRef(null);
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:1145596097.
-//   useEffect(()=>{console.log("profilesByDrop",profilesByDrop);},[profilesByDrop])
+  // Suggested code may be subject to a license. Learn more: ~LicenseLog:1145596097.
+  //   useEffect(()=>{console.log("profilesByDrop",profilesByDrop);},[profilesByDrop])
   const HandleOpenSettings = () => {
     setIsSettingsOpen(true);
   };
   const handleOldFileUpload = (event) => {
     setOldFiles(Array.from(event.target.files));
   };
-  const processFiles = async (startingDropTime, timeBetweenDrops ,sessionName,configName,scriptName) => {
+  const processFiles = async ({
+    startingDropTime,
+    timeBetweenDrops,
+    sessionName,
+    configName,
+    scriptName,
+  }) => {
     const { profiles, tags } = separateNumbersAndTags(tagsToAdd);
     // console.log("profiles", profiles);
     // console.log("tags", tags);
@@ -74,10 +82,20 @@ export default function AddSessionUsingTags() {
       })
     );
     setProfilesByDrop(profilesByDropp);
+
+    // Get Excel Blob
+    const blob = await updateAndDownloadExcel(
+      profilesByDropp,
+      startingDropTime,
+      timeBetweenDrops,
+      sessionName,
+      configName,
+      scriptName
+    );
     setprocessedFiles(modifiedFiles);
+    setExcelBlob(blob)
     toast.success("Tags added successfully!");
-    console.log(profilesByDrop ,startingDropTime, timeBetweenDrops);
-    updateAndDownloadExcel(profilesByDrop ,startingDropTime, timeBetweenDrops ,sessionName,configName,scriptName )
+   
   };
 
   //     const match = lastFile.name.match(/file_(\d+)/);
@@ -181,8 +199,8 @@ export default function AddSessionUsingTags() {
         </button>
         <button
           className="px-6 py-3 bg-purple-500 text-white rounded-lg shadow-md hover:bg-purple-600 transition-all duration-200 font-medium"
-          onClick={()=>updateAndDownloadExcel(profilesByDrop)
-          }
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:981594749.
+          onClick={()=>downloadProcessedContent(processedFiles ,excelBlob)}
         >
           Download Files
         </button>
@@ -192,7 +210,7 @@ export default function AddSessionUsingTags() {
         setIsModalOpen={setIsSettingsOpen}
         startingDropNbr={startingDropNbr}
         setStartingDropNbr={setStartingDropNbr}
-        onSave ={processFiles}
+        onSave={processFiles}
       />
     </div>
   );
