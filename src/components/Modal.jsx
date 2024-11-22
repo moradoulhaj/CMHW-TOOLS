@@ -13,6 +13,7 @@ export default function Modal({
   const [sessionName, setSessionName] = useState("");
   const [configName, setConfigName] = useState("");
   const [scriptName, setScriptName] = useState("");
+  const [EntityName, setEntityName] = useState("");
 
   return (
     <div
@@ -26,6 +27,18 @@ export default function Modal({
         </h2>
 
         {/* Session Name, Config Name, Script Name Inputs */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Entity Name
+          </label>
+          <input
+            type="text"
+            value={EntityName}
+            onChange={(e) => setEntityName(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
+            placeholder="Enter session name"
+          />
+        </div>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Session Name
