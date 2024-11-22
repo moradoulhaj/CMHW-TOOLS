@@ -10,9 +10,10 @@ export default function Modal({
   // Local states to store the input values
   const [startingDropTime, setStartingDropTime] = useState("");
   const [timeBetweenDrops, setTimeBetweenDrops] = useState("");
-  const [sessionName, setSessionName] = useState("");
-  const [configName, setConfigName] = useState("");
-  const [scriptName, setScriptName] = useState("");
+  const [sessionName, setSessionName] = useState("admin_1");
+  const [configName, setConfigName] = useState("reporting cmh5");
+  const [scriptName, setScriptName] = useState("repo.js");
+  const [EntityName, setEntityName] = useState("");
 
   return (
     <div
@@ -26,6 +27,9 @@ export default function Modal({
         </h2>
 
         {/* Session Name, Config Name, Script Name Inputs */}
+        <div className="mb-4">
+ 
+        </div>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Session Name
