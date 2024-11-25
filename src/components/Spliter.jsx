@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RotateCcw, SeparatorVertical } from "lucide-react";
@@ -6,6 +6,7 @@ import TagsInput from "./TagsInput";
 import {
   calcSessions,
   collectData,
+  generateExcel,
   parseNumberTagPairs,
   splitSessionsByDrops,
 } from "../scripts/spliterScripts";
@@ -17,6 +18,7 @@ export default function Spliter() {
   // Suggested code may be subject to a license. Learn more: ~LicenseLog:3081780946.
   const [seedsBySessions, setSeedsBySessions] = useState([]);
   const [dropNumbers, setDropNumbers] = useState(1);
+  const [seedsBySessionPerDrop , setSeedsBySessionPerDrop]= useState([]);
   const HandleReset = () => {
     setOldFiles([]);
     setProcessedContents([]);
@@ -49,21 +51,21 @@ export default function Spliter() {
 
       // Split pairs of each session based on the number of drops
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
-    console.log(splitDataByDrops);
+    setSeedsBySessionPerDrop(splitDataByDrops);
+    
     // Optionally, store this count if needed for further processing  
-
+    
   };
-
+useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
   return (
     <div className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen">
       <ToastContainer theme="colored" />
       <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
-        Remove Tags from Uploaded Text Files
+        Spliter
       </h2>
 
       <div className="flex flex-col md:flex-row gap-8 items-center">
         <div>
-          {" "}
           <button
             onClick={HandleReset}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg hover:scale-105 border border-blue-600 transition-transform transition-colors duration-200 font-medium"
@@ -113,10 +115,11 @@ export default function Spliter() {
         </button>
         <button
           className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
-            !processedContents.length ? "hidden" : ""
+            !processedContents.length ? "" : ""
           }`}
-          disabled={!processedContents.length}
+          onClick={()=>generateExcel(seedsBySessionPerDrop)}
         >
+        
           Download Files
         </button>
       </div>

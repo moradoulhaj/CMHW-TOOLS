@@ -1,3 +1,4 @@
+
 export const calcSessions = (tagsToSplit) => {
   const lines = tagsToSplit.split("\n");
   if (lines.length === 0) {
@@ -29,7 +30,10 @@ export const parseNumberTagPairs = (line) => {
 // to split tags by sesions
 export const collectData = (lines, sessionsNumber) => {
   // Initialize the grouped structure with empty subarrays for each position
-  const groupedProfilesAndTags = Array.from({ length: sessionsNumber }, () => []);
+  const groupedProfilesAndTags = Array.from(
+    { length: sessionsNumber },
+    () => []
+  );
 
   // Track whether we've encountered an empty pair for each column
   const stopPush = Array(sessionsNumber).fill(false);
@@ -47,13 +51,13 @@ export const collectData = (lines, sessionsNumber) => {
       }
     });
   });
-  
+
   return groupedProfilesAndTags;
 };
 
 // Function to split each session's pairs into chunks based on dropNumbers
 export const splitSessionsByDrops = (collectedData, dropNumbers) => {
-  return collectedData.map(session => {
+  return collectedData.map((session) => {
     const chunks = [];
     const seedsPerDropForSession = Math.ceil(session.length / dropNumbers);
 
@@ -65,4 +69,41 @@ export const splitSessionsByDrops = (collectedData, dropNumbers) => {
 
     return chunks;
   });
+};
+
+// Function to generate Excel file from session data
+import * as XLSX from "xlsx";
+
+export const generateExcel = (seedsBySessionPerDrop) => {
+  // Create a new workbook for the Excel file
+  const workbook = XLSX.utils.book_new();
+
+  // Initialize an array to hold all rows for the single worksheet
+  const worksheetData = [];
+
+  // Loop over each session
+  seedsBySessionPerDrop.forEach((session, sessionIndex) => {
+    worksheetData.push([`Session ${sessionIndex + 1}`]); // Label each session
+
+    // Loop through each drop within the session
+    session.forEach((drop, dropIndex) => {
+      worksheetData.push([`Drop ${dropIndex + 1}`]); // Label each drop
+
+      // Add each [profile, tag] pair within the drop to its own row
+      drop.forEach((pair) => {
+        worksheetData.push([pair[0], pair[1]]); // Add profile and tag in separate columns
+      });
+
+      worksheetData.push([]); // Add an empty row for spacing between drops
+    });
+
+    worksheetData.push([]); // Add an empty row for spacing between sessions
+  });
+
+  // Convert the worksheet data to a single sheet format and add it to the workbook
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  XLSX.utils.book_append_sheet(workbook, worksheet, "All Sessions");
+
+  // Export the workbook to an Excel file and download it
+  XLSX.writeFile(workbook, "sessions_data.xlsx");
 };
