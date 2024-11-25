@@ -107,3 +107,40 @@ export const generateExcel = (seedsBySessionPerDrop) => {
   // Export the workbook to an Excel file and download it
   XLSX.writeFile(workbook, "sessions_data.xlsx");
 };
+
+// export const generateExcel = (seedsBySessionPerDrop) => {
+//   // Create a new workbook
+//   const workbook = XLSX.utils.book_new();
+//   const worksheetData = []; // Initialize data array for a single worksheet
+
+//   // Determine the maximum number of drops across all sessions
+//   const maxDrops = Math.max(...seedsBySessionPerDrop.map(session => session.length));
+//   console.log (maxDrops);
+  
+//   // Create header row
+//   const headerRow = [];
+//   seedsBySessionPerDrop.forEach((_, sessionIndex) => {
+//     headerRow.push(`Session ${sessionIndex + 1} - Profile`, `Session ${sessionIndex + 1} - Tag`);
+//   });
+//   worksheetData.push(headerRow);
+
+//   // Populate each row by drop index, aligning sessions in separate columns
+//   for (let dropIndex = 0; dropIndex < maxDrops; dropIndex++) {
+//     const row = [];
+
+//     // For each session, add the profile-tag pair or empty cells if the drop does not exist
+//     seedsBySessionPerDrop.forEach((session) => {
+//       const drop = session[dropIndex] || ["", ""]; // Empty cells if no data for this drop
+//       row.push(drop[0], drop[1]); // Push profile and tag to respective columns
+//     });
+
+//     worksheetData.push(row); // Append row to worksheet data
+//   }
+
+//   // Convert worksheet data to Excel sheet format and add to the workbook
+//   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+//   XLSX.utils.book_append_sheet(workbook, worksheet, "All Sessions");
+
+//   // Export the workbook as an Excel file
+//   XLSX.writeFile(workbook, "sessions_data.xlsx");
+// };
