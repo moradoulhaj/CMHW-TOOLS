@@ -9,7 +9,7 @@ import { detectSeparator, readFileContent } from "../scripts/scripts";
 import FileViewer from "./FileViewer";
 import JSZip from "jszip";
 
-export default function DelimterSwitch() {
+export default function DelimiterSwitch() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedContents, setProcessedContents] = useState([]);
   const [delimiter, setDelimiter] = useState("AUTO");
@@ -19,7 +19,7 @@ export default function DelimterSwitch() {
   const [currentPage, setCurrentPage] = useState(0);
   const oldFileInputRef = useRef(null);
 
-  const HandleReset = () => {
+  const handleReset = () => {
     setOldFiles([]);
     setProcessedContents([]);
     setDelimiter("AUTO");
@@ -28,7 +28,7 @@ export default function DelimterSwitch() {
     setCurrentPage(0);
   };
 
-  const handleCovertDelimter = async () => {
+  const handleConvertDelimiter = async () => {
     if (!oldFiles.length) {
       toast.error("Please upload files.");
       return;
@@ -36,7 +36,6 @@ export default function DelimterSwitch() {
     if (delimiter === "AUTO") {
       setIsModalOpen(true);
       setSeparator(await detectSeparator(oldFiles));
-      return;
     } else {
       processFiles(delimiter);
     }
@@ -63,28 +62,31 @@ export default function DelimterSwitch() {
   const handleCancelSeparator = () => {
     setIsModalOpen(false);
   };
- const split = (content , separator) => {
-  content.split
 
- }
+  const split = (content, separator, converted) => {
+    if (separator === "\n") {
+      return content.split(`\r${separator}`).join(converted);
+    } else return content.split(separator).join("\n");
+  };
+
   const processFiles = async (separator) => {
     const converted = separator === "\n" ? ";" : "\n";
-  
+
     const fileProcesses = oldFiles.map((file) =>
       readFileContent(file).then((content) => ({
         name: file.name,
-        content: split(content , separator , converted )
+        content: split(content, separator, converted), // Ensures all data in one line
       }))
     );
-  
+
     Promise.all(fileProcesses)
       .then((results) => {
         setProcessedContents(results);
-        toast.success("Files read successfully!");
+        toast.success("Files converted successfully!");
       })
       .catch((error) => console.error("Error processing files:", error));
   };
-  
+
   const downloadZippedFiles = async () => {
     if (processedContents.length === 0) {
       toast.error("No processed files to download.");
@@ -131,10 +133,7 @@ export default function DelimterSwitch() {
             accept=".txt"
             multiple
             ref={oldFileInputRef}
-            onChange={(e) => {
-              handleOldFileUpload(e);
-              setOldFiles(Array.from(e.target.files));
-            }}
+            onChange={handleOldFileUpload}
             style={{ display: "none" }}
           />
           <button
@@ -147,7 +146,7 @@ export default function DelimterSwitch() {
         </div>
         <div>
           <button
-            onClick={HandleReset}
+            onClick={handleReset}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg hover:scale-105 border border-blue-600 transition-transform transition-colors duration-200 font-medium"
           >
             <RotateCcw className="w-5 h-5" />
@@ -156,34 +155,18 @@ export default function DelimterSwitch() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-4">
-        <DelimiterSelector
-          delimiter={delimiter}
-          setDelimiter={setDelimiter}
-          setProcessedContents={setProcessedContents}
-          name={"DelimiterSwitch"}
-        />
-      </div>
+      <DelimiterSelector
+        delimiter={delimiter}
+        setDelimiter={setDelimiter}
+        name={"DelimiterSwitch"}
+      />
 
-      <div
-        className={`flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6 ${
-          isDragging ? "border-2 border-blue-500" : ""
-        }`}
-      >
-        <FileList
-          files={oldFiles}
-          titre={"Uploaded Files"}
-          setOldFiles={setOldFiles}
-          setProcessedContents={setProcessedContents}
-        />
-      </div>
+      <FileList files={oldFiles} titre={"Uploaded Files"} />
 
       <div className="flex gap-6 mt-6">
         <button
-          onClick={handleCovertDelimter}
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
-            processedContents.length ? "hidden" : ""
-          }`}
+          onClick={handleConvertDelimiter}
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium`}
         >
           <RefreshCcw className="w-5 h-5" />
           Convert Separator
