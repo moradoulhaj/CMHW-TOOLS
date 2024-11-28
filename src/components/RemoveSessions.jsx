@@ -170,6 +170,8 @@ export default function RemoveSessions() {
           tagsToRemove={tagsToRemove}
           setTagsToRemove={setTagsToRemove}
           setProcessedContents={setProcessedContents}
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:3127348425.
+          content={"Tags to remove"}
         />
       </div>
 
