@@ -60,7 +60,7 @@ export const splitSessionsByDrops = (collectedData, dropNumbers) => {
   return collectedData.map((session) => {
     const chunks = [];
     const seedsPerDropForSession = Math.ceil(session.length / dropNumbers);
-
+    console.log(seedsPerDropForSession);
     // Loop through the session and create chunks
     for (let i = 0; i < session.length; i += seedsPerDropForSession) {
       const chunk = session.slice(i, i + seedsPerDropForSession);

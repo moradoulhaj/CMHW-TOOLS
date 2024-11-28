@@ -19,13 +19,17 @@ export default function Spliter() {
   const [seedsBySessions, setSeedsBySessions] = useState([]);
   const [dropNumbers, setDropNumbers] = useState(1);
   const [seedsBySessionPerDrop , setSeedsBySessionPerDrop]= useState([]);
+  const handleDropNumberChange = (e) =>{
+    setDropNumbers(e.target.value);setProcessedContents([]);
+
+  }
   const HandleReset = () => {
-    setOldFiles([]);
     setProcessedContents([]);
-    setTagsToRemove("");
-    setDelimiter("AUTO");
-    setIsModalOpen(false);
-    setSeparator("");
+    setTagsToSplit("");
+    setSessionCount("");
+    setSeedsBySessions([]);
+    setSeedsBySessionPerDrop([]);
+    setDropNumbers(1)
   };
 
   const handleSplit = async () => {
@@ -53,8 +57,9 @@ export default function Spliter() {
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
     setSeedsBySessionPerDrop(splitDataByDrops);
     toast.success("Splited successfuly");
-    
     // Optionally, store this count if needed for further processing  
+    setProcessedContents(collectedData);
+
     
   };
 useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
@@ -81,7 +86,7 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
             id="dropNumbers"
             type="number"
             value={dropNumbers}
-            onChange={(e) => setDropNumbers(e.target.value)}
+            onChange={(e)=>handleDropNumberChange(e) }
             placeholder="Enter number"
             className="w-24 py-2 px-3 rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500"
           />
@@ -107,7 +112,7 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
 
       <div className="flex gap-6 mt-6">
         <button
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed  ${
             processedContents.length ? "hidden" : ""
           }`}
           onClick={() => handleSplit()}
@@ -116,8 +121,8 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
           Split
         </button>
         <button
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
-            !processedContents.length ? "" : ""
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
+            !processedContents.length ? "hidden" : ""
           }`}
           onClick={()=>generateExcel(seedsBySessionPerDrop)}
         >
