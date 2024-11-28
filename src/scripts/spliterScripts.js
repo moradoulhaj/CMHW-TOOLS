@@ -109,66 +109,63 @@ export const generateExcell = (seedsBySessionPerDrop) => {
 
 
 
+
+
+
 export const generateExcel = (seedsBySessionPerDrop) => {
   const worksheetData = [];
 
-  // Create the first header row for session titles
-  const headerRow = [];
+  // Prepare headers for each session
+  const headerRow = ["Drop"]; // First column for drop labels
   seedsBySessionPerDrop.forEach((_, sessionIndex) => {
     headerRow.push(`Session ${sessionIndex + 1}`, ""); // One column for profile, one for tag
   });
   worksheetData.push(headerRow);
 
-  // Create the second header row for drop titles
-  const dropLabelRow = [];
-  seedsBySessionPerDrop.forEach(() => {
-    dropLabelRow.push("Drop", ""); // Placeholder for drop labels in both columns
-  });
-  worksheetData.push(dropLabelRow);
+  // To track merge ranges
+  const merges = [];
 
-  // Calculate the maximum number of drops across all sessions
+  // Loop through drops and sessions to structure data
+  let currentRow = 1; // Start after header row
   const maxDrops = Math.max(...seedsBySessionPerDrop.map(session => session.length));
 
   for (let dropIndex = 0; dropIndex < maxDrops; dropIndex++) {
-    let rowAdded = false;
+    let maxPairsInDrop = Math.max(
+      ...seedsBySessionPerDrop.map(session => session[dropIndex]?.length || 0)
+    );
 
-    // Add a label row for each drop
-    const dropRow = [];
-    seedsBySessionPerDrop.forEach(session => {
-      if (session[dropIndex]) {
-        dropRow.push(`Drop ${dropIndex + 1}`, "");
-        rowAdded = true;
-      } else {
-        dropRow.push("", ""); // Add empty cells if no data for the session
-      }
-    });
+    if (maxPairsInDrop > 0) {
+      // Merge Drop label cell
+      merges.push({
+        s: { r: currentRow, c: 0 }, // Start cell (row, column)
+        e: { r: currentRow + maxPairsInDrop - 1, c: 0 }, // End cell (row, column)
+      });
 
-    if (rowAdded) {
-      worksheetData.push(dropRow);
-
-      // Add rows for pairs in this drop
-      let maxPairs = Math.max(...seedsBySessionPerDrop.map(session => session[dropIndex]?.length || 0));
-      for (let pairIndex = 0; pairIndex < maxPairs; pairIndex++) {
-        const dataRow = [];
+      // Add data for each pair within the drop
+      for (let pairIndex = 0; pairIndex < maxPairsInDrop; pairIndex++) {
+        const row = [pairIndex === 0 ? `Drop ${dropIndex + 1}` : ""]; // Drop label only on the first row of the drop
         seedsBySessionPerDrop.forEach(session => {
           const pair = session[dropIndex]?.[pairIndex];
-          if (pair) {
-            dataRow.push(pair[0], pair[1]); // Add profile and tag
-          } else {
-            dataRow.push("", ""); // Add empty cells if no pair for this drop
-          }
+          row.push(pair ? `${pair[0]}` : "", pair ? `${pair[1]}` : ""); // Add profile and tag for the session
         });
-        worksheetData.push(dataRow);
+        worksheetData.push(row);
+        currentRow++;
       }
+
+      // Add an empty row between drops for visual spacing
+      worksheetData.push([]);
+      currentRow++;
     }
   }
 
-  // Create the workbook and add the worksheet
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  worksheet["!merges"] = merges; // Apply merge settings
+
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Sessions");
 
-  // Write the workbook to a file
   XLSX.writeFile(workbook, "sessions_data.xlsx");
 };
+
+
 
