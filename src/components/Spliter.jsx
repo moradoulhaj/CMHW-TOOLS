@@ -52,6 +52,7 @@ export default function Spliter() {
       // Split pairs of each session based on the number of drops
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
     setSeedsBySessionPerDrop(splitDataByDrops);
+    toast.success("Splited successfuly");
     
     // Optionally, store this count if needed for further processing  
     
@@ -94,6 +95,7 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
           tagsToRemove={tagsToSplit}
           setTagsToRemove={setTagsToSplit}
           setProcessedContents={setProcessedContents}
+          content = "Tags to split"
         />
       </div>
 
@@ -120,7 +122,7 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
           onClick={()=>generateExcel(seedsBySessionPerDrop)}
         >
         
-          Download Files
+          Download Excel
         </button>
       </div>
     </div>
