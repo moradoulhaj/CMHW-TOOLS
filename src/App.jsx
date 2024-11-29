@@ -5,6 +5,7 @@ import Offers from "./components/Offers";
 import DelimiterSwitch from "./components/DelimterSwitch";
 import AddSessionUsingTags from "./components/AddSessionsUsinTags";
 import Spliter from "./components/Spliter";
+import LogChecker from "./components/LogChecker";
 
 export default function App() {
   const [selectedOption, setSelectedOption] = useState("add");
@@ -21,7 +22,8 @@ export default function App() {
         return <DelimiterSwitch />;
       case "spliter":
         return <Spliter />;
-
+      case "logCheck":
+        return <LogChecker/>;
       default:
         return <Offers />;
     }

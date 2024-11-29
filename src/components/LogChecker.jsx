@@ -1,12 +1,12 @@
 import { useState } from "react";
-import Monitor from "../parts/Monitor";
 import { checkLogs } from "../scripts/checker"; // Adjust the import path based on your folder structure
-import TextAreaInput from "../small components/TextAreaInput"; // Adjust the import path based on your folder structure
+import Monitor from "./smalls/logCheckerSmalls/Monitor";
+import TextAreaInput from "./smalls/logCheckerSmalls/TextAreaInput";
 
 export default function LogChecker() {
   const [profiles, setProfiles] = useState("");
   const [logs, setLogs] = useState("");
-  const [sent, setSent] = useState(true);
+  const [sent, setSent] = useState(false);
   const [result, setResult] = useState({});
 
   const handleSubmit = (e) => {
@@ -22,39 +22,45 @@ export default function LogChecker() {
   };
 
   return (
-    <main>
-      <div className="px-5 mt-2">
-        <form onSubmit={handleSubmit}>
-          <div className="flex justify-center">
-            <div className="w-1/5">
+    <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col items-center py-10">
+      <div className="px-5 mt-4 w-full max-w-5xl">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="flex flex-col md:flex-row gap-6 justify-center">
+            <div className="w-full md:w-1/3">
               <TextAreaInput
                 id="profiles"
                 label="Profiles"
                 value={profiles}
                 onChange={(e) => setProfiles(e.target.value)}
+                placeholder="Enter profiles..."
               />
             </div>
-            <div className="w-1/2">
+            <div className="w-full md:w-2/3">
               <TextAreaInput
                 id="logs"
                 label="Logs"
                 value={logs}
                 onChange={(e) => setLogs(e.target.value)}
+                placeholder="Enter logs..."
               />
             </div>
           </div>
-          <div className="w-full flex justify-center">
+          <div className="flex justify-center">
             <button
               type="submit"
-              className="mt-1 bg-blue-600 py-1 w-1/2 rounded-full text-white hover:bg-blue-100 font-medium transition-2 hover:text-sky-700"
+              className="bg-blue-600 py-2 px-8 rounded-full text-white hover:bg-blue-500 hover:shadow-lg transition-all duration-300 font-semibold tracking-wide w-full md:w-1/2"
             >
               Check
             </button>
           </div>
         </form>
-        <hr className="mt-2 border-indigo-600" />
+        <hr className="mt-8 border-blue-300" />
       </div>
-      {sent && <Monitor  result={result} />}
+      {sent && (
+        <div className="mt-8 w-full max-w-5xl">
+          <Monitor result={result} />
+        </div>
+      )}
     </main>
   );
 }

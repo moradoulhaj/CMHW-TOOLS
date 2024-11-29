@@ -5,18 +5,18 @@ const TextAreaInput = ({ id, label, value, onChange }) => {
 
   return (
     <div className="w-full">
-      <label htmlFor={id} className="block mb-2 text-gray-700 font-medium">
-        {label}:
-        <span className="inline-flex items-center rounded-md bg-blue-50 px-2 ml-2 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-          Lines :{countLines(value)}
+      <label htmlFor={id} className="block mb-1 text-gray-700 font-semibold">
+        {label}
+        <span className="ml-2 inline-flex items-center rounded-md bg-blue-100 px-2 text-xs font-medium text-blue-700 ring-1 ring-blue-500/20">
+          Lines: {countLines(value)}
         </span>
       </label>
       <textarea
         id={id}
         name={id}
-        rows={3}
-        style={{ height: "150px", resize: "none" }}
-        className="block w-full p-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+        rows={5}
+        style={{ resize: "none" }}
+        className="block w-full p-3 rounded-lg border border-gray-300 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none placeholder-gray-400 sm:text-sm"
         value={value}
         onChange={onChange}
         required
