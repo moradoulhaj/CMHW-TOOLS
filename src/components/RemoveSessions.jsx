@@ -1,11 +1,11 @@
 import React, { useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ConfirmModal from "./ConfirmModal";
-import FileList from "./FilesList";
+import ConfirmModal from "./smalls/ConfirmModal";
+import FileList from "./smalls/FilesList";
 import { Download, RotateCcw, Trash2, Upload } from "lucide-react";
-import DelimiterSelector from "./DelimiterSelector";
-import TagsInput from "./TagsInput";
+import DelimiterSelector from "./smalls/DelimiterSelector";
+import TagsInput from "./smalls/TagsInput";
 import {
   detectSeparator,
   downloadProcessedContent,
@@ -170,7 +170,7 @@ export default function RemoveSessions() {
           tagsToRemove={tagsToRemove}
           setTagsToRemove={setTagsToRemove}
           setProcessedContents={setProcessedContents}
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:3127348425.
+          // Suggested code may be subject to a license. Learn more: ~LicenseLog:3127348425.
           content={"Tags to remove"}
         />
       </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RotateCcw, SeparatorVertical } from "lucide-react";
-import TagsInput from "./TagsInput";
+import TagsInput from "./smalls/TagsInput";
 import {
   calcSessions,
   collectData,
@@ -18,14 +18,18 @@ export default function Spliter() {
   // Suggested code may be subject to a license. Learn more: ~LicenseLog:3081780946.
   const [seedsBySessions, setSeedsBySessions] = useState([]);
   const [dropNumbers, setDropNumbers] = useState(1);
-  const [seedsBySessionPerDrop , setSeedsBySessionPerDrop]= useState([]);
-  const HandleReset = () => {
-    setOldFiles([]);
+  const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
+  const handleDropNumberChange = (e) => {
+    setDropNumbers(e.target.value);
     setProcessedContents([]);
-    setTagsToRemove("");
-    setDelimiter("AUTO");
-    setIsModalOpen(false);
-    setSeparator("");
+  };
+  const HandleReset = () => {
+    setProcessedContents([]);
+    setTagsToSplit("");
+    setSessionCount("");
+    setSeedsBySessions([]);
+    setSeedsBySessionPerDrop([]);
+    setDropNumbers(1);
   };
 
   const handleSplit = async () => {
@@ -49,15 +53,16 @@ export default function Spliter() {
     // Count seeds for each session
     const seedsCountBySession = collectedData.map((session) => session.length);
 
-      // Split pairs of each session based on the number of drops
+    // Split pairs of each session based on the number of drops
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
     setSeedsBySessionPerDrop(splitDataByDrops);
     toast.success("Splited successfuly");
-    
-    // Optionally, store this count if needed for further processing  
-    
+    // Optionally, store this count if needed for further processing
+    setProcessedContents(collectedData);
   };
-useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
+  // useEffect(() => {
+  //   console.log(seedsBySessionPerDrop);
+  // }, [seedsBySessionPerDrop]);
   return (
     <div className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen">
       <ToastContainer theme="colored" />
@@ -81,7 +86,7 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
             id="dropNumbers"
             type="number"
             value={dropNumbers}
-            onChange={(e) => setDropNumbers(e.target.value)}
+            onChange={(e) => handleDropNumberChange(e)}
             placeholder="Enter number"
             className="w-24 py-2 px-3 rounded-md border border-gray-300 shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500"
           />
@@ -95,7 +100,7 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
           tagsToRemove={tagsToSplit}
           setTagsToRemove={setTagsToSplit}
           setProcessedContents={setProcessedContents}
-          content = "Tags to split"
+          content="Tags to split"
         />
       </div>
 
@@ -107,7 +112,7 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
 
       <div className="flex gap-6 mt-6">
         <button
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed  ${
             processedContents.length ? "hidden" : ""
           }`}
           onClick={() => handleSplit()}
@@ -116,12 +121,11 @@ useEffect(()=>{console.log(seedsBySessionPerDrop);},[seedsBySessionPerDrop])
           Split
         </button>
         <button
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
-            !processedContents.length ? "" : ""
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
+            !processedContents.length ? "hidden" : ""
           }`}
-          onClick={()=>generateExcel(seedsBySessionPerDrop)}
+          onClick={() => generateExcel(seedsBySessionPerDrop)}
         >
-        
           Download Excel
         </button>
       </div>

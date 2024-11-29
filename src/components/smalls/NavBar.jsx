@@ -24,7 +24,7 @@ export default function Navbar({ selectedOption, onOptionChange }) {
       >
         Remove Sessions
       </button>
-      
+
       <button
         className={`py-2 px-4 rounded-md ${
           selectedOption === "addWithTags"
@@ -54,6 +54,16 @@ export default function Navbar({ selectedOption, onOptionChange }) {
         onClick={() => onOptionChange("spliter")}
       >
         Spliter
+      </button>
+      <button
+        className={`py-2 px-4 rounded-md ${
+          selectedOption === "logCheck"
+            ? "bg-blue-500"
+            : "bg-blue-700 hover:bg-blue-600"
+        }`}
+        onClick={() => onOptionChange("logCheck")}
+      >
+        Log Checker
       </button>
     </nav>
   );

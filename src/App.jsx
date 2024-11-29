@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import Navbar from "./components/NavBar";
-import AddSessions from "./components/AddSessions";
+import Navbar from "./components/smalls/NavBar";
 import RemoveSessions from "./components/RemoveSessions";
-import AddSessionWithTags from "./components/AddSessionsWithTags";
 import Offers from "./components/Offers";
-import LazyLoading from "./components/DelimterSwitch";
+import DelimiterSwitch from "./components/DelimterSwitch";
 import AddSessionUsingTags from "./components/AddSessionsUsinTags";
 import Spliter from "./components/Spliter";
+import LogChecker from "./components/LogChecker";
 
 export default function App() {
   const [selectedOption, setSelectedOption] = useState("add");
@@ -18,13 +17,13 @@ export default function App() {
       case "remove":
         return <RemoveSessions />;
       case "addWithTags":
-        
         return <AddSessionUsingTags />;
       case "delimterSwitch":
-        return <LazyLoading />;
+        return <DelimiterSwitch />;
       case "spliter":
-       return <Spliter />;
-        
+        return <Spliter />;
+      case "logCheck":
+        return <LogChecker/>;
       default:
         return <Offers />;
     }

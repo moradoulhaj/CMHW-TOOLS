@@ -59,17 +59,24 @@ export const collectData = (lines, sessionsNumber) => {
 export const splitSessionsByDrops = (collectedData, dropNumbers) => {
   return collectedData.map((session) => {
     const chunks = [];
-    const seedsPerDropForSession = Math.ceil(session.length / dropNumbers);
+    const seedsPerDropForSession = Math.floor(session.length / dropNumbers);
+    let remainder = session.length % dropNumbers; // Remaining seeds after even split
 
-    // Loop through the session and create chunks
-    for (let i = 0; i < session.length; i += seedsPerDropForSession) {
-      const chunk = session.slice(i, i + seedsPerDropForSession);
-      chunks.push(chunk);
+    let start = 0;
+
+    // Distribute seeds across drops
+    for (let i = 0; i < dropNumbers; i++) {
+      let end = start + seedsPerDropForSession + (remainder > 0 ? 1 : 0);
+      chunks.push(session.slice(start, end));
+      start = end;
+      if (remainder > 0) remainder--; // Use up the remainder
     }
 
     return chunks;
   });
 };
+
+
 
 // Function to generate Excel file from session data
 import * as XLSX from "xlsx";
