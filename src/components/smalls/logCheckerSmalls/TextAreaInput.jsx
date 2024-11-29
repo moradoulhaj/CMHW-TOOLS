@@ -1,14 +1,21 @@
 import React from "react";
 
 const TextAreaInput = ({ id, label, value, onChange ,placeholder}) => {
-  const countLines = (text) => (text ? text.split("\n").length : 0);
+  const countLines = (text) => {
+    if (typeof text !== "string") return 0;
+    return text.split("\n").length;
+  };
+  
 
+
+  // const countLines = (text) => (text ? text.split("\n").length : 0);
+  //  console.log(value.split("\n").length);
   return (
     <div className="w-full">
       <label htmlFor={id} className="block mb-1 text-gray-700 font-semibold">
         {label}
         <span className="ml-2 inline-flex items-center rounded-md bg-blue-100 px-2 text-xs font-medium text-blue-700 ring-1 ring-blue-500/20">
-          {/* Lines: {countLines(value)} */}
+            Lines: {countLines(value)}   
         </span>
       </label>
       <textarea

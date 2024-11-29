@@ -2,9 +2,9 @@ import TextAreaWithCopy from "./TextAreaWithCopy";
 
 export default function Monitor({ result }) {
   return (
-    
-    <div className="p-10 mx-auto flex flex-col justify-center items-center">
-      <div className="grid gap-4 grid-cols-5 ">
+    <div className="p-8 mx-auto flex flex-col justify-center items-center bg-white rounded-lg shadow-lg">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">Results Overview</h3>
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {result.connectedProfiles?.length > 0 && (
           <TextAreaWithCopy
             id="active"
@@ -58,7 +58,7 @@ export default function Monitor({ result }) {
         {result.unusualActivityProfiles?.length > 0 && (
           <TextAreaWithCopy
             id="usualActivity"
-            label="Usual Activity"
+            label="Unusual Activity"
             value={result.unusualActivityProfiles.join("\n")}
           />
         )}

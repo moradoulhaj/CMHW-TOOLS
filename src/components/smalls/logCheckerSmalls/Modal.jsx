@@ -20,7 +20,7 @@ export default function Modal({ showModal, setShowModal, proxyDownProfiles }) {
     const newPairedList = profiles.map(
       (profile, index) => `${profile};${proxies[index]}`
     );
-    console.log("Paired List:", newPairedList.join("\n"));
+    // console.log("Paired List:", newPairedList.join("\n"));
 
     // Set the paired list to the state
     setPairedList(newPairedList);

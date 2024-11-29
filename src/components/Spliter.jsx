@@ -60,9 +60,9 @@ export default function Spliter() {
     // Optionally, store this count if needed for further processing
     setProcessedContents(collectedData);
   };
-  useEffect(() => {
-    console.log(seedsBySessionPerDrop);
-  }, [seedsBySessionPerDrop]);
+  // useEffect(() => {
+  //   console.log(seedsBySessionPerDrop);
+  // }, [seedsBySessionPerDrop]);
   return (
     <div className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen">
       <ToastContainer theme="colored" />

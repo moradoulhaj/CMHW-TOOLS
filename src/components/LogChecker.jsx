@@ -12,25 +12,20 @@ export default function LogChecker() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
     // Split the combined input into lines
     const lines = combined.split("\n");
-  
     // Split each line into its components: profile, tag, log
     const profilesAndTags = lines.map((line) => line.split("\t"));
   
-    console.log("Profiles and Tags:", profilesAndTags);
   
     // Extract profiles and logs from the parsed data
     const profiles = profilesAndTags.map(([profile, tag]) => `${profile}\t${tag || ''}`).join("\n");
     const logs = profilesAndTags.map(([, , log]) => log || "").join("\n");
   
-    console.log("Profiles:", profiles);
-    console.log("Logs:", logs);
   
     setProfiles(profiles);
     setLogs(logs);
-  
+
     // Perform the log check
     const result = checkLogs(profiles, logs);
     if (result.error) {
