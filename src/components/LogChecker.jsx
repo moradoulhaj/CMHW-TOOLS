@@ -8,10 +8,30 @@ export default function LogChecker() {
   const [logs, setLogs] = useState("");
   const [sent, setSent] = useState(false);
   const [result, setResult] = useState({});
+  const [combined, setCombined] = useState([]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
+    // Split the combined input into lines
+    const lines = combined.split("\n");
+  
+    // Split each line into its components: profile, tag, log
+    const profilesAndTags = lines.map((line) => line.split("\t"));
+  
+    console.log("Profiles and Tags:", profilesAndTags);
+  
+    // Extract profiles and logs from the parsed data
+    const profiles = profilesAndTags.map(([profile, tag]) => `${profile}\t${tag || ''}`).join("\n");
+    const logs = profilesAndTags.map(([, , log]) => log || "").join("\n");
+  
+    console.log("Profiles:", profiles);
+    console.log("Logs:", logs);
+  
+    setProfiles(profiles);
+    setLogs(logs);
+  
+    // Perform the log check
     const result = checkLogs(profiles, logs);
     if (result.error) {
       alert(result.error);
@@ -20,28 +40,21 @@ export default function LogChecker() {
       setSent(true);
     }
   };
+  
+  
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col items-center py-10">
       <div className="px-5 mt-4 w-full max-w-5xl">
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="flex flex-col md:flex-row gap-6 justify-center">
-            <div className="w-full md:w-1/3">
+            <div className="w-full md:w-full">
               <TextAreaInput
                 id="profiles"
-                label="Profiles"
-                value={profiles}
-                onChange={(e) => setProfiles(e.target.value)}
-                placeholder="Enter profiles..."
-              />
-            </div>
-            <div className="w-full md:w-2/3">
-              <TextAreaInput
-                id="logs"
-                label="Logs"
-                value={logs}
-                onChange={(e) => setLogs(e.target.value)}
-                placeholder="Enter logs..."
+                label="Profiles And Logs"
+                value={combined}
+                onChange={(e) => setCombined(e.target.value)}
+                placeholder="Enter profiles with their logs"
               />
             </div>
           </div>
