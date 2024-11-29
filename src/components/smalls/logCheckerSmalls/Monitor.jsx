@@ -4,7 +4,7 @@ export default function Monitor({ result }) {
   return (
     <div className="p-8 mx-auto flex flex-col justify-center items-center bg-white rounded-lg shadow-lg">
       <h3 className="text-2xl font-bold text-gray-800 mb-6">Results Overview</h3>
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex flex-wrap justify-center gap-2 w-full">
         {result.connectedProfiles?.length > 0 && (
           <TextAreaWithCopy
             id="active"
