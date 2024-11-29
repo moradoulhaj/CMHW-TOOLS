@@ -36,7 +36,7 @@ export default function TextAreaWithCopy({ id, label, value, proxyDownProfiles }
 
   return (
     <>
-      <div className="w-full max-w-xl border p-5 border-gray-300 bg-white rounded-lg shadow-lg">
+      <div className="w-[30%] max-w-xl border p-5 border-gray-300 bg-white rounded-lg shadow-lg">
         <label
           htmlFor={id}
           className="block mb-3 text-center text-gray-800 font-semibold"
