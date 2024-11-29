@@ -1,18 +1,20 @@
 import React, { useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { downloadProcessedContent, readFileContent } from "../scripts/scripts";
-import FileList from "./FilesList";
-import TagsInput from "./TagsInput";
+import {
+  downloadProcessedContent,
+  readFileContent,
+} from "../../scripts/scripts";
+import FileList from "../smalls/FilesList";
+import TagsInput from "../smalls/TagsInput";
 export default function AddSessionWithTags() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedFiles, setprocessedFiles] = useState([]); // State to hold processed content
   const [tagsToAdd, setTagsToAdd] = useState("");
   const [startingDropNbr, setStartingDropNbr] = useState(1);
-  const [isDragging , setIsDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const oldFileInputRef = useRef(null);
-
 
   const handleOldFileUpload = (event) => {
     setOldFiles(Array.from(event.target.files));
@@ -62,7 +64,6 @@ export default function AddSessionWithTags() {
     setprocessedFiles(modifiedFiles);
     toast.success("Tags added successfully!");
   };
-  
 
   return (
     <div
@@ -127,7 +128,11 @@ export default function AddSessionWithTags() {
         />
       </div>
 
-      <div className={`flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6 ${isDragging ? "border-2 border-blue-500" : ""}`}>
+      <div
+        className={`flex flex-col md:flex-row gap-10 w-full max-w-lg md:justify-center mt-6 ${
+          isDragging ? "border-2 border-blue-500" : ""
+        }`}
+      >
         <FileList
           files={oldFiles}
           titre={"Uploaded Files"}
@@ -150,8 +155,9 @@ export default function AddSessionWithTags() {
           className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
             !processedContents.length ? "hidden" : ""
           }`}
-          
-          onClick={()=>{downloadProcessedContent(processedContents)}}
+          onClick={() => {
+            downloadProcessedContent(processedContents);
+          }}
           disabled={!processedContents.length}
         >
           <Download className="w-5 h-5" />

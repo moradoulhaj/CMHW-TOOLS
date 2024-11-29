@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ConfirmModal from "./ConfirmModal";
-import FileList from "./FilesList";
+import ConfirmModal from "./smalls/ConfirmModal";
+import FileList from "./smalls/FilesList";
 import { Eye, RefreshCcw, RotateCcw, Upload } from "lucide-react";
-import DelimiterSelector from "./DelimiterSelector";
+import DelimiterSelector from "./smalls/DelimiterSelector";
 import { detectSeparator, readFileContent } from "../scripts/scripts";
-import FileViewer from "./FileViewer";
+import FileViewer from "./smalls/FileViewer";
 import JSZip from "jszip";
 
 export default function DelimiterSwitch() {
