@@ -18,17 +18,14 @@ export const checkLogs = (profiles, logs) => {
   let accountDisabledProfiles = [];
   let othersProfiles = [];
   let wrongBrowserProfiles = [];
+  let wrongRecoveryProfiles = [];
 
   logsArr.forEach((log, i) => {
     log = log.toLowerCase();
 
     if (log === "") {
       notLogsProfiles.push(profilesArr[i]);
-    } else if (
-      log === "matched" ||
-      log.includes("active") ||
-      log.includes("connected")
-    ) {
+    } else if (log === "matched" || log.includes("active")) {
       connectedProfiles.push(profilesArr[i]);
     } else if (log.includes("proxy down") || log.includes("proxy problem")) {
       proxyDownProfiles.push(profilesArr[i]);
@@ -38,10 +35,19 @@ export const checkLogs = (profiles, logs) => {
     ) {
       accountDisabledProfiles.push(profilesArr[i]);
     } else if (
-      log.includes("Captcha Verification") ||
-      log.includes("captcha_verification")
+      log.includes("captcha verification") ||
+      log.includes("captcha_verification") ||
+      log.includes("captcha_text") ||
+      log.includes("device verification")
     ) {
       captchaVerificationProfiles.push(profilesArr[i]);
+    } else if (
+      log.includes("recovery verification") ||
+      log.includes("wrong_recovery") || log.includes("wrong_2fa")
+    ) {
+      wrongRecoveryProfiles.push(profilesArr[i]);
+    }else if (log.includes("confirm phone number")) {
+      phoneNumberProfiles.push(profilesArr[i]);
     } else {
       let logArr = log.split("update_status : ");
       log = logArr[logArr.length - 1];
@@ -97,6 +103,6 @@ export const checkLogs = (profiles, logs) => {
     unusualActivityProfiles,
     accountDisabledProfiles,
     othersProfiles,
-    wrongBrowserProfiles,
+    wrongBrowserProfiles,wrongRecoveryProfiles,
   };
 };

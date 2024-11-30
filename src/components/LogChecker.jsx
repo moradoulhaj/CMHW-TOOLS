@@ -2,6 +2,7 @@ import { useState } from "react";
 import { checkLogs } from "../scripts/checker"; // Adjust the import path based on your folder structure
 import Monitor from "./smalls/logCheckerSmalls/Monitor";
 import TextAreaInput from "./smalls/logCheckerSmalls/TextAreaInput";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function LogChecker() {
   const [profiles, setProfiles] = useState("");
@@ -29,7 +30,7 @@ export default function LogChecker() {
     // Perform the log check
     const result = checkLogs(profiles, logs);
     if (result.error) {
-      alert(result.error);
+      toast.error(result.error);
     } else {
       setResult(result);
       setSent(true);
@@ -69,6 +70,7 @@ export default function LogChecker() {
           <Monitor result={result} />
         </div>
       )}
+      <ToastContainer />
     </main>
   );
 }

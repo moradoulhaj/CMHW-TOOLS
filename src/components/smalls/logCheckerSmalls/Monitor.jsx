@@ -3,7 +3,9 @@ import TextAreaWithCopy from "./TextAreaWithCopy";
 export default function Monitor({ result }) {
   return (
     <div className="p-8 mx-auto flex flex-col justify-center items-center bg-white rounded-lg shadow-lg">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">Results Overview</h3>
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">
+        Results Overview
+      </h3>
       <div className="flex flex-wrap justify-center gap-2 w-full">
         {result.connectedProfiles?.length > 0 && (
           <TextAreaWithCopy
@@ -26,7 +28,8 @@ export default function Monitor({ result }) {
             label="Max Execution Time"
             value={result.maxExecutionTimeProfiles.join("\n")}
           />
-        )}  {result.wrongBrowserProfiles?.length > 0 && (
+        )}{" "}
+        {result.wrongBrowserProfiles?.length > 0 && (
           <TextAreaWithCopy
             id="wrongBrowser"
             label="Wrong Browser"
@@ -52,6 +55,13 @@ export default function Monitor({ result }) {
             id="wrongPassword"
             label="Wrong Password"
             value={result.wrongPasswordProfiles.join("\n")}
+          />
+        )}
+        {result.wrongRecoveryProfiles?.length > 0 && (
+          <TextAreaWithCopy
+            id="wrongRecovery"
+            label="Wrong Recovery"
+            value={result.wrongRecoveryProfiles.join("\n")}
           />
         )}
         {result.phoneNumberProfiles?.length > 0 && (
