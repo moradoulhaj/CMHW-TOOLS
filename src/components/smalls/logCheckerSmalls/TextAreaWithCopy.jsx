@@ -1,20 +1,21 @@
-import { useRef, useState } from "react";
-import Modal from "./Modal";
-import NewLogsModal from "./NewLogsModal";
+import { useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function TextAreaWithCopy({ id, label, value, proxyDownProfiles }) {
+export default function TextAreaWithCopy({ id, label, value }) {
   const textAreaRef = useRef(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showNewLogsModal, setShowNewLogsModal] = useState(false);
 
   const countLines = (text) => (text ? text.split("\n").length : 0);
 
   const copyToProfilesAndTagsToClipboard = () => {
-    textAreaRef.current.select();
-    document.execCommand("copy");
-    toast.info("Profile and Their Tags copied successfuly!");
-
+    navigator.clipboard
+      .writeText(value)
+      .then(() => {
+        toast.info("Profile and Their Tags copied successfully!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy Profiles and Tags.");
+      });
   };
 
   const copyProfilesNumbersToClipboard = () => {
@@ -23,20 +24,19 @@ export default function TextAreaWithCopy({ id, label, value, proxyDownProfiles }
       .map((line) => line.split("\t")[0]) // Assumes profiles are the first tab-separated value
       .join("\n");
 
-    navigator.clipboard.writeText(profileNumbers).then(() => {
-      toast.info("Profile numbers copied!");
-    });
-  };
-
-  const getIcon = (id) => {
-    if (id === "pairedList") return <i className="ri-check-double-line"></i>;
-    if (id === "proxyDown") return <i className="ri-pencil-fill"></i>;
-    return <i className="ri-download-fill"></i>;
+    navigator.clipboard
+      .writeText(profileNumbers)
+      .then(() => {
+        toast.info("Profile numbers copied!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy Profile numbers.");
+      });
   };
 
   return (
     <>
-      <div className="w-[30%] max-w-xl border p-5 border-gray-300 bg-white rounded-lg shadow-lg">
+      <div className="w-full sm:w-[30%] max-w-xl border p-5 border-gray-300 bg-white rounded-lg shadow-lg">
         <label
           htmlFor={id}
           className="block mb-3 text-center text-gray-800 font-semibold"
@@ -60,38 +60,31 @@ export default function TextAreaWithCopy({ id, label, value, proxyDownProfiles }
           <button
             onClick={copyToProfilesAndTagsToClipboard}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
-            title="Copy Profiles & Tags"
+            title="Copy profiles and their associated tags to clipboard"
           >
             <i className="ri-clipboard-line"></i>
           </button>
           <button
             onClick={copyProfilesNumbersToClipboard}
             className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
-            title="Copy Profile Numbers"
+            title="Copy profile numbers to clipboard"
           >
             <i className="ri-numbers-line"></i>
           </button>
-          {/* <button
-            onClick={() =>
-              id === "pairedList" ? setShowNewLogsModal(true) : setShowModal(true)
-            }
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
-            title="Open Modal"
-          >
-            {getIcon(id)}
-          </button> */}
         </div>
       </div>
-      <Modal
-        showModal={showModal}
-        setShowModal={setShowModal}
-        proxyDownProfiles={proxyDownProfiles}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
       />
-      <NewLogsModal
-        showNewLogsModal={showNewLogsModal}
-        setShowNewLogsModal={setShowNewLogsModal}
-      />
-      <ToastContainer />
     </>
   );
 }

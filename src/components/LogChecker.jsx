@@ -70,7 +70,7 @@ export default function LogChecker() {
           <Monitor result={result} />
         </div>
       )}
-      <ToastContainer />
+      <ToastContainer theme="colored" />
     </main>
   );
 }

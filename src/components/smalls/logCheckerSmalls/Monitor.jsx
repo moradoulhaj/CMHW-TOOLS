@@ -19,7 +19,6 @@ export default function Monitor({ result }) {
             id="proxyDown"
             label="Proxy Down"
             value={result.proxyDownProfiles.join("\n")}
-            proxyDownProfiles={result.proxyDownProfiles}
           />
         )}
         {result.maxExecutionTimeProfiles?.length > 0 && (
