@@ -26,6 +26,12 @@ export default function Monitor({ result }) {
             label="Max Execution Time"
             value={result.maxExecutionTimeProfiles.join("\n")}
           />
+        )}  {result.wrongBrowserProfiles?.length > 0 && (
+          <TextAreaWithCopy
+            id="wrongBrowser"
+            label="Wrong Browser"
+            value={result.wrongBrowserProfiles.join("\n")}
+          />
         )}
         {result.accountRestrictedProfiles?.length > 0 && (
           <TextAreaWithCopy

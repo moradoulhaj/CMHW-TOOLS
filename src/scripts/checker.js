@@ -17,13 +17,18 @@ export const checkLogs = (profiles, logs) => {
   let unusualActivityProfiles = [];
   let accountDisabledProfiles = [];
   let othersProfiles = [];
+  let wrongBrowserProfiles = [];
 
   logsArr.forEach((log, i) => {
     log = log.toLowerCase();
 
     if (log === "") {
       notLogsProfiles.push(profilesArr[i]);
-    } else if (log === "matched") {
+    } else if (
+      log === "matched" ||
+      log.includes("active") ||
+      log.includes("connected")
+    ) {
       connectedProfiles.push(profilesArr[i]);
     } else if (log.includes("proxy down") || log.includes("proxy problem")) {
       proxyDownProfiles.push(profilesArr[i]);
@@ -32,6 +37,11 @@ export const checkLogs = (profiles, logs) => {
       log.includes("account_disabled_check")
     ) {
       accountDisabledProfiles.push(profilesArr[i]);
+    } else if (
+      log.includes("Captcha Verification") ||
+      log.includes("captcha_verification")
+    ) {
+      captchaVerificationProfiles.push(profilesArr[i]);
     } else {
       let logArr = log.split("update_status : ");
       log = logArr[logArr.length - 1];
@@ -62,6 +72,9 @@ export const checkLogs = (profiles, logs) => {
         case "unusual_activity":
           unusualActivityProfiles.push(profilesArr[i]);
           break;
+        case "wrong_browser":
+          wrongBrowserProfiles.push(profilesArr[i]);
+          break;
         case "account_disabled" || "account_disabled_check":
           accountDisabledProfiles.push(profilesArr[i]);
           break;
@@ -84,5 +97,6 @@ export const checkLogs = (profiles, logs) => {
     unusualActivityProfiles,
     accountDisabledProfiles,
     othersProfiles,
+    wrongBrowserProfiles,
   };
 };

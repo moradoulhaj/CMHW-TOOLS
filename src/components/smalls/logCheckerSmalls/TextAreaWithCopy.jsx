@@ -71,7 +71,7 @@ export default function TextAreaWithCopy({ id, label, value, proxyDownProfiles }
           >
             <i className="ri-numbers-line"></i>
           </button>
-          <button
+          {/* <button
             onClick={() =>
               id === "pairedList" ? setShowNewLogsModal(true) : setShowModal(true)
             }
@@ -79,7 +79,7 @@ export default function TextAreaWithCopy({ id, label, value, proxyDownProfiles }
             title="Open Modal"
           >
             {getIcon(id)}
-          </button>
+          </button> */}
         </div>
       </div>
       <Modal
