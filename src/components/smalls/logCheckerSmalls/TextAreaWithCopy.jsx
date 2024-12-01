@@ -74,15 +74,9 @@ export default function TextAreaWithCopy({ id, label, value }) {
         </div>
       </div>
       <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
+     
+       
+   
         theme="colored"
       />
     </>

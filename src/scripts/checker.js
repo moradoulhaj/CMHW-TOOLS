@@ -2,10 +2,6 @@ export const checkLogs = (profiles, logs) => {
   const profilesArr = profiles.split("\n");
   const logsArr = logs.split("\n");
 
-  if (profilesArr.length !== logsArr.length) {
-    return { error: "Profiles number and Logs number do not match" };
-  }
-
   let notLogsProfiles = [];
   let connectedProfiles = [];
   let proxyDownProfiles = [];
