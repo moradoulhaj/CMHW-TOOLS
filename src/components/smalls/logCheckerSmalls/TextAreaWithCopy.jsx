@@ -73,12 +73,6 @@ export default function TextAreaWithCopy({ id, label, value }) {
           </button>
         </div>
       </div>
-      <ToastContainer
-     
-       
-   
-        theme="colored"
-      />
     </>
   );
 }
