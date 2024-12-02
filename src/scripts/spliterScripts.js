@@ -144,10 +144,10 @@ export const generateExcel = (seedsBySessionPerDrop) => {
 
       // Add data for each pair within the drop
       for (let pairIndex = 0; pairIndex < maxPairsInDrop; pairIndex++) {
-        const row = [pairIndex === 0 ? `Drop ${dropIndex + 1}` : ""]; // Drop label only on the first row of the drop
+        const row = [pairIndex === 0 ? (dropIndex + 1 ): ""]; // Drop label only on the first row of the drop
         seedsBySessionPerDrop.forEach((session) => {
           const pair = session[dropIndex]?.[pairIndex];
-          row.push(pair ? `${pair[0]}` : "", pair ? `${pair[1]}` : ""); // Add profile and tag for the session
+          row.push(pair ? `${pair[0]}` : null, pair ? `${pair[1]}` : null); // Add profile and tag for the session
         });
         worksheetData.push(row);
         currentRow++;
@@ -155,26 +155,8 @@ export const generateExcel = (seedsBySessionPerDrop) => {
 
       // Add an empty row between drops for visual spacing
       // Add a blank row for visual separation
-      const blankRow = new Array(headerRow.length).fill(""); // Ensure it has the same number of columns as the header
-      worksheetData.push(blankRow);
+      worksheetData.push([]);
 
-      // Apply a black background style to the blank row
-      merges.push({
-        s: { r: currentRow, c: 0 }, // Merge drop label over the blank row
-        e: { r: currentRow, c: 0 },
-      });
-
-      worksheetData[currentRow] = blankRow.map((_, colIndex) => ({
-        v: "",
-        s: {
-          fill: {
-            fgColor: { rgb: "000000" }, // Black background
-          },
-          font: {
-            color: { rgb: "FFFFFF" }, // White text for contrast
-          },
-        },
-      }));
 
       currentRow++;
     }

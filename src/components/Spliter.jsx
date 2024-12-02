@@ -19,7 +19,7 @@ export default function Spliter() {
   const [seedsBySessions, setSeedsBySessions] = useState([]);
   const [dropNumbers, setDropNumbers] = useState(1);
   const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
-  const [delimiter, setDelimiter] = useState("\n");
+  const [delimiter, setDelimiter] = useState(";");
 
   const handleDropNumberChange = (e) => {
     setDropNumbers(e.target.value);
