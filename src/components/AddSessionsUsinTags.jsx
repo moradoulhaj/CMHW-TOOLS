@@ -194,7 +194,7 @@ export default function AddSessionUsingTags() {
           className="px-6 py-3 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 transition-all duration-200 font-medium"
           onClick={HandleOpenSettings}
         >
-          Remove Rdp
+          Add Session
         </button>
         <button
           className="px-6 py-3 bg-purple-500 text-white rounded-lg shadow-md hover:bg-purple-600 transition-all duration-200 font-medium"

@@ -11,7 +11,7 @@ export default function TextAreaWithCopy({ id, label, value }) {
     navigator.clipboard
       .writeText(value)
       .then(() => {
-        toast.info("Profile and Their Tags copied successfully!");
+        toast.info("Profiles and Their Tags copied successfully!");
       })
       .catch(() => {
         toast.error("Failed to copy Profiles and Tags.");
@@ -27,7 +27,7 @@ export default function TextAreaWithCopy({ id, label, value }) {
     navigator.clipboard
       .writeText(profileNumbers)
       .then(() => {
-        toast.info("Profile numbers copied!");
+        toast.info("Profiles numbers copied!");
       })
       .catch(() => {
         toast.error("Failed to copy Profile numbers.");
