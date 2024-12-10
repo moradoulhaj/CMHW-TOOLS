@@ -17,7 +17,7 @@ export default function App() {
         <div>
           <Routes>
 
-            <Route path="/ReadAndShow" element={<Offers />} />
+            <Route path="/readAndShow" element={<Offers />} />
             <Route path="/removeTags" element={<RemoveSessions />} />
             <Route path="/addUsingTags" element={<AddSessionUsingTags />} />
             <Route path="/delimiterSwitch" element={<DelimiterSwitch />} />
