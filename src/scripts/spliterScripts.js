@@ -1,11 +1,6 @@
-export const calcSessions = (tagsToSplit) => {
-  const lines = tagsToSplit.split("\n");
-  if (lines.length === 0) {
-    return;
-  }
-
+export const calcSessions = (firstLine) => {
   // Split the first line by tab to detect the number of sessions
-  const firstLine = lines[0];
+ 
   const sessions = firstLine.split("\t");
   return sessions.length / 2; // return the number of sessions
 };
@@ -29,6 +24,10 @@ export const parseNumberTagPairs = (line) => {
 // to split tags by sesions
 export const collectData = (lines, sessionsNumber) => {
   // Initialize the grouped structure with empty subarrays for each position
+  if (sessionsNumber === 0 || !Number.isInteger(sessionsNumber)) {
+    toast.error("Make sure ur tags are correct then re-check again.");
+    return "wrongIinput";
+  }
   const groupedProfilesAndTags = Array.from(
     { length: sessionsNumber },
     () => []
@@ -172,6 +171,7 @@ export const generateExcel = (seedsBySessionPerDrop) => {
 };
 
 import JSZip from "jszip";
+import { toast } from "react-toastify";
 
 export const downloadZip = async (seedsBySessionPerDrop, delimiter) => {
   // Normalize delimiter: convert "\\n" to actual newline

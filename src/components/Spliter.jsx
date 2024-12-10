@@ -36,21 +36,32 @@ export default function Spliter() {
   };
 
   const handleSplit = async () => {
-    const sessionsNumber = calcSessions(tagsToSplit);
+    // if no tag area is empty
+    if (tagsToSplit === "") {
+      toast.error("No tags");
+      return;
+    }
+    // Split the first line by tab to detect the number of sessions
+    //Taking the first line of the input 
+    const firstLine = tagsToSplit.split("\n")[0];
+    // then pass the first line to return the number of sessions
+    const sessionsNumber = calcSessions(firstLine);
     setSessionCount(sessionsNumber);
-
+ 
     if (sessionsNumber === 0) {
       toast.error("No sessions");
       return;
     }
-
+    
     const lines = tagsToSplit
       .split("\n")
       .map((line) => parseNumberTagPairs(line));
 
     const collectedData = await collectData(lines, sessionsNumber);
     setSeedsBySessions(collectedData);
-
+    if (collectedData === "wrongIinput") {
+      return;
+    }
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
     setSeedsBySessionPerDrop(splitDataByDrops);
 
