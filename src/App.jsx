@@ -6,6 +6,7 @@ import DelimiterSwitch from "./components/DelimterSwitch";
 import AddSessionUsingTags from "./components/AddSessionsUsinTags";
 import Spliter from "./components/Spliter";
 import LogChecker from "./components/LogChecker";
+import { BrowserRouter as Router } from "react-router-dom";
 
 export default function App() {
   const [selectedOption, setSelectedOption] = useState("add");
@@ -23,7 +24,7 @@ export default function App() {
       case "spliter":
         return <Spliter />;
       case "logCheck":
-        return <LogChecker/>;
+        return <LogChecker />;
       default:
         return <Offers />;
     }
@@ -31,10 +32,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50">
-      <Navbar
-        selectedOption={selectedOption}
-        onOptionChange={setSelectedOption}
-      />
+      <Navbar />
 
       <div className="p-8">{renderContent()}</div>
     </div>
