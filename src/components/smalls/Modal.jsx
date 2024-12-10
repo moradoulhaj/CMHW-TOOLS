@@ -9,11 +9,11 @@ export default function Modal({
 }) {
   // Local states to store the input values
   const [startingDropTime, setStartingDropTime] = useState("");
-  const [timeBetweenDrops, setTimeBetweenDrops] = useState("");
-  const [sessionName, setSessionName] = useState("");
-  const [configName, setConfigName] = useState("");
-  const [scriptName, setScriptName] = useState("");
-  const [EntityName, setEntityName] = useState("");
+  const [timeBetweenDrops, setTimeBetweenDrops] = useState("60");
+  const [sessionName, setSessionName] = useState("admin_");
+  const [configName, setConfigName] = useState("Reporting CMH");
+  const [scriptName, setScriptName] = useState("Reporting_Gmail_1D.js");
+  // const [EntityName, setEntityName] = useState("");
 
   return (
     <div
@@ -27,7 +27,7 @@ export default function Modal({
         </h2>
 
         {/* Session Name, Config Name, Script Name Inputs */}
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Entity Name
           </label>
@@ -38,7 +38,7 @@ export default function Modal({
             className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
             placeholder="Enter session name"
           />
-        </div>
+        </div> */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Session Name

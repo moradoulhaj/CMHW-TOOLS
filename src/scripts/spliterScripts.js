@@ -1,12 +1,6 @@
-
-export const calcSessions = (tagsToSplit) => {
-  const lines = tagsToSplit.split("\n");
-  if (lines.length === 0) {
-    return;
-  }
-
+export const calcSessions = (firstLine) => {
   // Split the first line by tab to detect the number of sessions
-  const firstLine = lines[0];
+ 
   const sessions = firstLine.split("\t");
   return sessions.length / 2; // return the number of sessions
 };
@@ -30,6 +24,10 @@ export const parseNumberTagPairs = (line) => {
 // to split tags by sesions
 export const collectData = (lines, sessionsNumber) => {
   // Initialize the grouped structure with empty subarrays for each position
+  if (sessionsNumber === 0 || !Number.isInteger(sessionsNumber)) {
+    toast.error("Make sure ur tags are correct then re-check again.");
+    return "wrongIinput";
+  }
   const groupedProfilesAndTags = Array.from(
     { length: sessionsNumber },
     () => []
@@ -76,8 +74,6 @@ export const splitSessionsByDrops = (collectedData, dropNumbers) => {
   });
 };
 
-
-
 // Function to generate Excel file from session data
 import * as XLSX from "xlsx";
 
@@ -114,11 +110,6 @@ export const generateExcell = (seedsBySessionPerDrop) => {
   XLSX.writeFile(workbook, "sessions_data.xlsx");
 };
 
-
-
-
-
-
 export const generateExcel = (seedsBySessionPerDrop) => {
   const worksheetData = [];
 
@@ -134,11 +125,13 @@ export const generateExcel = (seedsBySessionPerDrop) => {
 
   // Loop through drops and sessions to structure data
   let currentRow = 1; // Start after header row
-  const maxDrops = Math.max(...seedsBySessionPerDrop.map(session => session.length));
+  const maxDrops = Math.max(
+    ...seedsBySessionPerDrop.map((session) => session.length)
+  );
 
   for (let dropIndex = 0; dropIndex < maxDrops; dropIndex++) {
     let maxPairsInDrop = Math.max(
-      ...seedsBySessionPerDrop.map(session => session[dropIndex]?.length || 0)
+      ...seedsBySessionPerDrop.map((session) => session[dropIndex]?.length || 0)
     );
 
     if (maxPairsInDrop > 0) {
@@ -150,17 +143,20 @@ export const generateExcel = (seedsBySessionPerDrop) => {
 
       // Add data for each pair within the drop
       for (let pairIndex = 0; pairIndex < maxPairsInDrop; pairIndex++) {
-        const row = [pairIndex === 0 ? `Drop ${dropIndex + 1}` : ""]; // Drop label only on the first row of the drop
-        seedsBySessionPerDrop.forEach(session => {
+        const row = [pairIndex === 0 ? (dropIndex + 1 ): ""]; // Drop label only on the first row of the drop
+        seedsBySessionPerDrop.forEach((session) => {
           const pair = session[dropIndex]?.[pairIndex];
-          row.push(pair ? `${pair[0]}` : "", pair ? `${pair[1]}` : ""); // Add profile and tag for the session
+          row.push(pair ? `${pair[0]}` : null, pair ? `${pair[1]}` : null); // Add profile and tag for the session
         });
         worksheetData.push(row);
         currentRow++;
       }
 
       // Add an empty row between drops for visual spacing
+      // Add a blank row for visual separation
       worksheetData.push([]);
+
+
       currentRow++;
     }
   }
@@ -174,5 +170,47 @@ export const generateExcel = (seedsBySessionPerDrop) => {
   XLSX.writeFile(workbook, "sessions_data.xlsx");
 };
 
+import JSZip from "jszip";
+import { toast } from "react-toastify";
 
+export const downloadZip = async (seedsBySessionPerDrop, delimiter) => {
+  // Normalize delimiter: convert "\\n" to actual newline
+  if (delimiter === "\\n") {
+    delimiter = "\n";
+  }
+  // Initialize an array to hold tags for each drop across all sessions
+  const combinedDrops = [];
+  const zip = new JSZip();
 
+  // Iterate through all sessions and their drops
+  seedsBySessionPerDrop.forEach((session) => {
+    session.forEach((drop, dropIndex) => {
+      // If the drop index doesn't exist in combinedDrops, initialize it as an empty array
+      if (!combinedDrops[dropIndex]) {
+        combinedDrops[dropIndex] = [];
+      }
+
+      // Push the tags of the current drop from the current session into the combinedDrops array
+      const dropTags = drop.map(([_, tag]) => tag);
+      combinedDrops[dropIndex].push(...dropTags);
+    });
+  });
+  // Create a file for each drop
+  combinedDrops.forEach((tags, dropIndex) => {
+    const fileName = `file_${dropIndex + 1}.txt`; // file_x where x is the 1-based drop index
+    const fileContent = tags.join(delimiter); // Join tags with newlines
+    zip.file(fileName, fileContent); // Add the file to the zip
+  });
+
+  // Generate and trigger download
+  const blob = await zip.generateAsync({ type: "blob" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "drops.zip";
+  a.click();
+
+  // Clean up
+  URL.revokeObjectURL(url);
+};

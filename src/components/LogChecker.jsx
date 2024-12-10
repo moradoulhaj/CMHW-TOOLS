@@ -2,6 +2,7 @@ import { useState } from "react";
 import { checkLogs } from "../scripts/checker"; // Adjust the import path based on your folder structure
 import Monitor from "./smalls/logCheckerSmalls/Monitor";
 import TextAreaInput from "./smalls/logCheckerSmalls/TextAreaInput";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function LogChecker() {
   const [profiles, setProfiles] = useState("");
@@ -16,27 +17,30 @@ export default function LogChecker() {
     const lines = combined.split("\n");
     // Split each line into its components: profile, tag, log
     const profilesAndTags = lines.map((line) => line.split("\t"));
-  
-  
+
     // Extract profiles and logs from the parsed data
-    const profiles = profilesAndTags.map(([profile, tag]) => `${profile}\t${tag || ''}`).join("\n");
+    const profiles = profilesAndTags
+      .map(([profile, tag]) => `${profile}\t${tag || ""}`)
+      .join("\n");
     const logs = profilesAndTags.map(([, , log]) => log || "").join("\n");
-  
-  
+
     setProfiles(profiles);
     setLogs(logs);
 
     // Perform the log check
-    const result = checkLogs(profiles, logs);
-    if (result.error) {
-      alert(result.error);
+    const profilesArr = profiles.split("\n");
+    const logsArr = logs.split("\n");
+  
+    
+    if (profilesArr.length !== logsArr.length) {
+      toast.error("Profiles number and Logs number do not match");
+      return;
     } else {
+      const result = checkLogs(profiles, logs);
       setResult(result);
       setSent(true);
     }
   };
-  
-  
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col items-center py-10">
@@ -69,6 +73,7 @@ export default function LogChecker() {
           <Monitor result={result} />
         </div>
       )}
+      <ToastContainer theme="colored" />
     </main>
   );
 }
