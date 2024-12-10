@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , lazy } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RotateCcw } from "lucide-react";
@@ -41,10 +41,9 @@ export default function Spliter() {
       toast.error("No tags");
       return;
     }
-    // Split the first line by tab to detect the number of sessions
     //Taking the first line of the input 
     const firstLine = tagsToSplit.split("\n")[0];
-    // then pass the first line to return the number of sessions
+    // then passung the first line to return the number of sessions
     const sessionsNumber = calcSessions(firstLine);
     setSessionCount(sessionsNumber);
  
