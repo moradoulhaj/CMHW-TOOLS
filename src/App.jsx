@@ -6,11 +6,9 @@ import DelimiterSwitch from "./components/DelimterSwitch";
 import AddSessionUsingTags from "./components/AddSessionsUsinTags";
 import Spliter from "./components/Spliter";
 import LogChecker from "./components/LogChecker";
-import { BrowserRouter as Router, Routes , Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 export default function App() {
-
-
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50">
@@ -18,7 +16,9 @@ export default function App() {
 
         <div>
           <Routes>
-            <Route path="/" element={<Offers />} />
+            <Route path="/" element={<LogChecker />} />
+
+            <Route path="/ReadAndShow" element={<Offers />} />
             <Route path="/removeTags" element={<RemoveSessions />} />
             <Route path="/addUsingTags" element={<AddSessionUsingTags />} />
             <Route path="/delimiterSwitch" element={<DelimiterSwitch />} />

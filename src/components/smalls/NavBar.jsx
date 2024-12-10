@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 export default function Navbar() {
   // Array of links with paths and labels
   const links = [
-    { path: "/", label: "Read and Show" },
+    { path: "/ReadAndShow", label: "Read and Show" },
     { path: "/removeTags", label: "Remove Sessions" },
     { path: "/addUsingTags", label: "Add Session Using Tags" },
     { path: "/delimiterSwitch", label: "Delimiter Switch" },
