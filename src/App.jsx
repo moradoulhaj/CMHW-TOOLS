@@ -10,13 +10,12 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 export default function App() {
   return (
-    <Router>
+    <Router basename="/CMHW-TOOLS">
       <div className="min-h-screen bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50">
         <Navbar />
 
         <div>
           <Routes>
-            <Route path="/" element={<LogChecker />} />
 
             <Route path="/ReadAndShow" element={<Offers />} />
             <Route path="/removeTags" element={<RemoveSessions />} />
@@ -24,6 +23,8 @@ export default function App() {
             <Route path="/delimiterSwitch" element={<DelimiterSwitch />} />
             <Route path="/spliter" element={<Spliter />} />
             <Route path="/logChecker" element={<LogChecker />} />
+            <Route path="*" element={<LogChecker/>} />
+
           </Routes>
         </div>
       </div>
