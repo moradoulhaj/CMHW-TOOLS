@@ -180,21 +180,125 @@ export const downloadZip = async (seedsBySessionPerDrop, delimiter) => {
   // Clean up
   URL.revokeObjectURL(url);
 };
+////////////////////
 export const downloadShedule = (seedsBySessionPerDrop) => {
-  seedsBySessionPerDrop.forEach((session, sessionIndex) => {
-    console.log(`Session ${sessionIndex + 1}:`);
-    
-    const formattedDrops = session.map((drop, dropIndex) => {
-      // Extract only the numbers and join them with '|'
-      const numbers = drop.map((pair) => pair[0]);
-      const joinedNumbers = numbers.join("|");
-      console.log(`  Drop ${dropIndex + 1}: ${joinedNumbers}`);
-      return joinedNumbers;
-    });
+  const sessionNames = ["Session 1", "Session 2"];
+const userStartTime = "08:00";
+const timeBetweenDrops = 15; // 15 minutes
+const configName = "DefaultConfig";
+const scriptName = "Script123";
 
+generateScheduleExcelForSessions(
+  seedsBySessionPerDrop,
+  userStartTime,
+  timeBetweenDrops,
+  sessionNames,
+  configName,
+  scriptName
+).then((files) => {
+  files.forEach(({ blob, fileName }) => {
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
   });
+});
+
+  
 };
 
-export const generateSceduleExcel = () => {
-  
-}
+
+
+
+
+
+//////////////////////////////////////////////////
+export const generateScheduleExcelForSessions = async (
+  seedsBySessionPerDrop,
+  userStartTime,
+  timeBetweenDrops,
+  sessionNames,
+  configName,
+  scriptName
+) => {
+  try {
+    const response = await fetch("/merger/template.xlsx");
+    const arrayBuffer = await response.arrayBuffer();
+    const templateWorkbook = XLSX.read(arrayBuffer, { type: "array" });
+
+    const today = new Date();
+    const predefinedDate = today.toLocaleDateString("en-GB");
+    const [hours, minutes] = userStartTime.split(":");
+    const formattedDate = `${predefinedDate
+      .split("/")
+      .reverse()
+      .join("/")} ${hours}:${minutes}:00`;
+    const startingDropTime = new Date(formattedDate);
+
+    if (isNaN(startingDropTime)) throw new Error("Invalid Date format.");
+
+    let files = [];
+
+    seedsBySessionPerDrop.forEach((sessionDrops, sessionIndex) => {
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet([]); // Start with an empty worksheet
+      let currentStartTime = new Date(startingDropTime);
+
+      // Add header row
+      XLSX.utils.sheet_add_aoa(worksheet, [
+        [
+          "TaskId",
+          "Session",
+          "Script_Name",
+          "Profiles",
+          "Start_at",
+          "End_at",
+          "Config_name",
+          "Time_type",
+          "Description",
+        ],
+      ]);
+
+      sessionDrops.forEach((drop, dropIndex) => {
+        const profileGroup = drop.map((profile) => profile[0]).join("|"); // Combine profiles as numbers separated by '|'
+        const startTime = currentStartTime.toLocaleString(); // Start time
+        currentStartTime = new Date(
+          currentStartTime.getTime() + timeBetweenDrops * 60000
+        ); // Increment start time
+        const endTime = currentStartTime.toLocaleString(); // End time
+
+        XLSX.utils.sheet_add_aoa(worksheet, [
+          [
+            dropIndex + 1, // TaskId (Drop number)
+            sessionNames[sessionIndex], // Session name
+            scriptName, // Script name
+            profileGroup, // Profiles combined as numbers separated by |
+            startTime, // Start_at time
+            endTime, // End_at time
+            configName, // Config_name
+            "3", // Time_type
+            "Drop", // Description
+          ],
+        ], { origin: -1 }); // Add each row at the next available row
+      });
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Schedule");
+      const excelBlob = new Blob(
+        [XLSX.write(workbook, { type: "array", bookType: "xlsx" })],
+        {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }
+      );
+
+      files.push({
+        blob: excelBlob,
+        fileName: `${sessionNames[sessionIndex]}_Schedule.xlsx`,
+      });
+    });
+
+    return files;
+  } catch (error) {
+    console.error("Error updating Excel template:", error);
+  }
+};
+
