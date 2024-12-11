@@ -183,34 +183,27 @@ export const downloadZip = async (seedsBySessionPerDrop, delimiter) => {
 ////////////////////
 export const downloadShedule = (seedsBySessionPerDrop) => {
   const sessionNames = ["Session 1", "Session 2"];
-const userStartTime = "08:00";
-const timeBetweenDrops = 15; // 15 minutes
-const configName = "DefaultConfig";
-const scriptName = "Script123";
+  const userStartTime = "08:00";
+  const timeBetweenDrops = 15; // 15 minutes
+  const configName = "DefaultConfig";
+  const scriptName = "Script123";
 
-generateScheduleExcelForSessions(
-  seedsBySessionPerDrop,
-  userStartTime,
-  timeBetweenDrops,
-  sessionNames,
-  configName,
-  scriptName
-).then((files) => {
-  files.forEach(({ blob, fileName }) => {
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
+  generateScheduleExcelForSessions(
+    seedsBySessionPerDrop,
+    userStartTime,
+    timeBetweenDrops,
+    sessionNames,
+    configName,
+    scriptName
+  ).then((files) => {
+    files.forEach(({ blob, fileName }) => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+    });
   });
-});
-
-  
 };
-
-
-
-
-
 
 //////////////////////////////////////////////////
 export const generateScheduleExcelForSessions = async (
@@ -222,7 +215,7 @@ export const generateScheduleExcelForSessions = async (
   scriptName
 ) => {
   try {
-    const response = await fetch("/merger/template.xlsx");
+    const response = await fetch("/CMHW-TOOLS/template.xlsx");
     const arrayBuffer = await response.arrayBuffer();
     const templateWorkbook = XLSX.read(arrayBuffer, { type: "array" });
 
@@ -267,19 +260,23 @@ export const generateScheduleExcelForSessions = async (
         ); // Increment start time
         const endTime = currentStartTime.toLocaleString(); // End time
 
-        XLSX.utils.sheet_add_aoa(worksheet, [
+        XLSX.utils.sheet_add_aoa(
+          worksheet,
           [
-            dropIndex + 1, // TaskId (Drop number)
-            sessionNames[sessionIndex], // Session name
-            scriptName, // Script name
-            profileGroup, // Profiles combined as numbers separated by |
-            startTime, // Start_at time
-            endTime, // End_at time
-            configName, // Config_name
-            "3", // Time_type
-            "Drop", // Description
+            [
+              dropIndex + 1, // TaskId (Drop number)
+              sessionNames[sessionIndex], // Session name
+              scriptName, // Script name
+              profileGroup, // Profiles combined as numbers separated by |
+              startTime, // Start_at time
+              endTime, // End_at time
+              configName, // Config_name
+              "3", // Time_type
+              "Drop", // Description
+            ],
           ],
-        ], { origin: -1 }); // Add each row at the next available row
+          { origin: -1 }
+        ); // Add each row at the next available row
       });
 
       XLSX.utils.book_append_sheet(workbook, worksheet, "Schedule");
@@ -301,4 +298,3 @@ export const generateScheduleExcelForSessions = async (
     console.error("Error updating Excel template:", error);
   }
 };
-
