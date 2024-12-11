@@ -6,6 +6,7 @@ import TagsInput from "./smalls/TagsInput";
 import {
   calcSessions,
   collectData,
+  downloadShedule,
   downloadZip,
   generateExcel,
   parseNumberTagPairs,
@@ -63,7 +64,7 @@ export default function Spliter() {
     }
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
     setSeedsBySessionPerDrop(splitDataByDrops);
-
+    console.log(splitDataByDrops);
     toast.success("Split successfully");
     setProcessedContents(collectedData);
   };
@@ -141,6 +142,14 @@ export default function Spliter() {
           onClick={() => generateExcel(seedsBySessionPerDrop)}
         >
           Download Excel
+        </button>
+        <button
+          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-400 to-red-400 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
+            !processedContents.length ? "hidden" : ""
+          }`}
+          onClick={() => downloadShedule(seedsBySessionPerDrop)}
+        >
+          Download Schedule
         </button>
         <button
           className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-400 to-red-400 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${

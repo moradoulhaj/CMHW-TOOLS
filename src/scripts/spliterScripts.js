@@ -1,6 +1,6 @@
 export const calcSessions = (firstLine) => {
   // Split the first line by tab to detect the number of sessions
- 
+
   const sessions = firstLine.split("\t");
   return sessions.length / 2; // return the number of sessions
 };
@@ -77,39 +77,6 @@ export const splitSessionsByDrops = (collectedData, dropNumbers) => {
 // Function to generate Excel file from session data
 import * as XLSX from "xlsx";
 
-export const generateExcell = (seedsBySessionPerDrop) => {
-  // Create a new workbook for the Excel file
-  const workbook = XLSX.utils.book_new();
-
-  // Initialize an array to hold all rows for the single worksheet
-  const worksheetData = [];
-
-  // Loop over each session
-  seedsBySessionPerDrop.forEach((session, sessionIndex) => {
-    worksheetData.push([`Session ${sessionIndex + 1}`]); // Label each session
-
-    // Loop through each drop within the session
-    session.forEach((drop, dropIndex) => {
-      worksheetData.push([`Drop ${dropIndex + 1}`]); // Label each drop
-
-      // Add each [profile, tag] pair within the drop to its own row
-      drop.forEach((pair) => {
-        worksheetData.push([pair[0], pair[1]]); // Add profile and tag in separate columns
-      });
-
-      worksheetData.push([]); // Add an empty row for spacing between drops
-    });
-
-    worksheetData.push([]); // Add an empty row for spacing between sessions
-  });
-  // Convert the worksheet data to a single sheet format and add it to the workbook
-  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-  XLSX.utils.book_append_sheet(workbook, worksheet, "All Sessions");
-
-  // Export the workbook to an Excel file and download it
-  XLSX.writeFile(workbook, "sessions_data.xlsx");
-};
-
 export const generateExcel = (seedsBySessionPerDrop) => {
   const worksheetData = [];
 
@@ -143,7 +110,7 @@ export const generateExcel = (seedsBySessionPerDrop) => {
 
       // Add data for each pair within the drop
       for (let pairIndex = 0; pairIndex < maxPairsInDrop; pairIndex++) {
-        const row = [pairIndex === 0 ? (dropIndex + 1 ): ""]; // Drop label only on the first row of the drop
+        const row = [pairIndex === 0 ? dropIndex + 1 : ""]; // Drop label only on the first row of the drop
         seedsBySessionPerDrop.forEach((session) => {
           const pair = session[dropIndex]?.[pairIndex];
           row.push(pair ? `${pair[0]}` : null, pair ? `${pair[1]}` : null); // Add profile and tag for the session
@@ -155,7 +122,6 @@ export const generateExcel = (seedsBySessionPerDrop) => {
       // Add an empty row between drops for visual spacing
       // Add a blank row for visual separation
       worksheetData.push([]);
-
 
       currentRow++;
     }
@@ -214,3 +180,21 @@ export const downloadZip = async (seedsBySessionPerDrop, delimiter) => {
   // Clean up
   URL.revokeObjectURL(url);
 };
+export const downloadShedule = (seedsBySessionPerDrop) => {
+  seedsBySessionPerDrop.forEach((session, sessionIndex) => {
+    console.log(`Session ${sessionIndex + 1}:`);
+    
+    const formattedDrops = session.map((drop, dropIndex) => {
+      // Extract only the numbers and join them with '|'
+      const numbers = drop.map((pair) => pair[0]);
+      const joinedNumbers = numbers.join("|");
+      console.log(`  Drop ${dropIndex + 1}: ${joinedNumbers}`);
+      return joinedNumbers;
+    });
+
+  });
+};
+
+export const generateSceduleExcel = () => {
+  
+}
