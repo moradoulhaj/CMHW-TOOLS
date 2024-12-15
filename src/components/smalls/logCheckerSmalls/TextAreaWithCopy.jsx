@@ -57,6 +57,13 @@ export default function TextAreaWithCopy({ id, label, value }) {
           readOnly
         />
         <div className="flex justify-center gap-6 mt-4">
+        <button
+            onClick={copyProfilesNumbersToClipboard}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
+            title="Copy profile numbers to clipboard"
+          >
+            <i className="ri-numbers-line"></i>
+          </button>
           <button
             onClick={copyToProfilesAndTagsToClipboard}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
@@ -64,13 +71,7 @@ export default function TextAreaWithCopy({ id, label, value }) {
           >
             <i className="ri-clipboard-line"></i>
           </button>
-          <button
-            onClick={copyProfilesNumbersToClipboard}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
-            title="Copy profile numbers to clipboard"
-          >
-            <i className="ri-numbers-line"></i>
-          </button>
+         
         </div>
       </div>
     </>
