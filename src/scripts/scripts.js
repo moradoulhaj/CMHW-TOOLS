@@ -72,7 +72,7 @@ export const updateAndDownloadExcel = async (
   scriptName
 ) => {
   try {
-    const response = await fetch("/merger/template.xlsx");
+    const response = await fetch("/CMHW-TOOLS/template.xlsx");
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];

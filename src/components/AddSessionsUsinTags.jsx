@@ -92,6 +92,7 @@ export default function AddSessionUsingTags() {
       configName,
       scriptName
     );
+    console.log(profilesByDropp);
     setprocessedFiles(modifiedFiles);
     setExcelBlob(blob);
     toast.success("Tags added successfully!");
