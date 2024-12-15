@@ -67,7 +67,7 @@ export default function LogChecker() {
           <Monitor result={result} />
         </div>
       )}
-      <ToastContainer theme="colored" />
+<ToastContainer theme="colored" autoClose={1500} />
     </main>
   );
 }
