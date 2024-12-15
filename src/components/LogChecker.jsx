@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { checkLogs } from "../scripts/checker"; // Adjust the import path based on your folder structure
 import Monitor from "./smalls/logCheckerSmalls/Monitor";
 import TextAreaInput from "./smalls/logCheckerSmalls/TextAreaInput";
@@ -9,16 +9,18 @@ export default function LogChecker() {
   const [logs, setLogs] = useState("");
   const [sent, setSent] = useState(false);
   const [result, setResult] = useState({});
-  const [combined, setCombined] = useState([]);
+  const [combined, setCombined] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (combined === "") {
+      setSent(false);
+      return;
+    }
+
     // Split the combined input into lines
     const lines = combined.split("\n");
-    // Split each line into its components: profile, tag, log
     const profilesAndTags = lines.map((line) => line.split("\t"));
 
-    // Extract profiles and logs from the parsed data
     const profiles = profilesAndTags
       .map(([profile, tag]) => `${profile}\t${tag || ""}`)
       .join("\n");
@@ -27,25 +29,25 @@ export default function LogChecker() {
     setProfiles(profiles);
     setLogs(logs);
 
-    // Perform the log check
     const profilesArr = profiles.split("\n");
     const logsArr = logs.split("\n");
-  
-    
+
     if (profilesArr.length !== logsArr.length) {
       toast.error("Profiles number and Logs number do not match");
+      setSent(false);
       return;
-    } else {
-      const result = checkLogs(profiles, logs);
-      setResult(result);
-      setSent(true);
     }
-  };
+
+    // Perform the log check
+    const result = checkLogs(profiles, logs);
+    setResult(result);
+    setSent(true);
+  }, [combined]); // Trigger effect when `combined` changes
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col items-center py-10">
       <div className="px-5 mt-4 w-full max-w-5xl">
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form className="space-y-8">
           <div className="flex flex-col md:flex-row gap-6 justify-center">
             <div className="w-full md:w-full">
               <TextAreaInput
@@ -56,14 +58,6 @@ export default function LogChecker() {
                 placeholder="Enter profiles with their logs"
               />
             </div>
-          </div>
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              className="bg-blue-600 py-2 px-8 rounded-full text-white hover:bg-blue-500 hover:shadow-lg transition-all duration-300 font-semibold tracking-wide w-full md:w-1/2"
-            >
-              Check
-            </button>
           </div>
         </form>
         <hr className="mt-8 border-blue-300" />
