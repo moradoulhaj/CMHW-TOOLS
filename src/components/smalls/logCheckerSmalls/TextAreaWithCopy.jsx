@@ -27,7 +27,7 @@ export default function TextAreaWithCopy({ id, label, value }) {
     navigator.clipboard
       .writeText(profileNumbers)
       .then(() => {
-        toast.info("Profiles numbers copied!");
+        toast.success("Profiles numbers copied!");
       })
       .catch(() => {
         toast.error("Failed to copy Profile numbers.");
