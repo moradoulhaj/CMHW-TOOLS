@@ -15,6 +15,7 @@ export const checkLogs = (profiles, logs) => {
   let othersProfiles = [];
   let wrongBrowserProfiles = [];
   let wrongRecoveryProfiles = [];
+  let disconnectedProfiles = [];
 
   logsArr.forEach((log, i) => {
     log = log.toLowerCase();
@@ -44,6 +45,10 @@ export const checkLogs = (profiles, logs) => {
       wrongRecoveryProfiles.push(profilesArr[i]);
     }else if (log.includes("confirm phone number")) {
       phoneNumberProfiles.push(profilesArr[i]);
+    }else if (log.includes("wrong_password")) {
+      wrongPasswordProfiles.push(profilesArr[i]); // Add profile to disconnectedProfiles
+    }else if (log.includes("profile disconnected")) {
+      disconnectedProfiles.push(profilesArr[i]); // Add profile to disconnectedProfiles
     } else {
       let logArr = log.split("update_status : ");
       log = logArr[logArr.length - 1];
@@ -99,6 +104,6 @@ export const checkLogs = (profiles, logs) => {
     unusualActivityProfiles,
     accountDisabledProfiles,
     othersProfiles,
-    wrongBrowserProfiles,wrongRecoveryProfiles,
+    wrongBrowserProfiles,wrongRecoveryProfiles,disconnectedProfiles,
   };
 };
