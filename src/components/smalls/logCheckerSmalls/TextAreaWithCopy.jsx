@@ -36,10 +36,10 @@ export default function TextAreaWithCopy({ id, label, value }) {
 
   return (
     <>
-      <div className="w-full sm:w-[30%] max-w-xl border p-5 border-gray-300 bg-white rounded-lg shadow-lg">
+      <div className={`w-full sm:w-[30%] max-w-xl border p-5 border-gray-300 rounded-lg shadow-lg ${label == "Active" ? "bg-green-300" :  "bg-white-white"}`}>
         <label
           htmlFor={id}
-          className="block mb-3 text-center text-gray-800 font-semibold"
+          className={`block mb-3 text-center font-semibold   ${label == "Active" ? "text-white" :  " text-gray-800"}`}
         >
           {label}
           <span className="inline-flex items-center rounded-md bg-blue-100 px-2 ml-2 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">

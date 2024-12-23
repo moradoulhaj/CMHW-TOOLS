@@ -27,7 +27,14 @@ export default function Monitor({ result }) {
             label="Max Execution Time"
             value={result.maxExecutionTimeProfiles.join("\n")}
           />
-        )}{" "}
+        )}
+        {result.disconnectedProfiles?.length > 0 && (
+          <TextAreaWithCopy
+            id="disconnected"
+            label="Disconnected"
+            value={result.disconnectedProfiles.join("\n")}
+          />
+        )}
         {result.wrongBrowserProfiles?.length > 0 && (
           <TextAreaWithCopy
             id="wrongBrowser"
