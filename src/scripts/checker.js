@@ -47,8 +47,6 @@ export const checkLogs = (profiles, logs) => {
       phoneNumberProfiles.push(profilesArr[i]);
     }else if (log.includes("wrong_password")) {
       wrongPasswordProfiles.push(profilesArr[i]); // Add profile to disconnectedProfiles
-    }else if (log.includes("profile disconnected")) {
-      disconnectedProfiles.push(profilesArr[i]); // Add profile to disconnectedProfiles
     } else {
       let logArr = log.split("update_status : ");
       log = logArr[logArr.length - 1];
@@ -85,11 +83,17 @@ export const checkLogs = (profiles, logs) => {
         case "account_disabled" || "account_disabled_check":
           accountDisabledProfiles.push(profilesArr[i]);
           break;
+        case "wrong_recovery" :
+          wrongRecoveryProfiles.push(profilesArr[i]);
+          break;
+        
+
         default:
           othersProfiles.push(profilesArr[i]);
           break;
       }
     }
+    
   });
 
   return {

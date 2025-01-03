@@ -13,9 +13,10 @@ export default function FileViewer({
   const handleCopyContent = () => {
     const content = processedContents[currentPage].content;
     navigator.clipboard.writeText(content).then(() => {
-      toast.success("Content copied to clipboard!");
-    
+      toast.success("Content copied to clipboard!");  
     });
+    handleNextFile();  
+
   };
 
   return (
