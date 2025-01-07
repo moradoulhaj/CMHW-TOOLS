@@ -169,6 +169,7 @@ export default function DelimiterSwitch() {
         id="entityName"
         value={entityName}
         onChange={(e)=>setEntityName(e.target.value)}
+        placeholder="Entity number"
       />
       <FileList files={oldFiles} titre={"Uploaded Files"} />
 
