@@ -27,9 +27,7 @@ export default function DelimiterSwitch() {
     setSeparator("");
     setCurrentPage(0);
   };
-  useEffect(() => {
-    console.log(entityName);
-  }, [entityName]);
+ 
 
   const handleConvertDelimiter = async () => {
     if (!oldFiles.length) {

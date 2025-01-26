@@ -15,15 +15,15 @@ export default function ProxiesModal({
   const proxies = proxyInput.split("\n"); // Proxies already include the full address with ports
 
   useEffect(() => {
-    handleProxySubmit(profiles,proxies);
+    handleProxySubmit(profiles, proxies);
     if (profiles.length === proxies.length) {
       setIsValid(true);
     } else {
       setIsValid(false);
     }
   }, [proxyInput]);
-  const handleProxySubmit = (profiles ,proxies ) => {
-    
+
+  const handleProxySubmit = (profiles, proxies) => {
     // if (profiles.length !== proxies.length) {
     //   alert("You must provide the same number of proxies as profiles.");
     //   return;
@@ -33,8 +33,6 @@ export default function ProxiesModal({
     const newPairedList = profiles.map(
       (profile, index) => `${profile};${proxies[index]}`
     );
-    console.log("Paired List:", newPairedList.join("\n"));
-    console.log(profiles);
 
     // Set the paired list to the state
     setPairedList(newPairedList);
@@ -75,7 +73,6 @@ export default function ProxiesModal({
                 value={proxyInput}
                 onChange={(e) => setProxyInput(e.target.value)}
                 isValid={isValid}
-
               />
             </div>
           </div>

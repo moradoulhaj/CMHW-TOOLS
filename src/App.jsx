@@ -7,6 +7,7 @@ import AddSessionUsingTags from "./components/AddSessionsUsinTags";
 import Spliter from "./components/Spliter";
 import LogChecker from "./components/LogChecker";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import Footer from "./components/smalls/Footer";
 
 export default function App() {
   return (
@@ -27,6 +28,9 @@ export default function App() {
 
           </Routes>
         </div>
+        <Footer />
+        
+        
       </div>
     </Router>
   );
