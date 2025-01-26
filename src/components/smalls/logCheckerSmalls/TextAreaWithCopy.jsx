@@ -3,7 +3,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProxiesModal from "../ProxiesModal";
 
-export default function TextAreaWithCopy({ id, label, value ,setIsModalOpen ,forProxies }) {
+export default function TextAreaWithCopy({ id, label, value ,forProxies }) {
 
   const textAreaRef = useRef(null);
 

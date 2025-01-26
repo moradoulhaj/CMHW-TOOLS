@@ -21,7 +21,9 @@ export default function Monitor({ result }) {
         <button
           className="hover:bg-gray-50 text-black p-2 bg-transparent rounded-md transition-all duration-200 "
           title="Copy profiles and their associated tags (Proxy Down)"
-         onClick={()=>{setIsModalOpen(true)}}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
         >
           <i className="ri-settings-5-line text-xl"></i>
         </button>
@@ -40,7 +42,6 @@ export default function Monitor({ result }) {
             id="proxyDown"
             label="Proxy Down"
             value={result.proxyDownProfiles.join("\n")}
-            setIsModalOpen={setIsModalOpen}
           />
         )}
         {result.maxExecutionTimeProfiles?.length > 0 && (
@@ -48,7 +49,6 @@ export default function Monitor({ result }) {
             id="maxExecutionTime"
             label="Max Execution Time"
             value={result.maxExecutionTimeProfiles.join("\n")}
-            setIsModalOpen={setIsModalOpen}
           />
         )}
         {result.disconnectedProfiles?.length > 0 && (
@@ -56,7 +56,6 @@ export default function Monitor({ result }) {
             id="disconnected"
             label="Disconnected"
             value={result.disconnectedProfiles.join("\n")}
-            setIsModalOpen={setIsModalOpen}
           />
         )}
         {result.wrongBrowserProfiles?.length > 0 && (
@@ -120,7 +119,6 @@ export default function Monitor({ result }) {
             id="empty"
             label="Empty"
             value={result.notLogsProfiles.join("\n")}
-            setIsModalOpen={setIsModalOpen}
           />
         )}
         {result.othersProfiles?.length > 0 && (
@@ -128,7 +126,6 @@ export default function Monitor({ result }) {
             id="others"
             label="Others"
             value={result.othersProfiles.join("\n")}
-            setIsModalOpen={setIsModalOpen}
           />
         )}
 
