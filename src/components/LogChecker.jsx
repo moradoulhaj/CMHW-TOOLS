@@ -45,7 +45,7 @@ export default function LogChecker() {
   }, [combined]); // Trigger effect when `combined` changes
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col items-center py-10">
+    <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col items-center py-10">
       <div className="px-5 mt-4 w-full max-w-5xl">
         <form className="space-y-8">
           <div className="flex flex-col md:flex-row gap-6 justify-center">

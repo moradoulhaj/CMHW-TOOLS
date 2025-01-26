@@ -4,24 +4,17 @@ export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white py-6">
       <div className="container mx-auto flex flex-col items-center justify-center space-y-2">
-        <p className="text-sm">&copy; 2024 By Morad Oulhaj with Help of Merouan Bouchettouy and Ayoub Aharmouch And Omar Elmohamedy. All rights reserved.</p>
+        <p className="text-sm">&copy; 2024 By Morad Oulhaj with the of Merouan Bouchettouy, Ayoub Aharmouch And Omar Elmohamedy. All rights reserved.</p>
         <div className="flex space-x-4">
           <a
-            href="#"
-            className="text-gray-400 hover:text-white transition-colors duration-200"
-            aria-label="Twitter"
-          >
-            <i className="ri-twitter-line"></i>
-          </a>
-          <a
-            href="#"
+            href="https://t.me/moulhaj"
             className="text-gray-400 hover:text-white transition-colors duration-200"
             aria-label="LinkedIn"
           >
-            <i className="ri-linkedin-line"></i>
+            <i className="ri-telegram-fill"></i>
           </a>
           <a
-            href="#"
+            href="https://github.com/moradoulhaj"
             className="text-gray-400 hover:text-white transition-colors duration-200"
             aria-label="GitHub"
           >
