@@ -17,7 +17,7 @@ export default function Monitor({ result }) {
   // Keydown listener for modal toggle
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if ((event.altey || event.shiftKey) && combinedProfiles.length >0 ) {
+      if ((event.altKey || event.shiftKey) && combinedProfiles.length >0 ) {
         setIsModalOpen((prev) => !prev);
       }
     };
