@@ -56,6 +56,7 @@ export default function LogChecker() {
                 value={combined}
                 onChange={(e) => setCombined(e.target.value)}
                 placeholder="Enter profiles with their logs"
+         
               />
             </div>
           </div>

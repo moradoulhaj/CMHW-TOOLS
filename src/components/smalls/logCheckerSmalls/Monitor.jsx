@@ -1,11 +1,32 @@
+import { useState } from "react";
 import TextAreaWithCopy from "./TextAreaWithCopy";
+import ProxiesModal from "../ProxiesModal";
 
 export default function Monitor({ result }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Combine specific profile arrays
+  const combinedProfiles = [
+    ...(result.maxExecutionTimeProfiles || []),
+    ...(result.proxyDownProfiles || []),
+    ...(result.notLogsProfiles || []),
+    ...(result.disconnectedProfiles || []),
+    ...(result.othersProfiles || []),
+  ];
+
   return (
     <div className="p-8 mx-auto flex flex-col justify-center items-center bg-white rounded-lg shadow-lg">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">
-        Results Overview
-      </h3>
+      <div className="w-4/5 flex justify-between items-center mb-6  ">
+        <h3 className="text-2xl font-bold text-gray-800">Results Overview</h3>
+
+        <button
+          className="hover:bg-gray-50 text-black p-2 bg-transparent rounded-md transition-all duration-200 "
+          title="Copy profiles and their associated tags (Proxy Down)"
+         onClick={()=>{setIsModalOpen(true)}}
+        >
+          <i className="ri-settings-5-line text-xl"></i>
+        </button>
+      </div>
+      <hr className="text-xl" />
       <div className="flex flex-wrap justify-center gap-2 w-full">
         {result.connectedProfiles?.length > 0 && (
           <TextAreaWithCopy
@@ -19,6 +40,7 @@ export default function Monitor({ result }) {
             id="proxyDown"
             label="Proxy Down"
             value={result.proxyDownProfiles.join("\n")}
+            setIsModalOpen={setIsModalOpen}
           />
         )}
         {result.maxExecutionTimeProfiles?.length > 0 && (
@@ -26,6 +48,7 @@ export default function Monitor({ result }) {
             id="maxExecutionTime"
             label="Max Execution Time"
             value={result.maxExecutionTimeProfiles.join("\n")}
+            setIsModalOpen={setIsModalOpen}
           />
         )}
         {result.disconnectedProfiles?.length > 0 && (
@@ -33,6 +56,7 @@ export default function Monitor({ result }) {
             id="disconnected"
             label="Disconnected"
             value={result.disconnectedProfiles.join("\n")}
+            setIsModalOpen={setIsModalOpen}
           />
         )}
         {result.wrongBrowserProfiles?.length > 0 && (
@@ -96,6 +120,7 @@ export default function Monitor({ result }) {
             id="empty"
             label="Empty"
             value={result.notLogsProfiles.join("\n")}
+            setIsModalOpen={setIsModalOpen}
           />
         )}
         {result.othersProfiles?.length > 0 && (
@@ -103,6 +128,15 @@ export default function Monitor({ result }) {
             id="others"
             label="Others"
             value={result.othersProfiles.join("\n")}
+            setIsModalOpen={setIsModalOpen}
+          />
+        )}
+
+        {isModalOpen && (
+          <ProxiesModal
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            proxyDownProfiles={combinedProfiles}
           />
         )}
       </div>

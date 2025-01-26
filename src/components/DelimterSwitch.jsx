@@ -18,7 +18,7 @@ export default function DelimiterSwitch() {
   const [isDragging, setIsDragging] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const oldFileInputRef = useRef(null);
-  const [entityName, setEntityName] = useState(0);
+  const [entityName, setEntityName] = useState();
   const handleReset = () => {
     setOldFiles([]);
     setProcessedContents([]);
@@ -27,7 +27,9 @@ export default function DelimiterSwitch() {
     setSeparator("");
     setCurrentPage(0);
   };
-  useEffect(()=>{console.log(entityName)},[entityName])
+  useEffect(() => {
+    console.log(entityName);
+  }, [entityName]);
 
   const handleConvertDelimiter = async () => {
     if (!oldFiles.length) {
@@ -39,7 +41,6 @@ export default function DelimiterSwitch() {
       setSeparator(await detectSeparator(oldFiles));
     } else {
       processFiles(delimiter);
-      downloadZippedFiles();
     }
   };
 
@@ -60,7 +61,6 @@ export default function DelimiterSwitch() {
     try {
       setIsModalOpen(false); // Close the modal first
       await processFiles(separator); // Wait for files to be processed
-      downloadZippedFiles(); // Download files after processing is complete
     } catch (error) {
       console.error("Error processing files:", error);
       // Optionally, you can show an error message to the user
@@ -168,8 +168,9 @@ export default function DelimiterSwitch() {
         name="entityName"
         id="entityName"
         value={entityName}
-        onChange={(e)=>setEntityName(e.target.value)}
+        onChange={(e) => setEntityName(e.target.value)}
         placeholder="Entity number"
+        required
       />
       <FileList files={oldFiles} titre={"Uploaded Files"} />
 
@@ -180,6 +181,13 @@ export default function DelimiterSwitch() {
         >
           <RefreshCcw className="w-5 h-5" />
           Convert Separator
+        </button>
+        <button
+          onClick={downloadZippedFiles}
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium"
+        >
+          <RefreshCcw className="w-5 h-5" />
+          Download Files{" "}
         </button>
       </div>
 
