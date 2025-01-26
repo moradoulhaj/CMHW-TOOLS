@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import TextAreaWithCopy from "./TextAreaWithCopy";
 import ProxiesModal from "../ProxiesModal";
+import { toast } from "react-toastify";
 
 export default function Monitor({ result }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,8 +18,12 @@ export default function Monitor({ result }) {
   // Keydown listener for modal toggle
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if ((event.altKey || event.shiftKey) && combinedProfiles.length >0 ) {
-        setIsModalOpen((prev) => !prev);
+      if (event.altKey || event.shiftKey) {
+        if (combinedProfiles.length > 0) {
+          setIsModalOpen((prev) => !prev);
+        } else {
+          toast.error("You have no profiles with proxy down");
+        }
       }
     };
 
@@ -26,23 +31,63 @@ export default function Monitor({ result }) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [combinedProfiles]);
 
   // Helper to render TextAreas
   const renderTextAreas = () => {
     const profileCategories = [
       { id: "active", label: "Active", data: result?.connectedProfiles },
       { id: "proxyDown", label: "Proxy Down", data: result?.proxyDownProfiles },
-      { id: "maxExecutionTime", label: "Max Execution Time", data: result?.maxExecutionTimeProfiles },
-      { id: "disconnected", label: "Disconnected", data: result?.disconnectedProfiles },
-      { id: "wrongBrowser", label: "Wrong Browser", data: result?.wrongBrowserProfiles },
-      { id: "accountRestricted", label: "Account Restricted", data: result?.accountRestrictedProfiles },
-      { id: "captchaVerification", label: "Captcha Verification", data: result?.captchaVerificationProfiles },
-      { id: "wrongPassword", label: "Wrong Password", data: result?.wrongPasswordProfiles },
-      { id: "wrongRecovery", label: "Wrong Recovery", data: result?.wrongRecoveryProfiles },
-      { id: "phoneNumber", label: "Phone Number", data: result?.phoneNumberProfiles },
-      { id: "usualActivity", label: "Unusual Activity", data: result?.unusualActivityProfiles },
-      { id: "accountDisabled", label: "Account Disabled", data: result?.accountDisabledProfiles },
+      {
+        id: "maxExecutionTime",
+        label: "Max Execution Time",
+        data: result?.maxExecutionTimeProfiles,
+      },
+      {
+        id: "disconnected",
+        label: "Disconnected",
+        data: result?.disconnectedProfiles,
+      },
+      {
+        id: "wrongBrowser",
+        label: "Wrong Browser",
+        data: result?.wrongBrowserProfiles,
+      },
+      {
+        id: "accountRestricted",
+        label: "Account Restricted",
+        data: result?.accountRestrictedProfiles,
+      },
+      {
+        id: "captchaVerification",
+        label: "Captcha Verification",
+        data: result?.captchaVerificationProfiles,
+      },
+      {
+        id: "wrongPassword",
+        label: "Wrong Password",
+        data: result?.wrongPasswordProfiles,
+      },
+      {
+        id: "wrongRecovery",
+        label: "Wrong Recovery",
+        data: result?.wrongRecoveryProfiles,
+      },
+      {
+        id: "phoneNumber",
+        label: "Phone Number",
+        data: result?.phoneNumberProfiles,
+      },
+      {
+        id: "usualActivity",
+        label: "Unusual Activity",
+        data: result?.unusualActivityProfiles,
+      },
+      {
+        id: "accountDisabled",
+        label: "Account Disabled",
+        data: result?.accountDisabledProfiles,
+      },
       { id: "empty", label: "Empty", data: result?.notLogsProfiles },
       { id: "others", label: "Others", data: result?.othersProfiles },
     ];
@@ -50,7 +95,12 @@ export default function Monitor({ result }) {
     return profileCategories.map(
       ({ id, label, data }) =>
         data?.length > 0 && (
-          <TextAreaWithCopy key={id} id={id} label={label} value={data.join("\n")} />
+          <TextAreaWithCopy
+            key={id}
+            id={id}
+            label={label}
+            value={data.join("\n")}
+          />
         )
     );
   };
@@ -61,7 +111,7 @@ export default function Monitor({ result }) {
         <h3 className="text-2xl font-bold text-gray-800">Results Overview</h3>
         <button
           className="hover:bg-gray-50 text-black p-2 bg-transparent rounded-md transition-all duration-200"
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:1992134615.
+          // Suggested code may be subject to a license. Learn more: ~LicenseLog:1992134615.
           title="Open the proxies settings modal - Alt Or Shift"
           aria-label="Copy profiles"
           onClick={() => setIsModalOpen(true)}
