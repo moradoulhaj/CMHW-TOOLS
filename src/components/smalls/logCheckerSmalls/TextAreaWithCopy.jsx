@@ -20,20 +20,28 @@ export default function TextAreaWithCopy({ id, label, value ,forProxies }) {
   };
 
   const copyProfilesNumbersToClipboard = () => {
-    const profileNumbers = value
-      .split("\n")
-      .map((line) => line.split("\t")[0]) // Assumes profiles are the first tab-separated value
-      .join("\n");
-
+    // Extract profile numbers
+    const profileNumbers = id === "pairedList" 
+      ? value
+          .split("\n")
+          .map((line) => line.split(";")[0]) // Assuming `;` is the delimiter for `pairedList`
+          .join("\n")
+      : value
+          .split("\n")
+          .map((line) => line.split("\t")[0]) // Assuming `\t` is the delimiter for other cases
+          .join("\n");
+  
+    // Copy to clipboard
     navigator.clipboard
       .writeText(profileNumbers)
       .then(() => {
-        toast.success("Profiles numbers copied!");
+        toast.success("Profile numbers copied!");
       })
       .catch(() => {
-        toast.error("Failed to copy Profile numbers.");
+        toast.error("Failed to copy profile numbers.");
       });
   };
+  
 
   return (
     <>

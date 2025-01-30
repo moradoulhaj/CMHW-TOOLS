@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { NavLink } from "react-router-dom";
 export default function Navbar() {
@@ -10,10 +8,9 @@ export default function Navbar() {
     { path: "/addUsingTags", label: "Add Session Using Tags" },
     { path: "/delimiterSwitch", label: "Delimiter Switch" },
     { path: "/spliter", label: "Spliter" },
-    { path: "/logChecker", label: "Log Checker" },
+    { path: "/logChecker", label: "Checker" },
+    { path: "/spamCalculator", label: "Spam Calculator" },
   ];
-
-
 
   return (
     <nav className="bg-gradient-to-r from-blue-500 to-blue-500 shadow-md">
@@ -24,7 +21,9 @@ export default function Navbar() {
               to={link.path}
               className={({ isActive }) =>
                 `text-lg font-semibold px-3 py-2 rounded transition duration-300 ${
-                  isActive ? "text-white bg-blue-800 shadow-md" : "hover:bg-blue-700"
+                  isActive
+                    ? "text-white bg-blue-800 shadow-md"
+                    : "hover:bg-blue-700"
                 }`
               }
             >
@@ -33,8 +32,6 @@ export default function Navbar() {
           </li>
         ))}
       </ul>
-      
     </nav>
   );
 }
-
