@@ -8,6 +8,9 @@ export default function TableSpam({ matchedSessions }) {
   // Determine the max number of rows in any session
   const maxRows = Math.max(...matchedSessions.map(session => session.length));
 
+  // Calculate total profiles count (excluding empty entries)
+  const totalProfiles = matchedSessions.reduce((sum, session) => sum + session.length, 0);
+
   return (
     <div className="overflow-x-auto mt-6">
       <table className="min-w-full border border-gray-300">
@@ -36,6 +39,11 @@ export default function TableSpam({ matchedSessions }) {
           ))}
         </tbody>
       </table>
+
+      {/* Display total profiles count */}
+      <p className="mt-4 text-center font-semibold text-gray-700">
+        Total Profiles: {totalProfiles}
+      </p>
     </div>
   );
 }
