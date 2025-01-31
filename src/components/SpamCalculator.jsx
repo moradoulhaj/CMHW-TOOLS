@@ -26,7 +26,8 @@ export default function SpamCalculator() {
       rows.map((row) => [row[colIndex], ""]) // Adding empty spam field
     );
     const profilesWithSpamArr = profilesWithSpam.split("\n").map((line) => line.split("\t"));
-    
+    console.log(sessions);
+
     console.log(profilesWithSpamArr);
   
 
