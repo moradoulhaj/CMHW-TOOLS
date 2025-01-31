@@ -92,12 +92,18 @@ export default function SpamCalculator() {
               />
             </div>
           </div>
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center gap-10 mt-6">
             <button
               type="submit"
               className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition duration-300"
             >
-              Match
+              Match By Session
+            </button>
+            <button
+              type="submit"
+              className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition duration-300"
+            >
+              Match By Deploy
             </button>
           </div>
         </form>
