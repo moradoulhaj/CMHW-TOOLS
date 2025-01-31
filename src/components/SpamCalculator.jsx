@@ -1,36 +1,69 @@
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import TextAreaInput from "./smalls/logCheckerSmalls/TextAreaInput";
-import { calcSessions } from "../scripts/spliterScripts";
+import TableDisplay from "./smalls/TableSpam";
 
 export default function SpamCalculator() {
   const [profiles, setProfiles] = useState("");
   const [profilesWithSpam, setProfilesWithSpam] = useState("");
+  const [matchedSessions, setMatchedSessions] = useState([]); // Store the matched data
 
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    if (!profiles.trim()) {
+    if (!profiles?.trim()) {
       toast.error("Please enter valid profiles!");
       return;
     }
   
-    // Splitting profiles into columns (sessions) and adding an empty spam number field
+    const profilesWithSpamData = profilesWithSpam || "";
+  
+    // Step 1: Convert profiles input into a structured array.
     const rows = profiles
       .trim()
-      .split("\n") // Split input by lines (rows of profiles)
-      .map((line) => line.split("\t")); // Split each line into profiles
+      .split("\n")
+      .map((line) => line.split("\t"));
   
-    // Now, create sessions based on columns
+    // Step 2: Convert rows into sessions (column-based grouping)
     const sessions = rows[0].map((_, colIndex) =>
-      rows.map((row) => [row[colIndex], ""]) // Adding empty spam field
+      rows.map((row) => [row[colIndex], ""]).filter(([profile]) => profile) // Remove empty values
     );
-    const profilesWithSpamArr = profilesWithSpam.split("\n").map((line) => line.split("\t"));
-    console.log(sessions);
-
-    console.log(profilesWithSpamArr);
   
-
+    // Step 3: Convert profilesWithSpam input into an array
+    const profilesWithSpamArr = profilesWithSpamData
+      .trim()
+      .split("\n")
+      .map((line) => line.split("\t"));
+  
+    // Step 4: Create a Map for spam numbers
+    const spamMap = new Map();
+    profilesWithSpamArr.forEach(([profile, spam]) => {
+      if (profile) spamMap.set(profile, spam);
+    });
+  
+    // Step 5: Count occurrences of each profile in sessions
+    const profileCount = new Map();
+    sessions.flat().forEach(([profile]) => {
+      if (profile) profileCount.set(profile, (profileCount.get(profile) || 0) + 1);
+    });
+  
+    // Step 6: Assign spam numbers and mark duplicates
+    let newMatchedSessions = sessions.map((session) =>
+      session.map(([profile]) => {
+        const spamNumber = spamMap.get(profile) || "";
+        const isDuplicate = profileCount.get(profile) > 1;
+        return [profile, isDuplicate ? `${spamNumber} D` : spamNumber];
+      })
+    );
+  
+    // **Step 7: Sort Sessions Numerically**
+    newMatchedSessions = newMatchedSessions.map((session) =>
+      session.sort((a, b) => Number(a[0]) - Number(b[0])) // Sort based on profile numbers
+    );
+  
+    setMatchedSessions(newMatchedSessions);
+    console.log("Sorted Matched Sessions:", newMatchedSessions);
+    toast.success("Profiles matched with spam successfully!");
   };
   
   
@@ -69,6 +102,9 @@ export default function SpamCalculator() {
           </div>
         </form>
         <hr className="mt-8 border-blue-300" />
+
+        {/* Render table only if matchedSessions has data */}
+        {matchedSessions.length > 0 && <TableDisplay matchedSessions={matchedSessions} />}
       </div>
 
       <ToastContainer theme="colored" autoClose={1500} />
