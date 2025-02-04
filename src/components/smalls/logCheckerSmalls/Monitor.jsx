@@ -1,108 +1,145 @@
+import { useEffect, useState } from "react";
 import TextAreaWithCopy from "./TextAreaWithCopy";
+import ProxiesModal from "../ProxiesModal";
+import { toast } from "react-toastify";
 
 export default function Monitor({ result }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+
+
+  // Combine specific profile arrays
+  const combinedProfiles = [
+    ...(result?.maxExecutionTimeProfiles || []),
+    ...(result?.proxyDownProfiles || []),
+    ...(result?.notLogsProfiles || []),
+    ...(result?.disconnectedProfiles || []),
+    ...(result?.othersProfiles || []),
+  ];
+
+  // Keydown listener for modal toggle
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.altKey || event.shiftKey) {
+        if (combinedProfiles.length > 0) {
+          setIsModalOpen((prev) => !prev);
+        } else {
+          toast.error("You have no profiles with proxy down");
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [combinedProfiles]);
+
+  // Helper to render TextAreas
+  const renderTextAreas = () => {
+    const profileCategories = [
+      { id: "active", label: "Active", data: result?.connectedProfiles },
+      { id: "proxyDown", label: "Proxy Down", data: result?.proxyDownProfiles },
+      {
+        id: "maxExecutionTime",
+        label: "Max Execution Time",
+        data: result?.maxExecutionTimeProfiles,
+      },
+      {
+        id: "disconnected",
+        label: "Disconnected",
+        data: result?.disconnectedProfiles,
+      },
+      {
+        id: "wrongBrowser",
+        label: "Wrong Browser",
+        data: result?.wrongBrowserProfiles,
+      },
+      {
+        id: "accountRestricted",
+        label: "Account Restricted",
+        data: result?.accountRestrictedProfiles,
+      },
+      {
+        id: "captchaVerification",
+        label: "Captcha Verification",
+        data: result?.captchaVerificationProfiles,
+      },
+      {
+        id: "wrongPassword",
+        label: "Wrong Password",
+        data: result?.wrongPasswordProfiles,
+      },
+      {
+        id: "wrongRecovery",
+        label: "Wrong Recovery",
+        data: result?.wrongRecoveryProfiles,
+      },
+      {
+        id: "phoneNumber",
+        label: "Phone Number",
+        data: result?.phoneNumberProfiles,
+      },
+      {
+        id: "usualActivity",
+        label: "Unusual Activity",
+        data: result?.unusualActivityProfiles,
+      },
+      {
+        id: "accountDisabled",
+        label: "Account Disabled",
+        data: result?.accountDisabledProfiles,
+      },
+      { id: "empty", label: "Empty", data: result?.notLogsProfiles },
+      { id: "others", label: "Others", data: result?.othersProfiles },
+    ];
+
+    return profileCategories.map(
+      ({ id, label, data }) =>
+        data?.length > 0 && (
+          <TextAreaWithCopy
+            key={id}
+            id={id}
+            label={label}
+            value={data.join("\n")}
+          />
+        )
+    );
+  };
+
   return (
     <div className="p-8 mx-auto flex flex-col justify-center items-center bg-white rounded-lg shadow-lg">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">
-        Results Overview
-      </h3>
+      <div className="w-4/5 flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-800">Results Overview</h3>
+         <div
+          className="relative"
+          onMouseEnter={() => setShowNotification(true)}
+          onMouseLeave={() => setShowNotification(false)}
+        >
+          <button
+            className="hover:bg-gray-50 text-black p-2 bg-transparent rounded-md transition-all duration-200"
+            title="Open the proxies settings modal - Alt Or Shift"
+            aria-label="Copy profiles"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <i className="ri-settings-5-line text-xl"></i>
+          </button>
+          {/* Hover Notification */}
+          {showNotification && (
+            <div className="absolute top-9 left-[-40px] bg-gray-800 text-white text-sm rounded-lg p-1 shadow-lg z-10">
+              Shift Or Alt
+            </div>
+          )}
+      </div>
+      </div>
+      <hr className="text-xl" />
       <div className="flex flex-wrap justify-center gap-2 w-full">
-        {result.connectedProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="active"
-            label="Active"
-            value={result.connectedProfiles.join("\n")}
-          />
-        )}
-        {result.proxyDownProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="proxyDown"
-            label="Proxy Down"
-            value={result.proxyDownProfiles.join("\n")}
-          />
-        )}
-        {result.maxExecutionTimeProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="maxExecutionTime"
-            label="Max Execution Time"
-            value={result.maxExecutionTimeProfiles.join("\n")}
-          />
-        )}
-        {result.disconnectedProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="disconnected"
-            label="Disconnected"
-            value={result.disconnectedProfiles.join("\n")}
-          />
-        )}
-        {result.wrongBrowserProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="wrongBrowser"
-            label="Wrong Browser"
-            value={result.wrongBrowserProfiles.join("\n")}
-          />
-        )}
-        {result.accountRestrictedProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="accountRestricted"
-            label="Account Restricted"
-            value={result.accountRestrictedProfiles.join("\n")}
-          />
-        )}
-        {result.captchaVerificationProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="captchaVerification"
-            label="Captcha Verification"
-            value={result.captchaVerificationProfiles.join("\n")}
-          />
-        )}
-        {result.wrongPasswordProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="wrongPassword"
-            label="Wrong Password"
-            value={result.wrongPasswordProfiles.join("\n")}
-          />
-        )}
-        {result.wrongRecoveryProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="wrongRecovery"
-            label="Wrong Recovery"
-            value={result.wrongRecoveryProfiles.join("\n")}
-          />
-        )}
-        {result.phoneNumberProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="phoneNumber"
-            label="Phone Number"
-            value={result.phoneNumberProfiles.join("\n")}
-          />
-        )}
-        {result.unusualActivityProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="usualActivity"
-            label="Unusual Activity"
-            value={result.unusualActivityProfiles.join("\n")}
-          />
-        )}
-        {result.accountDisabledProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="accountDisabled"
-            label="Account Disabled"
-            value={result.accountDisabledProfiles.join("\n")}
-          />
-        )}
-        {result.notLogsProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="empty"
-            label="Empty"
-            value={result.notLogsProfiles.join("\n")}
-          />
-        )}
-        {result.othersProfiles?.length > 0 && (
-          <TextAreaWithCopy
-            id="others"
-            label="Others"
-            value={result.othersProfiles.join("\n")}
+        {renderTextAreas()}
+        {isModalOpen && (
+          <ProxiesModal
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            proxyDownProfiles={combinedProfiles}
           />
         )}
       </div>

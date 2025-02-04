@@ -21,7 +21,7 @@ export default function AddSessionUsingTags() {
   const [excelBlob, setExcelBlob] = useState(null); // State to hold the Excel blob
   const oldFileInputRef = useRef(null);
   // Suggested code may be subject to a license. Learn more: ~LicenseLog:1145596097.
-  //   useEffect(()=>{console.log("profilesByDrop",profilesByDrop);},[profilesByDrop])
+  //   useEffect(()=>{("profilesByDrop",profilesByDrop);},[profilesByDrop])
   const HandleOpenSettings = () => {
     setIsSettingsOpen(true);
   };
@@ -36,8 +36,8 @@ export default function AddSessionUsingTags() {
     scriptName,
   }) => {
     const { profiles, tags } = separateNumbersAndTags(tagsToAdd);
-    // console.log("profiles", profiles);
-    // console.log("tags", tags);
+    // ("profiles", profiles);
+    // ("tags", tags);
     let lastFile = oldFiles.at(-1);
     const match = lastFile.name.match(/file_(\d+)/);
     const lastFileIndex = match ? parseInt(match[1]) : -1;
@@ -92,7 +92,7 @@ export default function AddSessionUsingTags() {
       configName,
       scriptName
     );
-    console.log(profilesByDropp);
+    profilesByDropp;
     setprocessedFiles(modifiedFiles);
     setExcelBlob(blob);
     toast.success("Tags added successfully!");

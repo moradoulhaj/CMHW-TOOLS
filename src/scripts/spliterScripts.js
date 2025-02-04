@@ -232,9 +232,10 @@ export const generateExcel = (seedsBySessionPerDrop) => {
     // Create a row for the profiles sheet (drop level)
     const profileRow = [dropIndex + 1]; // Drop number in the first column
     seedsBySessionPerDrop.forEach((session) => {
-      const profiles = session[dropIndex]
-        ?.map((pair) => pair[0]) // Collect profile IDs
-        .join("|") || ""; // Join profiles with "|" or empty if none
+      const profiles =
+        session[dropIndex]
+          ?.map((pair) => pair[0]) // Collect profile IDs
+          .join("|") || ""; // Join profiles with "|" or empty if none
       profileRow.push(profiles);
     });
     profileSheetData.push(profileRow);
@@ -260,11 +261,6 @@ export const generateExcel = (seedsBySessionPerDrop) => {
 
   XLSX.writeFile(workbook, "sessions_data.xlsx");
 };
-
-
-
-
-
 
 ////////////////////
 // export const downloadShedule = (seedsBySessionPerDrop) => {
@@ -390,7 +386,7 @@ export const generateExcel = (seedsBySessionPerDrop) => {
 //       timeBetweenDrops,
 //       dropsTimes,   // Specific drop times
 //     } = await fetchDynamicConfig(configUrl);
-//     console.log();
+//     ();
 //     // Fetch the template Excel file
 //     const response = await fetch("/CMHW-TOOLS/template.xlsx");
 //     const arrayBuffer = await response.arrayBuffer();

@@ -1,4 +1,4 @@
-import React, { useState  } from "react";
+import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RotateCcw } from "lucide-react";
@@ -41,17 +41,17 @@ export default function Spliter() {
       toast.error("No tags");
       return;
     }
-    //Taking the first line of the input 
+    //Taking the first line of the input
     const firstLine = tagsToSplit.split("\n")[0];
     // then passung the first line to return the number of sessions
     const sessionsNumber = calcSessions(firstLine);
     setSessionCount(sessionsNumber);
- 
+
     if (sessionsNumber === 0) {
       toast.error("No sessions");
       return;
     }
-    
+
     const lines = tagsToSplit
       .split("\n")
       .map((line) => parseNumberTagPairs(line));
@@ -63,7 +63,7 @@ export default function Spliter() {
     }
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
     setSeedsBySessionPerDrop(splitDataByDrops);
-    console.log(splitDataByDrops);
+    splitDataByDrops;
     toast.success("Split successfully");
     setProcessedContents(collectedData);
   };

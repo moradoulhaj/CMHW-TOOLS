@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmModal from "./smalls/ConfirmModal";
@@ -18,7 +18,7 @@ export default function DelimiterSwitch() {
   const [isDragging, setIsDragging] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const oldFileInputRef = useRef(null);
-
+  const [entityName, setEntityName] = useState();
   const handleReset = () => {
     setOldFiles([]);
     setProcessedContents([]);
@@ -27,6 +27,7 @@ export default function DelimiterSwitch() {
     setSeparator("");
     setCurrentPage(0);
   };
+ 
 
   const handleConvertDelimiter = async () => {
     if (!oldFiles.length) {
@@ -54,9 +55,14 @@ export default function DelimiterSwitch() {
     setProcessedContents([]);
   };
 
-  const handleConfirmSeparator = () => {
-    setIsModalOpen(false);
-    processFiles(separator);
+  const handleConfirmSeparator = async () => {
+    try {
+      setIsModalOpen(false); // Close the modal first
+      await processFiles(separator); // Wait for files to be processed
+    } catch (error) {
+      console.error("Error processing files:", error);
+      // Optionally, you can show an error message to the user
+    }
   };
 
   const handleCancelSeparator = () => {
@@ -88,11 +94,6 @@ export default function DelimiterSwitch() {
   };
 
   const downloadZippedFiles = async () => {
-    if (processedContents.length === 0) {
-      toast.error("No processed files to download.");
-      return;
-    }
-
     const zip = new JSZip();
     processedContents.forEach((file) => {
       zip.file(file.name, file.content);
@@ -102,9 +103,9 @@ export default function DelimiterSwitch() {
       const content = await zip.generateAsync({ type: "blob" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(content);
-      link.download = "processed_files.zip";
+      link.download = `CMH ${entityName}.zip`;
       link.click();
-      toast.success("Files downloaded successfully!");
+      toast.success("Delimiter Coverted successfully!");
     } catch (error) {
       console.error("Error generating zip:", error);
       toast.error("Failed to download files.");
@@ -160,13 +161,21 @@ export default function DelimiterSwitch() {
         setDelimiter={setDelimiter}
         name={"DelimiterSwitch"}
       />
-
+      <input
+        type="number"
+        name="entityName"
+        id="entityName"
+        value={entityName}
+        onChange={(e) => setEntityName(e.target.value)}
+        placeholder="Entity number"
+        required
+      />
       <FileList files={oldFiles} titre={"Uploaded Files"} />
 
       <div className="flex gap-6 mt-6">
         <button
           onClick={handleConvertDelimiter}
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium`}
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium"
         >
           <RefreshCcw className="w-5 h-5" />
           Convert Separator
@@ -175,7 +184,8 @@ export default function DelimiterSwitch() {
           onClick={downloadZippedFiles}
           className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium"
         >
-          Download Zipped Files
+          <RefreshCcw className="w-5 h-5" />
+          Download Files{" "}
         </button>
       </div>
 
