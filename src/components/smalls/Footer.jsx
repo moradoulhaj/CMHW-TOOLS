@@ -13,13 +13,13 @@ export default function Footer() {
           >
             <i className="ri-telegram-fill"></i>
           </a>
-          <a
+          {/* <a
             href="https://github.com/moradoulhaj"
             className="text-gray-400 hover:text-white transition-colors duration-200"
             aria-label="GitHub"
           >
             <i className="ri-github-line"></i>
-          </a>
+          </a> */}
         </div>
       </div>
     </footer>

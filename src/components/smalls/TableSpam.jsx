@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function TableSpam({ matchedSessions }) {
+export default function TableSpam({ matchedSessions, modeToTable }) {
   if (!matchedSessions || matchedSessions.length === 0) {
     return <p className="text-center text-gray-500">No data available</p>;
   }
@@ -11,6 +11,29 @@ export default function TableSpam({ matchedSessions }) {
   // Calculate total profiles count (excluding empty entries)
   const totalProfiles = matchedSessions.reduce((sum, session) => sum + session.length, 0);
 
+  // Function to copy profiles with spam or only spam, keeping table alignment
+  const handleCopy = (copySpamOnly = false) => {
+    let headers = matchedSessions
+      .map((_, index) => `${modeToTable === "session" ? "Session" : "Deploy"} ${index + 1}`)
+      .join("\t"); // Join headers with tabs
+
+    let rows = [...Array(maxRows)].map((_, rowIndex) =>
+      matchedSessions
+        .map(session => {
+          const profile = session[rowIndex]?.[0] || "-";
+          const spam = session[rowIndex]?.[1] ? `(${session[rowIndex][1]})` : "";
+          return copySpamOnly ? spam : `${profile} ${spam}`;
+        })
+        .join("\t") // Join row values with tabs
+    );
+
+    let dataToCopy = [headers, ...rows].join("\n"); // Join everything with new lines
+
+    navigator.clipboard.writeText(dataToCopy)
+      .then(() => alert(copySpamOnly ? "Spam copied!" : "Profiles with spam copied!"))
+      .catch(() => alert("Failed to copy!"));
+  };
+
   return (
     <div className="overflow-x-auto mt-6">
       <table className="min-w-full border border-gray-300">
@@ -18,7 +41,7 @@ export default function TableSpam({ matchedSessions }) {
           <tr className="bg-blue-600 text-white">
             {matchedSessions.map((_, index) => (
               <th key={index} className="border p-2">
-                Session {index + 1}
+                {modeToTable === "session" ? "Session" : "Deploy"} {index + 1}
               </th>
             ))}
           </tr>
@@ -44,6 +67,22 @@ export default function TableSpam({ matchedSessions }) {
       <p className="mt-4 text-center font-semibold text-gray-700">
         Total Profiles: {totalProfiles}
       </p>
+
+      {/* Copy buttons */}
+      <div className="flex justify-center gap-4 mt-4">
+        <button 
+          onClick={() => handleCopy(false)} 
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+        >
+          Copy Profiles with Spam
+        </button>
+        <button 
+          onClick={() => handleCopy(true)} 
+          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+        >
+          Copy Only Spam
+        </button>
+      </div>
     </div>
   );
 }
