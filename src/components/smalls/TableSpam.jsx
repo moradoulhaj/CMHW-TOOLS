@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "react-toastify";
 
 export default function TableSpam({ matchedSessions, modeToTable }) {
   if (!matchedSessions || matchedSessions.length === 0) {
@@ -30,8 +31,8 @@ export default function TableSpam({ matchedSessions, modeToTable }) {
     let dataToCopy = [headers, ...rows].join("\n"); // Join everything with new lines
 
     navigator.clipboard.writeText(dataToCopy)
-      .then(() => alert(copySpamOnly ? "Spam copied!" : "Profiles with spam copied!"))
-      .catch(() => alert("Failed to copy!"));
+      .then(() => toast.info(copySpamOnly ? "Spam copied!" : "Profiles with spam copied!"))
+      .catch(() => toast.info("Failed to copy!"));
   };
 
   return (
