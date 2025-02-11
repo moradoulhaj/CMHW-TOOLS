@@ -57,6 +57,7 @@ export const checkLogs = (profiles, logs) => {
         case "connected":
         case "active":
         case "matched":
+        case "spam deleted":
           connectedProfiles.push(profilesArr[i]);
           break;
         case "max_execution_time":
