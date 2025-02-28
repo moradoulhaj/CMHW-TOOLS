@@ -10,6 +10,7 @@ export default function Navbar() {
     { path: "/spliter", label: "Spliter" },
     { path: "/logChecker", label: "Checker" },
     { path: "/spamCalculator", label: "Spam Calculator" },
+    { path: "/ramadanTask", label: "Ramadan Task" },
   ];
 
   return (
