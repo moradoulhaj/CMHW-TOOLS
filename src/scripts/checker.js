@@ -57,6 +57,7 @@ export const checkLogs = (profiles, logs) => {
         case "connected":
         case "active":
         case "matched":
+        case "critical alert":
         case "spam deleted":
           connectedProfiles.push(profilesArr[i]);
           break;

@@ -76,13 +76,18 @@ export default function Spliter() {
       </h2>
 
       <div className="flex flex-col md:flex-row gap-8 items-center">
-        <button
-          onClick={handleReset}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg hover:scale-105 border border-blue-600 transition-transform transition-colors duration-200 font-medium"
-        >
-          <RotateCcw className="w-5 h-5" />
-          Reset
-        </button>
+        <div className="flex flex-col items-center">
+        <label htmlFor="dropNumbers" className="block text-gray-700">
+            Drop Numbers
+          </label>
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg hover:scale-105 border border-blue-600 duration-200 font-medium"
+          >
+            <RotateCcw className="w-5 h-5" />
+            Reset
+          </button>
+        </div>
 
         <div>
           <label htmlFor="dropNumbers" className="block text-gray-700">
