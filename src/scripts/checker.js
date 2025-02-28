@@ -13,6 +13,8 @@ export const checkLogs = (profiles, logs) => {
   let unusualActivityProfiles = [];
   let accountDisabledProfiles = [];
   let othersProfiles = [];
+  let othersLogs = [];
+
   let wrongBrowserProfiles = [];
   let wrongRecoveryProfiles = [];
   let disconnectedProfiles = [];
@@ -92,6 +94,8 @@ export const checkLogs = (profiles, logs) => {
 
         default:
           othersProfiles.push(profilesArr[i]);
+          othersLogs.push(log);
+
           break;
       }
     }
@@ -110,6 +114,6 @@ export const checkLogs = (profiles, logs) => {
     unusualActivityProfiles,
     accountDisabledProfiles,
     othersProfiles,
-    wrongBrowserProfiles,wrongRecoveryProfiles,disconnectedProfiles,
+    wrongBrowserProfiles,wrongRecoveryProfiles,disconnectedProfiles,othersLogs
   };
 };

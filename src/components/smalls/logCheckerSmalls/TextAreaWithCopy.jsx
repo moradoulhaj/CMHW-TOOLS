@@ -3,7 +3,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProxiesModal from "../ProxiesModal";
 
-export default function TextAreaWithCopy({ id, label, value ,forProxies }) {
+export default function TextAreaWithCopy({ id, label, value ,forProxies , setModalogs }) {
 
   const textAreaRef = useRef(null);
 
@@ -49,6 +49,7 @@ export default function TextAreaWithCopy({ id, label, value ,forProxies }) {
         className={`w-full ${forProxies ? "sm:w-[100%]" :"sm:w-[30%]"} max-w-xl border p-5 border-gray-300 rounded-lg shadow-lg ${
           label == "Active" ? "bg-green-300" : "bg-white-white"
         }`}
+        onClick={()=>setModalogs(true)}
       >
         <label
           htmlFor={id}

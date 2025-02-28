@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import TextAreaWithCopy from "./TextAreaWithCopy";
 import ProxiesModal from "../ProxiesModal";
 import { toast } from "react-toastify";
+import LogsModal from "./LogsModal ";
 
 export default function Monitor({ result }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [modalLogs ,setModalogs ] = useState(false)
 
 
   // Combine specific profile arrays
@@ -28,7 +30,8 @@ export default function Monitor({ result }) {
         }
       }
     };
-
+    
+    
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -93,19 +96,26 @@ export default function Monitor({ result }) {
       { id: "empty", label: "Empty", data: result?.notLogsProfiles },
       { id: "others", label: "Others", data: result?.othersProfiles },
     ];
+   return profileCategories.map(({id , label , data})=>{
+    if (!data?.length) return null; // Skip empty categories
+        // If it's "others", display the logs instead
+        if (id === "others") {
+          return (
+            <TextAreaWithCopy
+              key={id}
+              id={id}
+              label={label}
+              value={data.join("\n")}
+              setModalogs={ setModalogs}
+            />
+          );
+        }
+        return (
+          <TextAreaWithCopy key={id} id={id} label={label} value={data.join("\n")} />
+        );
 
-    return profileCategories.map(
-      ({ id, label, data }) =>
-        data?.length > 0 && (
-          <TextAreaWithCopy
-            key={id}
-            id={id}
-            label={label}
-            value={data.join("\n")}
-          />
-        )
-    );
-  };
+
+   })};
 
   return (
     <div className="p-8 mx-auto flex flex-col justify-center items-center bg-white rounded-lg shadow-lg">
@@ -142,6 +152,17 @@ export default function Monitor({ result }) {
             proxyDownProfiles={combinedProfiles}
           />
         )}
+   
+         {modalLogs && (
+          <LogsModal
+            isOpen={modalLogs}
+            onClose={() => setModalogs(false)}
+            logs={result?.othersLogs}
+            profiles={result?.othersProfiles} // Ensure profiles are passed
+          />
+        )}
+        
+    
       </div>
     </div>
   );
