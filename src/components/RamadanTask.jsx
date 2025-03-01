@@ -3,16 +3,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import JSZip from "jszip";
 
-
 import FileList from "./smalls/FilesList";
 import { Download, RotateCcw, Trash2, Upload } from "lucide-react";
 
 import TagsInput from "./smalls/TagsInput";
 import { saveAs } from "file-saver";
 
-import {
-  downloadProcessedContent,
-} from "../scripts/scripts";
+import { downloadProcessedContent } from "../scripts/scripts";
 import {
   calcSessions,
   collectData,
@@ -28,6 +25,8 @@ export default function RamadanTask() {
   const [sessionCount, setSessionCount] = useState();
   const [isDragging, setIsDragging] = useState(false);
   const oldFileInputRef = useRef(null);
+  const [entityName, setEntityName] = useState("");
+
   const HandleReset = () => {
     setOldFiles([]);
     setProcessedContents([]);
@@ -42,14 +41,14 @@ export default function RamadanTask() {
       toast.error("Please upload files.");
       return;
     }
-  
+
     // Taking the first line of the input
     const firstLine = tagsToAdd.split("\n")[0];
-  
+
     // then passing the first line to return the number of sessions
     const sessionsNumber = calcSessions(firstLine) - 0.5;
     setSessionCount(sessionsNumber);
-  
+
     if (sessionsNumber === 0) {
       toast.error("No sessions");
       return;
@@ -57,37 +56,36 @@ export default function RamadanTask() {
       toast.error("Number of files and sessions do not match");
       return;
     }
-  
+
     // Now I will need to remove the first column in the input
     const { nextDay, onlyTags } = processData(tagsToAdd);
-    console.log(nextDay);
-  
+
     const lines = onlyTags.split("\n").map((line) => parseNumberTagPairs(line));
-  
+
     const collectedData = await collectData(lines, sessionsNumber);
     setSeedsBySessions(collectedData);
-  
+
     if (collectedData === "wrongInput") {
       return;
     }
-  
+
     // Process Excel files and prepare downloads
     const updatedFiles = await processExcelFiles(oldFiles, collectedData);
-  
+
     // Create a new zip instance
     const zip = new JSZip();
-  
+
     // Add each processed file to the zip
     updatedFiles.forEach(({ blob, fileName }) => {
       zip.file(fileName, blob);
     });
-  
+
     // Generate the zip file
     zip.generateAsync({ type: "blob" }).then((content) => {
       // Save the zip file
-      saveAs(content, `TaskWithLogin[${nextDay}].zip`);
+      saveAs(content, `TaskWithLogin[${nextDay}]-CMH${entityName}.zip`);
     });
-  
+
     toast.success("Files processed and zipped successfully!");
   };
 
@@ -104,8 +102,6 @@ export default function RamadanTask() {
     setProcessedContents([]); // Clear processed contents
   };
 
- 
-
   return (
     <div
       className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen"
@@ -118,7 +114,7 @@ export default function RamadanTask() {
     >
       <ToastContainer theme="colored" />
       <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
-        ADD LOGIN OF NEXT DAY
+        ADD LOGIN OF THE NEXT DAY
       </h2>
 
       <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -154,7 +150,15 @@ export default function RamadanTask() {
       </div>
 
       <div className="flex flex-col items-center mt-4">
-        <h1>Something</h1>
+        <input
+          type="number"
+          name="entityName"
+          id="entityName"
+          value={entityName}
+          onChange={(e) => setEntityName(e.target.value)}
+          placeholder="Entity number"
+          required
+        />
       </div>
 
       <div className="flex flex-col items-center mt-4 w-full max-w-lg">

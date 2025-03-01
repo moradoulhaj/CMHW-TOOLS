@@ -29,7 +29,7 @@ export default function TableSpam({ matchedSessions, modeToTable }) {
     );
   
     let dataToCopy = [headers, ...rows].join("\n"); // Join everything with new lines
-    console.log(matchedSessions);
+ 
     navigator.clipboard.writeText(dataToCopy)
       .then(() => toast.info(copySpamOnly ? "Spam copied!" : "Profiles with spam copied!"))
       .catch(() => toast.info("Failed to copy!"));

@@ -66,7 +66,7 @@ export const processExcelFiles = (files, seedsBySessions) => {
   
           // Assign new profiles based on index or default to "500|600|700|800"
           const newProfiles = seedsBySessions[index].map(item => item[0]).join('|') || "check|error|700|800";
-          console.log(newProfiles)
+        
           // Generate new start & end times in the required format
           const newStartTime = formatDate(startTime); // Format start time
           const newEndTime = formatDate(endTime); // Format end time
