@@ -29,7 +29,6 @@ export const checkLogs = (profiles, logs) => {
     } else if (log.includes("proxy down") || log.includes("proxy problem")) {
       proxyDownProfiles.push(profilesArr[i]);
     } else if (
-      log.includes("proxy down") ||
       log.includes("account_disabled_check")
     ) {
       accountDisabledProfiles.push(profilesArr[i]);

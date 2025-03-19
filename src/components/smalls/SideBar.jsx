@@ -1,10 +1,8 @@
-import { AlignJustify , X } from "lucide-react";
-import React, { useState } from "react";
+import { AlignJustify, X } from "lucide-react";
+import React from "react";
 import { NavLink } from "react-router-dom";
 
-export default function Sidebar() {
-  const [togle, setTogle] = useState(false);
-
+export default function Sidebar({ isOpen, toggle }) {
   const links = [
     { path: "/readAndShow", label: "Read and Show" },
     { path: "/removeTags", label: "Remove Sessions" },
@@ -15,34 +13,41 @@ export default function Sidebar() {
     { path: "/spamCalculator", label: "Spam Calculator" },
     { path: "/ramadanTask", label: "Ramadan Task" },
     { path: "/cleanChecker", label: "Clean Checker" },
+    { path: "/spliterBeta", label: "Spliter Beta" },
+
   ];
 
   return (
-    <div className={`w-64 h-screen bg-gradient-to-b from-blue-500 to-blue-600 shadow-lg p-4 fixed ${togle ? "-left-[210px]" : "translate-x-0"}`}>
-      <div className="flex justify-between items-center ">
-        
-        <h2 className="text-white text-xl font-bold mb-6 text-center">Menu</h2>
-        <a  onClick={()=>setTogle(!togle)}>
-          {togle ?  <AlignJustify className="text-white text-xl font-bold mb-6 text-center" onClick={()=>setTogle(!togle)}/> : <X className="text-white text-xl font-bold mb-6 text-center"/>}
-        </a>
-      </div>
+    <>
+  
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 h-screen w-64 bg-gradient-to-b from-blue-500 to-blue-600 shadow-lg p-4 transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-64"
+        }`}
+      >
+        <h2 className="text-white text-xl font-bold mb-6 text-center">
+          Menu
+        </h2>
 
-      <ul className="space-y-4">
-        {links.map((link) => (
-          <li key={link.path}>
-            <NavLink
-              to={link.path}
-              className={({ isActive }) =>
-                `block text-lg font-semibold px-4 py-2 rounded transition duration-300 text-white ${
-                  isActive ? "bg-blue-800 shadow-md" : "hover:bg-blue-700"
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          </li>
-        ))}
-      </ul>
-    </div>
+        <ul className="space-y-4">
+          {links.map((link) => (
+            <li key={link.path}>
+              <NavLink
+                to={link.path}
+                className={({ isActive }) =>
+                  `block text-lg font-semibold px-4 py-2 rounded transition duration-300 text-white ${
+                    isActive ? "bg-blue-800 shadow-md" : "hover:bg-blue-700"
+                  }`
+                }
+                onClick={toggle} // Close sidebar when clicking a link
+              >
+                {link.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 }

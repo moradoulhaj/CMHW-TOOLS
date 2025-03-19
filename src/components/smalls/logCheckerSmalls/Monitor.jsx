@@ -41,11 +41,9 @@ export default function Monitor({ result }) {
     const profileCategories = [
       { id: "active", label: "Active", data: result?.connectedProfiles },
       { id: "proxyDown", label: "Proxy Down", data: result?.proxyDownProfiles },
-      { id: "proxyDown", label: "Proxy Down", data: result?.proxyDownProfiles },
       { id: "spamDeleted", label: "Spam Deleted", data: result?.spamDeleted },
 
       { id: "spamNotDeleted", label: "Spam Not Deleted", data: result?.spamNotDeleted },
-      { id: "proxyDown", label: "Proxy Down", data: result?.proxyDownProfiles },
 
       {
         id: "maxExecutionTime",
