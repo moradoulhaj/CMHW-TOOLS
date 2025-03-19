@@ -1,54 +1,92 @@
-import React, { useState, useRef ,useEffect} from "react";
+import React, { useState, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ConfirmModal from "./smalls/ConfirmModal";
+import JSZip from "jszip";
+
 import FileList from "./smalls/FilesList";
-import { Download, RotateCcw, Trash2, Upload } from "lucide-react";
-import DelimiterSelector from "./smalls/DelimiterSelector";
+import { Download, Plus, RotateCcw, Trash2, Upload } from "lucide-react";
+
 import TagsInput from "./smalls/TagsInput";
+import { saveAs } from "file-saver";
+
+import { downloadProcessedContent } from "../scripts/scripts";
 import {
-  detectSeparator,
-  downloadProcessedContent,
-  readFileContent,
-} from "../scripts/scripts";
+  calcSessions,
+  collectData,
+  parseNumberTagPairs,
+} from "../scripts/spliterScripts";
+import { processData, processExcelFiles } from "../scripts/ramadanTask";
 import EntitySelector from "./smalls/EntitySelector";
 
-export default function RemoveSessions() {
+export default function RamadanTask() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedContents, setProcessedContents] = useState([]);
-  const [tagsToRemove, setTagsToRemove] = useState("");
-  const [delimiter, setDelimiter] = useState("AUTO");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [separator, setSeparator] = useState("");
+  const [tagsToAdd, setTagsToAdd] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const oldFileInputRef = useRef(null);
   const [entityName, setEntityName] = useState("");
+
   const HandleReset = () => {
     setOldFiles([]);
     setProcessedContents([]);
-    setTagsToRemove("");
-    setDelimiter("AUTO");
-    setIsModalOpen(false);
-    setSeparator("");
+    setTagsToAdd("");
   };
-  useEffect(() => {
-    console.log(entityName);
-  }, [entityName]);
-  const handleRemoveTags = async () => {
-    if (!tagsToRemove) {
-      toast.error("Please specify tags to remove.");
+
+  const handleAddTags = async () => {
+    if (!tagsToAdd) {
+      toast.error("Please specify tags to Add.");
       return;
     } else if (!oldFiles.length) {
       toast.error("Please upload files.");
       return;
-    }
-    if (delimiter === "AUTO") {
-      setIsModalOpen(true);
-      setSeparator(await detectSeparator(oldFiles));
+    } else if (entityName === "") {
+      toast.error("Name your entity.");
       return;
-    } else {
-      processFiles(delimiter);
     }
+
+    // Taking the first line of the input
+    const firstLine = tagsToAdd.split("\n")[0];
+
+    // then passing the first line to return the number of sessions
+    const sessionsNumber = calcSessions(firstLine) - 0.5;
+
+    if (sessionsNumber === 0) {
+      toast.error("No sessions");
+      return;
+    } else if (oldFiles.length !== sessionsNumber) {
+      toast.error("Number of files and sessions do not match");
+      return;
+    }
+
+    // Now I will need to remove the first column in the input
+    const { nextDay, onlyTags } = processData(tagsToAdd);
+
+    const lines = onlyTags.split("\n").map((line) => parseNumberTagPairs(line));
+
+    const collectedData = await collectData(lines, sessionsNumber);
+
+    if (collectedData === "wrongInput") {
+      return;
+    }
+
+    // Process Excel files and prepare downloads
+    const updatedFiles = await processExcelFiles(oldFiles, collectedData);
+
+    // Create a new zip instance
+    const zip = new JSZip();
+
+    // Add each processed file to the zip
+    updatedFiles.forEach(({ blob, fileName }) => {
+      zip.file(fileName, blob);
+    });
+
+    // Generate the zip file
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      // Save the zip file
+      saveAs(content, `TaskWithLogin[${nextDay}]-CMH${entityName}.zip`);
+    });
+
+    toast.success("Files processed and zipped successfully!");
   };
 
   const handleOldFileUpload = (event) => {
@@ -64,55 +102,6 @@ export default function RemoveSessions() {
     setProcessedContents([]); // Clear processed contents
   };
 
-  const removeTags = async (content, tagsArray, delimiter) => {
-    tagsArray.forEach((tag) => {
-      content = content.split(tag).join("");
-    });
-
-    const cleanedContentArray = content
-      .split("\n")
-      .map((line) =>
-        line
-          .split(delimiter)
-          .map((item) => item.trim())
-          .filter((item) => item)
-          .join(delimiter)
-      )
-      .filter((line) => line.trim() !== "");
-
-    return cleanedContentArray.join("\n").trim();
-  };
-
-  const handleConfirmSeparator = () => {
-    setIsModalOpen(false);
-    processFiles(separator);
-  };
-
-  const handleCancelSeparator = () => {
-    setIsModalOpen(false);
-  };
-
-  const processFiles = async (separatoor) => {
-    const tags = tagsToRemove
-      .split("\n")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag);
-
-    const fileProcesses = oldFiles.map((file) =>
-      readFileContent(file).then((content) => ({
-        name: file.name,
-        content: removeTags(content, tags, separatoor),
-      }))
-    );
-
-    Promise.all(fileProcesses)
-      .then((results) => {
-        setProcessedContents(results);
-        toast.success("Tags removed successfully!");
-      })
-      .catch((error) => console.error("Error processing files:", error));
-  };
-
   return (
     <div
       className="flex flex-col items-center p-10 space-y-8 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 min-h-screen"
@@ -125,14 +114,14 @@ export default function RemoveSessions() {
     >
       <ToastContainer theme="colored" />
       <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
-        Remove Tags from Uploaded Text Files
+        ADD LOGIN FOR THE NEXT DAY
       </h2>
 
       <div className="flex flex-col md:flex-row gap-8 items-center">
         <div>
           <input
             type="file"
-            accept=".txt"
+            accept=".xlsx"
             multiple
             ref={oldFileInputRef}
             onChange={(e) => {
@@ -146,7 +135,7 @@ export default function RemoveSessions() {
             onClick={() => oldFileInputRef.current.click()}
           >
             <Upload className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-            <span className="font-medium">Upload Text Files</span>
+            <span className="font-medium">Upload EXCELS</span>
           </button>
         </div>
         <div>
@@ -159,30 +148,17 @@ export default function RemoveSessions() {
           </button>
         </div>
       </div>
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <div className="flex flex-col items-center mt-4">
-          <DelimiterSelector
-            delimiter={delimiter}
-            setDelimiter={setDelimiter}
-            setProcessedContents={setProcessedContents}
-            name={"normal"}
-          />
-        </div>
-        <div className="flex flex-col items-center mt-4">
-          <EntitySelector
-            entityName={entityName}
-            setEntityName={setEntityName}
-          />
-        </div>
-      </div>
+      <EntitySelector entityName={entityName} setEntityName={setEntityName} placeholder="Entity number"/>
+
+ 
 
       <div className="flex flex-col items-center mt-4 w-full max-w-lg">
         <TagsInput
-          tagsToRemove={tagsToRemove}
-          setTagsToRemove={setTagsToRemove}
+          tagsToRemove={tagsToAdd}
+          setTagsToRemove={setTagsToAdd}
           setProcessedContents={setProcessedContents}
           // Suggested code may be subject to a license. Learn more: ~LicenseLog:3127348425.
-          content={"Tags to remove"}
+          content={"Tags to Add"}
         />
       </div>
 
@@ -201,35 +177,31 @@ export default function RemoveSessions() {
 
       <div className="flex gap-6 mt-6">
         <button
-          onClick={handleRemoveTags}
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
-            processedContents.length ? "hidden" : ""
-          }`}
+          onClick={handleAddTags}
+          className={`flex items-center gap-2 px-6 py-3 
+    bg-gradient-to-r from-blue-500 to-blue-600 text-white 
+    rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 
+    transition-all duration-200 font-medium ${
+      processedContents.length ? "hidden" : ""
+    }`}
         >
-          <Trash2 className="w-5 h-5" />
-          Remove Tags
+          <Plus className="w-5 h-5" />
+          Add Task
         </button>
+
         <button
           className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
             !processedContents.length ? "hidden" : ""
           }`}
           onClick={() => {
-            downloadProcessedContent(processedContents,null, entityName);
+            downloadProcessedContent(processedContents);
           }}
-          
           disabled={!processedContents.length}
         >
           <Download className="w-5 h-5" />
           Download Files
         </button>
       </div>
-
-      <ConfirmModal
-        isOpen={isModalOpen}
-        separator={separator}
-        onConfirm={handleConfirmSeparator}
-        onCancel={handleCancelSeparator}
-      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "react-toastify";
 
 export default function TableSpam({ matchedSessions, modeToTable }) {
   if (!matchedSessions || matchedSessions.length === 0) {
@@ -16,24 +17,25 @@ export default function TableSpam({ matchedSessions, modeToTable }) {
     let headers = matchedSessions
       .map((_, index) => `${modeToTable === "session" ? "Session" : "Deploy"} ${index + 1}`)
       .join("\t"); // Join headers with tabs
-
+  
     let rows = [...Array(maxRows)].map((_, rowIndex) =>
       matchedSessions
         .map(session => {
-          const profile = session[rowIndex]?.[0] || "-";
-          const spam = session[rowIndex]?.[1] ? `(${session[rowIndex][1]})` : "";
+          const profile = session[rowIndex]?.[0] || ""; // "DE" if profile is missing
+          const spam = session[rowIndex]?.[1] ? `(${session[rowIndex][1]})` : "(N)"; // "(N)" if spam is missing
           return copySpamOnly ? spam : `${profile} ${spam}`;
         })
         .join("\t") // Join row values with tabs
     );
-
+  
     let dataToCopy = [headers, ...rows].join("\n"); // Join everything with new lines
-
+ 
     navigator.clipboard.writeText(dataToCopy)
-      .then(() => alert(copySpamOnly ? "Spam copied!" : "Profiles with spam copied!"))
-      .catch(() => alert("Failed to copy!"));
+      .then(() => toast.info(copySpamOnly ? "Spam copied!" : "Profiles with spam copied!"))
+      .catch(() => toast.info("Failed to copy!"));
   };
-
+  
+  
   return (
     <div className="overflow-x-auto mt-6">
       <table className="min-w-full border border-gray-300">

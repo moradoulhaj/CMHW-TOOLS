@@ -13,6 +13,8 @@ export const checkLogs = (profiles, logs) => {
   let unusualActivityProfiles = [];
   let accountDisabledProfiles = [];
   let othersProfiles = [];
+  let othersLogs = [];
+
   let wrongBrowserProfiles = [];
   let wrongRecoveryProfiles = [];
   let disconnectedProfiles = [];
@@ -27,7 +29,6 @@ export const checkLogs = (profiles, logs) => {
     } else if (log.includes("proxy down") || log.includes("proxy problem")) {
       proxyDownProfiles.push(profilesArr[i]);
     } else if (
-      log.includes("proxy down") ||
       log.includes("account_disabled_check")
     ) {
       accountDisabledProfiles.push(profilesArr[i]);
@@ -40,13 +41,16 @@ export const checkLogs = (profiles, logs) => {
       captchaVerificationProfiles.push(profilesArr[i]);
     } else if (
       log.includes("recovery verification") ||
-      log.includes("wrong_recovery") || log.includes("wrong_2fa")
+      log.includes("wrong_recovery") ||
+      log.includes("wrong_2fa")
     ) {
       wrongRecoveryProfiles.push(profilesArr[i]);
-    }else if (log.includes("confirm phone number")) {
+    } else if (log.includes("confirm phone number")) {
       phoneNumberProfiles.push(profilesArr[i]);
-    }else if (log.includes("wrong_password")) {
+    } else if (log.includes("wrong_password")) {
       wrongPasswordProfiles.push(profilesArr[i]); // Add profile to disconnectedProfiles
+    } else if (log.includes("unusual activity")) {
+      unusualActivityProfiles.push(profilesArr[i]);
     } else {
       let logArr = log.split("update_status : ");
       log = logArr[logArr.length - 1];
@@ -57,6 +61,8 @@ export const checkLogs = (profiles, logs) => {
         case "connected":
         case "active":
         case "matched":
+        case "critical alert":
+          // case "spam deleted":
           connectedProfiles.push(profilesArr[i]);
           break;
         case "max_execution_time":
@@ -83,17 +89,17 @@ export const checkLogs = (profiles, logs) => {
         case "account_disabled" || "account_disabled_check":
           accountDisabledProfiles.push(profilesArr[i]);
           break;
-        case "wrong_recovery" :
+        case "wrong_recovery":
           wrongRecoveryProfiles.push(profilesArr[i]);
           break;
-        
 
         default:
           othersProfiles.push(profilesArr[i]);
+          othersLogs.push(log);
+
           break;
       }
     }
-    
   });
 
   return {
@@ -108,6 +114,35 @@ export const checkLogs = (profiles, logs) => {
     unusualActivityProfiles,
     accountDisabledProfiles,
     othersProfiles,
-    wrongBrowserProfiles,wrongRecoveryProfiles,disconnectedProfiles,
+    wrongBrowserProfiles,
+    wrongRecoveryProfiles,
+    disconnectedProfiles,
+    othersLogs,
+  };
+};
+export const checkCleanLogs = (profiles, logs) => {
+  const profilesArr = profiles.split("\n");
+  const logsArr = logs.split("\n");
+
+  let notLogsProfiles = [];
+  let spamNotDeleted = [];
+  let spamDeleted = [];
+
+  logsArr.forEach((log, i) => {
+    log = log.toLowerCase();
+
+    if (log === "") {
+      notLogsProfiles.push(profilesArr[i]);
+    } else if (log === "spam not deleted") {
+      spamNotDeleted.push(profilesArr[i]);
+    } else if (log.includes("spam deleted")) {
+      spamDeleted.push(profilesArr[i]);
+    }
+  });
+
+  return {
+    notLogsProfiles,
+    spamNotDeleted,
+    spamDeleted,
   };
 };

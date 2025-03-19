@@ -21,7 +21,7 @@ export const detectSeparator = async (oldFiles) => {
   return "no_detect";
 };
 
-export const downloadProcessedContent = async (processedContents, excelBlob = null) => {
+export const downloadProcessedContent = async (processedContents, excelBlob = null , entityName = null) => {
   const zip = new JSZip();
 
   // Add the processed files to the zip
@@ -41,7 +41,7 @@ export const downloadProcessedContent = async (processedContents, excelBlob = nu
   // Create a link element to trigger the download
   const a = document.createElement("a");
   a.href = url;
-  a.download = "processed_files.zip";
+  a.download = `CMH${entityName}.zip`;
   a.click();
 
   // Clean up the URL object after download
@@ -110,5 +110,55 @@ export const updateAndDownloadExcel = async (
   }
 };
 
+
+
+//excel for CMH5
+
+
+
+
+export const handleExcel = (processedContents) => {
+  if (!processedContents.length) {
+    alert("No data available to export!");
+    return;
+  }
+
+  const excelData = [];
+  const startHour = 11;
+
+  // Generate current date dynamically (DD/MM/YYYY format)
+  const currentDate = new Date().toLocaleDateString("fr-FR").replace(/\//g, "-");
+
+  // Create headers (timing for each file)
+  const headers = processedContents.map((_, index) => `${startHour + index}:00`);
+  excelData.push(headers);
+
+  // Determine the max number of tags in any file
+  const maxRows = Math.max(
+    ...processedContents.map(({ content }) => content.trim().split("\n").length)
+  );
+
+  // Fill in the tags under each time slot
+  for (let i = 0; i < maxRows; i++) {
+    excelData.push(
+      processedContents.map(({ content }) => {
+        const rows = content.trim().split("\n");
+        return rows[i] ? rows[i].split(/\s+/)[0] : ""; // Take only the first tag in each row
+      })
+    );
+  }
+
+  // Create worksheet
+  const ws = XLSX.utils.aoa_to_sheet(excelData);
+  ws["!cols"] = new Array(processedContents.length).fill({ wch: 20 });
+
+  // Create workbook and append the sheet
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Tags Data");
+
+  // Generate Excel file with dynamic date
+  const fileName = `Seeds CMH5 - ${currentDate}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+};
 
 

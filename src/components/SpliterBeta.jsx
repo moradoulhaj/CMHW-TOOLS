@@ -12,7 +12,7 @@ import {
   splitSessionsByDrops,
 } from "../scripts/spliterScripts";
 
-export default function Spliter() {
+export default function SpliterBeta() {
   const [processedContents, setProcessedContents] = useState([]);
   const [tagsToSplit, setTagsToSplit] = useState("");
   const [sessionCount, setSessionCount] = useState("");
