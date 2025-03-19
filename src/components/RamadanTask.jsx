@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import JSZip from "jszip";
 
 import FileList from "./smalls/FilesList";
-import { Download, RotateCcw, Trash2, Upload } from "lucide-react";
+import { Download, Plus, RotateCcw, Trash2, Upload } from "lucide-react";
 
 import TagsInput from "./smalls/TagsInput";
 import { saveAs } from "file-saver";
@@ -16,13 +16,12 @@ import {
   parseNumberTagPairs,
 } from "../scripts/spliterScripts";
 import { processData, processExcelFiles } from "../scripts/ramadanTask";
+import EntitySelector from "./smalls/EntitySelector";
 
 export default function RamadanTask() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedContents, setProcessedContents] = useState([]);
   const [tagsToAdd, setTagsToAdd] = useState("");
-  const [seedsBySessions, setSeedsBySessions] = useState("");
-  const [sessionCount, setSessionCount] = useState();
   const [isDragging, setIsDragging] = useState(false);
   const oldFileInputRef = useRef(null);
   const [entityName, setEntityName] = useState("");
@@ -40,6 +39,9 @@ export default function RamadanTask() {
     } else if (!oldFiles.length) {
       toast.error("Please upload files.");
       return;
+    } else if (entityName === "") {
+      toast.error("Name your entity.");
+      return;
     }
 
     // Taking the first line of the input
@@ -47,7 +49,6 @@ export default function RamadanTask() {
 
     // then passing the first line to return the number of sessions
     const sessionsNumber = calcSessions(firstLine) - 0.5;
-    setSessionCount(sessionsNumber);
 
     if (sessionsNumber === 0) {
       toast.error("No sessions");
@@ -63,7 +64,6 @@ export default function RamadanTask() {
     const lines = onlyTags.split("\n").map((line) => parseNumberTagPairs(line));
 
     const collectedData = await collectData(lines, sessionsNumber);
-    setSeedsBySessions(collectedData);
 
     if (collectedData === "wrongInput") {
       return;
@@ -114,7 +114,7 @@ export default function RamadanTask() {
     >
       <ToastContainer theme="colored" />
       <h2 className="text-4xl font-extrabold text-blue-800 drop-shadow-lg">
-        ADD LOGIN OF THE NEXT DAY
+        ADD LOGIN FOR THE NEXT DAY
       </h2>
 
       <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -148,18 +148,9 @@ export default function RamadanTask() {
           </button>
         </div>
       </div>
+      <EntitySelector entityName={entityName} setEntityName={setEntityName} placeholder="Entity number"/>
 
-      <div className="flex flex-col items-center mt-4">
-        <input
-          type="number"
-          name="entityName"
-          id="entityName"
-          value={entityName}
-          onChange={(e) => setEntityName(e.target.value)}
-          placeholder="Entity number"
-          required
-        />
-      </div>
+ 
 
       <div className="flex flex-col items-center mt-4 w-full max-w-lg">
         <TagsInput
@@ -187,13 +178,17 @@ export default function RamadanTask() {
       <div className="flex gap-6 mt-6">
         <button
           onClick={handleAddTags}
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium ${
-            processedContents.length ? "hidden" : ""
-          }`}
+          className={`flex items-center gap-2 px-6 py-3 
+    bg-gradient-to-r from-blue-500 to-blue-600 text-white 
+    rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 
+    transition-all duration-200 font-medium ${
+      processedContents.length ? "hidden" : ""
+    }`}
         >
-          <Trash2 className="w-5 h-5" />
+          <Plus className="w-5 h-5" />
           Add Task
         </button>
+
         <button
           className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
             !processedContents.length ? "hidden" : ""

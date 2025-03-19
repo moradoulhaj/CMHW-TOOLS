@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef ,useEffect} from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmModal from "./smalls/ConfirmModal";
@@ -11,6 +11,7 @@ import {
   downloadProcessedContent,
   readFileContent,
 } from "../scripts/scripts";
+import EntitySelector from "./smalls/EntitySelector";
 
 export default function RemoveSessions() {
   const [oldFiles, setOldFiles] = useState([]);
@@ -21,6 +22,7 @@ export default function RemoveSessions() {
   const [separator, setSeparator] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const oldFileInputRef = useRef(null);
+  const [entityName, setEntityName] = useState("");
   const HandleReset = () => {
     setOldFiles([]);
     setProcessedContents([]);
@@ -29,7 +31,9 @@ export default function RemoveSessions() {
     setIsModalOpen(false);
     setSeparator("");
   };
-
+  useEffect(() => {
+    console.log(entityName);
+  }, [entityName]);
   const handleRemoveTags = async () => {
     if (!tagsToRemove) {
       toast.error("Please specify tags to remove.");
@@ -155,14 +159,21 @@ export default function RemoveSessions() {
           </button>
         </div>
       </div>
-
-      <div className="flex flex-col items-center mt-4">
-        <DelimiterSelector
-          delimiter={delimiter}
-          setDelimiter={setDelimiter}
-          setProcessedContents={setProcessedContents}
-          name={"normal"}
-        />
+      <div className="flex justify-center items-center gap-4 mt-4">
+        <div className="flex flex-col items-center mt-4">
+          <DelimiterSelector
+            delimiter={delimiter}
+            setDelimiter={setDelimiter}
+            setProcessedContents={setProcessedContents}
+            name={"normal"}
+          />
+        </div>
+        <div className="flex flex-col items-center mt-4">
+          <EntitySelector
+            entityName={entityName}
+            setEntityName={setEntityName}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col items-center mt-4 w-full max-w-lg">
@@ -203,8 +214,9 @@ export default function RemoveSessions() {
             !processedContents.length ? "hidden" : ""
           }`}
           onClick={() => {
-            downloadProcessedContent(processedContents);
+            downloadProcessedContent(processedContents,null, entityName);
           }}
+          
           disabled={!processedContents.length}
         >
           <Download className="w-5 h-5" />

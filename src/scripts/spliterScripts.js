@@ -140,63 +140,59 @@ import JSZip from "jszip";
 import { toast } from "react-toastify";
 
 export const downloadZip = async (seedsBySessionPerDrop, delimiter) => {
-  // Normalize delimiter: convert "\\n" to actual newline
   if (delimiter === "\\n") {
     delimiter = "\n";
   }
-  // Initialize an array to hold tags for each drop across all sessions
-  const combinedDrops = [];
-  const zip = new JSZip();
 
-  // Iterate through all sessions and their drops
+  const zip = new JSZip();
+  const combinedDrops = [];
+
   seedsBySessionPerDrop.forEach((session) => {
     session.forEach((drop, dropIndex) => {
-      // If the drop index doesn't exist in combinedDrops, initialize it as an empty array
       if (!combinedDrops[dropIndex]) {
         combinedDrops[dropIndex] = [];
       }
-
-      // Push the tags of the current drop from the current session into the combinedDrops array
       const dropTags = drop.map(([_, tag]) => tag);
       combinedDrops[dropIndex].push(...dropTags);
     });
   });
-  // Create a file for each drop
+
+  // Add text files
   combinedDrops.forEach((tags, dropIndex) => {
-    const fileName = `file_${dropIndex + 1}.txt`; // file_x where x is the 1-based drop index
-    const fileContent = tags.join(delimiter); // Join tags with newlines
-    zip.file(fileName, fileContent); // Add the file to the zip
+    const fileName = `file_${dropIndex + 1}.txt`;
+    const fileContent = tags.join(delimiter);
+    zip.file(fileName, fileContent);
   });
 
-  // Generate and trigger download
-  const blob = await zip.generateAsync({ type: "blob" });
-  const url = URL.createObjectURL(blob);
+  // ✅ Add the same Excel file to ZIP
+  const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
+  zip.file("sessions_data.xlsx", excelBlob);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "drops.zip";
-  a.click();
-
-  // Clean up
-  URL.revokeObjectURL(url);
+  // ✅ Generate ZIP and trigger download
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  saveAs(zipBlob, "drops.zip");
 };
 
 export const generateExcel = (seedsBySessionPerDrop) => {
+  const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
+  saveAs(excelBlob, "sessions_data.xlsx");
+};
+
+
+export const generateExcelBlob = (seedsBySessionPerDrop) => {
   const worksheetData = [];
-  const profileSheetData = []; // Data for the second sheet
+  const profileSheetData = [];
+  const headerRow = ["Drop"];
 
   // Prepare headers for each session
-  const headerRow = ["Drop"]; // First column for drop labels
   seedsBySessionPerDrop.forEach((_, sessionIndex) => {
-    headerRow.push(`Session ${sessionIndex + 1}`, ""); // One column for profile, one for tag
+    headerRow.push(`Session ${sessionIndex + 1}`, ""); 
   });
   worksheetData.push(headerRow);
 
-  // To track merge ranges
+  // Track merges
   const merges = [];
-
-  // Loop through drops and sessions to structure data
-  let currentRow = 1; // Start after header row
+  let currentRow = 1;
   const maxDrops = Math.max(
     ...seedsBySessionPerDrop.map((session) => session.length)
   );
@@ -207,59 +203,56 @@ export const generateExcel = (seedsBySessionPerDrop) => {
     );
 
     if (maxPairsInDrop > 0) {
-      // Merge Drop label cell
       merges.push({
-        s: { r: currentRow, c: 0 }, // Start cell (row, column)
-        e: { r: currentRow + maxPairsInDrop - 1, c: 0 }, // End cell (row, column)
+        s: { r: currentRow, c: 0 },
+        e: { r: currentRow + maxPairsInDrop - 1, c: 0 },
       });
 
-      // Add data for each pair within the drop
       for (let pairIndex = 0; pairIndex < maxPairsInDrop; pairIndex++) {
-        const row = [pairIndex === 0 ? dropIndex + 1 : ""]; // Drop label only on the first row of the drop
+        const row = [pairIndex === 0 ? dropIndex + 1 : ""];
         seedsBySessionPerDrop.forEach((session) => {
           const pair = session[dropIndex]?.[pairIndex];
-          row.push(pair ? `${pair[0]}` : null, pair ? `${pair[1]}` : null); // Add profile and tag for the session
+          row.push(pair ? `${pair[0]}` : null, pair ? `${pair[1]}` : null);
         });
         worksheetData.push(row);
         currentRow++;
       }
 
-      // Add an empty row between drops for visual spacing
       worksheetData.push([]);
       currentRow++;
     }
 
-    // Create a row for the profiles sheet (drop level)
-    const profileRow = [dropIndex + 1]; // Drop number in the first column
+    // Create row for Profiles sheet
+    const profileRow = [dropIndex + 1];
     seedsBySessionPerDrop.forEach((session) => {
       const profiles =
         session[dropIndex]
-          ?.map((pair) => pair[0]) // Collect profile IDs
-          .join("|") || ""; // Join profiles with "|" or empty if none
+          ?.map((pair) => pair[0])
+          .join("|") || "";
       profileRow.push(profiles);
     });
     profileSheetData.push(profileRow);
   }
 
-  // Add headers to the profiles sheet
   const profileSheetHeader = ["Drop"];
   seedsBySessionPerDrop.forEach((_, sessionIndex) =>
     profileSheetHeader.push(`Session ${sessionIndex + 1}`)
   );
-  profileSheetData.unshift(profileSheetHeader); // Add header row to the top
+  profileSheetData.unshift(profileSheetHeader);
 
-  // Create worksheets
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-  worksheet["!merges"] = merges; // Apply merge settings
-
+  worksheet["!merges"] = merges;
   const profileSheet = XLSX.utils.aoa_to_sheet(profileSheetData);
 
-  // Create and save the workbook
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Sessions");
   XLSX.utils.book_append_sheet(workbook, profileSheet, "Profiles by Drop");
 
-  XLSX.writeFile(workbook, "sessions_data.xlsx");
+  // Convert to Blob for downloading or adding to ZIP
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  return new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
 };
 
 ////////////////////

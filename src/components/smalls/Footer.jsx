@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white py-6">
       <div className="container mx-auto flex flex-col items-center justify-center space-y-2">
-        <p className="text-sm">&copy; 2024 By Morad Oulhaj with the help of Merouan Bouchettoy, Ayoub Aharmouch And Omar Elmohamedy. All rights reserved.</p>
+        <p className="text-sm">&copy; 2024 By Morad Oulhaj with the help of Ayoub Aharmouch , Noureddine Charifi And Omar Elmohamedy. All rights reserved.</p>
         <div className="flex space-x-4">
           <a
             href="https://t.me/moulhaj"

@@ -21,7 +21,7 @@ export const detectSeparator = async (oldFiles) => {
   return "no_detect";
 };
 
-export const downloadProcessedContent = async (processedContents, excelBlob = null) => {
+export const downloadProcessedContent = async (processedContents, excelBlob = null , entityName = null) => {
   const zip = new JSZip();
 
   // Add the processed files to the zip
@@ -41,7 +41,7 @@ export const downloadProcessedContent = async (processedContents, excelBlob = nu
   // Create a link element to trigger the download
   const a = document.createElement("a");
   a.href = url;
-  a.download = "processed_files.zip";
+  a.download = `CMH${entityName}.zip`;
   a.click();
 
   // Clean up the URL object after download

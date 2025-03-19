@@ -63,7 +63,6 @@ export default function Spliter() {
     }
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
     setSeedsBySessionPerDrop(splitDataByDrops);
-    splitDataByDrops;
     toast.success("Split successfully");
     setProcessedContents(collectedData);
   };
