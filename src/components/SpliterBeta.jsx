@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RotateCcw, Settings } from "lucide-react";
@@ -12,6 +12,8 @@ import {
   parseNumberTagPairs,
   splitSessionsByDrops,
 } from "../scripts/spliterScripts";
+import axios from "axios";
+
 
 export default function SpliterBeta() {
   const [processedContents, setProcessedContents] = useState([]);
@@ -19,8 +21,36 @@ export default function SpliterBeta() {
   const [sessionCount, setSessionCount] = useState("");
   const [seedsBySessions, setSeedsBySessions] = useState([]);
   const [dropNumbers, setDropNumbers] = useState(1);
+  const [sessionNumber, setSessionNumber] = useState("\n");
+
   const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
   const [delimiter, setDelimiter] = useState("\n");
+  
+
+
+  useEffect(() => {
+    // Fetch data from the API using axios
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("https://193.24.209.182:8444/api/dep/9");
+        const data = response.data;
+        console.log(data)
+  
+        // Split the timedrops string into an array
+        const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
+        setDropNumbers(timedropsArray.length);
+  
+        // Set session number based on the length of the sessions array
+        const sessionsNumber = Array.isArray(data.sessions) ? data.sessions.length : 0;
+        setSessionNumber(sessionsNumber);
+      } catch (error) {
+        toast.error("Failed to fetch data from API!");
+        console.error("Error fetching data:", error);
+      }
+    };
+  
+    fetchData();
+  }, []); // Empty dependency array means this runs once when the component mounts
   
   // Modal Settings State
   const [modalSettings, setModalSettings] = useState({
@@ -66,6 +96,7 @@ export default function SpliterBeta() {
     setProcessedContents(collectedData);
     toast.success("Splitting successful!");
   };
+  
 
   return (
     <div className="flex flex-col items-center p-10 space-y-8 bg-gray-100 min-h-screen">
@@ -99,6 +130,16 @@ export default function SpliterBeta() {
             type="number"
             value={dropNumbers}
             onChange={(e) => setDropNumbers(e.target.value)}
+            className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
+          />
+        </div>
+        <div className="flex flex-col items-center">
+          <label htmlFor="sessionNumbers" className="text-gray-700 font-medium">Drop Numbers</label>
+          <input
+            id="sessionNumbers"
+            type="number"
+            value={sessionNumber}
+            onChange={(e) => setSessionNumber(e.target.value)}
             className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
           />
         </div>
