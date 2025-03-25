@@ -1,9 +1,8 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RotateCcw, Settings } from "lucide-react";
 import TagsInput from "./smalls/TagsInput";
-import SpliterModal from "./smalls/SpliterModal";
 import {
   calcSessions,
   collectData,
@@ -12,46 +11,73 @@ import {
   parseNumberTagPairs,
   splitSessionsByDrops,
 } from "../scripts/spliterScripts";
-import axios from "axios";
-
+import { fetchEntityId } from "../api/apiService"; // Import API function
+import SpliterSettingsModal from "./SpliterComponents/SpliterSettingsModal";
+import SessionModal from "./SpliterComponents/SessionModal";
+import TimeDropsModal from "./SpliterComponents/TimeDropsModal";
 
 export default function SpliterBeta() {
   const [processedContents, setProcessedContents] = useState([]);
   const [tagsToSplit, setTagsToSplit] = useState("");
   const [sessionCount, setSessionCount] = useState("");
   const [seedsBySessions, setSeedsBySessions] = useState([]);
-  const [dropNumbers, setDropNumbers] = useState(1);
-  const [sessionNumber, setSessionNumber] = useState("\n");
+  const [timeDrops, setTimeDrops] = useState([]);
+  const [sessionNumber, setSessionNumber] = useState(0);
+  const [selectedEntity, setSelectedEntity] = useState("CMH1");
 
   const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
   const [delimiter, setDelimiter] = useState("\n");
-  
-
+  const [sessionData, setSessionData] = useState([]);
+  const [isSessionModalOpen, setSessionModalOpen] = useState(false); // Modal state
+  const [isTimeDropsModalOpen, setIsTimeDropsModalOpen] = useState(false); // Modal state
 
   useEffect(() => {
-    // Fetch data from the API using axios
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://193.24.209.182:8444/api/dep/9");
-        const data = response.data;
-        console.log(data)
-  
-        // Split the timedrops string into an array
+        const entityId = selectedEntity.replace("CMH", ""); // Extract number
+        const data = await fetchEntityId(entityId);
+
+        console.log("Fetched Data:", data);
+      
+
         const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
-        setDropNumbers(timedropsArray.length);
-  
-        // Set session number based on the length of the sessions array
-        const sessionsNumber = Array.isArray(data.sessions) ? data.sessions.length : 0;
+        setTimeDrops(timedropsArray);
+
+        const sessionsNumber = Array.isArray(data.sessions)
+          ? data.sessions.length
+          : 0;
         setSessionNumber(sessionsNumber);
+
+        // Store session data in the state
+        setSessionData(data.sessions || []);
       } catch (error) {
         toast.error("Failed to fetch data from API!");
         console.error("Error fetching data:", error);
+
       }
     };
-  
+
     fetchData();
-  }, []); // Empty dependency array means this runs once when the component mounts
+  }, [selectedEntity]);
+
+  // Handle opening the modal when clicking "Session Numbers"
+  const handleSessionClick = () => {
+    if (sessionData.length === 0) {
+      toast.error("No session data available!");
+      return;
+    }
+    setSessionModalOpen(true);
+  };
+  // Handle opening the modal when clicking "Time Drops"
+  const handleTimeDropsClick = () => {
+    if (timeDrops.length === 0) {
+      toast.error("No TimeDrops data available!");
+      return;
+    }
+    setIsTimeDropsModalOpen(true);
+  };
   
+
   // Modal Settings State
   const [modalSettings, setModalSettings] = useState({
     isOpen: false,
@@ -96,7 +122,6 @@ export default function SpliterBeta() {
     setProcessedContents(collectedData);
     toast.success("Splitting successful!");
   };
-  
 
   return (
     <div className="flex flex-col items-center p-10 space-y-8 bg-gray-100 min-h-screen">
@@ -104,10 +129,14 @@ export default function SpliterBeta() {
 
       {/* Header */}
       <div className="w-full max-w-4xl flex justify-between items-center bg-blue-500 p-4 rounded-lg shadow-lg">
-        <h2 className="text-4xl font-bold text-white drop-shadow-md">Spliter</h2>
+        <h2 className="text-4xl font-bold text-white drop-shadow-md">
+          Spliter
+        </h2>
         <div className="flex gap-4">
           <button
-            onClick={() => setModalSettings((prev) => ({ ...prev, isOpen: true }))}
+            onClick={() =>
+              setModalSettings((prev) => ({ ...prev, isOpen: true }))
+            }
             className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg shadow-md transition-transform transform hover:scale-105 active:scale-95"
           >
             <Settings className="w-5 h-5" /> Settings
@@ -121,25 +150,50 @@ export default function SpliterBeta() {
         </div>
       </div>
 
+      {/* Entity Selection Dropdown */}
+      <div className="flex flex-col items-center">
+        <label htmlFor="entitySelect" className="text-gray-700 font-medium">
+          Select Entity
+        </label>
+        <select
+          id="entitySelect"
+          value={selectedEntity}
+          onChange={(e) => setSelectedEntity(e.target.value)}
+          className="w-40 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
+        >
+          {[...Array(16)].map((_, i) => (
+            <option key={i} value={`CMH${i + 1}`}>
+              CMH{i + 1}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Input Fields */}
       <div className="flex flex-wrap justify-center gap-6 w-full max-w-3xl">
         <div className="flex flex-col items-center">
-          <label htmlFor="dropNumbers" className="text-gray-700 font-medium">Drop Numbers</label>
+          <label htmlFor="dropNumbers" className="text-gray-700 font-medium">
+            Drop Numbers
+          </label>
           <input
             id="dropNumbers"
             type="number"
-            value={dropNumbers}
-            onChange={(e) => setDropNumbers(e.target.value)}
+            value={timeDrops.length}
+            onClick={handleTimeDropsClick} // Open modal on click
+            readOnly
             className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
           />
         </div>
         <div className="flex flex-col items-center">
-          <label htmlFor="sessionNumbers" className="text-gray-700 font-medium">Drop Numbers</label>
+          <label htmlFor="sessionNumbers" className="text-gray-700 font-medium">
+            Session In Repo
+          </label>
           <input
             id="sessionNumbers"
             type="number"
             value={sessionNumber}
-            onChange={(e) => setSessionNumber(e.target.value)}
+            onClick={handleSessionClick} // Open modal on click
+            readOnly
             className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
           />
         </div>
@@ -180,8 +234,20 @@ export default function SpliterBeta() {
         )}
       </div>
 
-      {/* Spliter Modal */}
-      <SpliterModal modalSettings={modalSettings} setModalSettings={setModalSettings} />
+      {/* Spliter Settings Modal */}
+      <SpliterSettingsModal
+        modalSettings={modalSettings}
+        setModalSettings={setModalSettings}
+      />
+
+      {/* Session Modal */}
+      <SessionModal
+        isOpen={isSessionModalOpen}
+        onClose={() => setSessionModalOpen(false)}
+        sessionData={sessionData} 
+      />
+
+      <TimeDropsModal isOpen={isTimeDropsModalOpen} onClose={() => setIsTimeDropsModalOpen(false)}  timeDrops ={timeDrops} setTimeDrops={setTimeDrops} entityName={selectedEntity}/>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import RamadanTask from "./components/RamadanTask";
 import CleanChecker from "./components/CleanChecker";
 import { AlignJustify } from "lucide-react"; // Importing the menu icon
 import SpliterBeta from "./components/SpliterBeta";
+import UpdateTask from "./components/UpdateTask";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,6 +47,8 @@ export default function App() {
               <Route path="/ramadanTask" element={<RamadanTask />} />
               <Route path="/cleanChecker" element={<CleanChecker />} />
               <Route path="/spliterBeta" element={<SpliterBeta />} />
+              <Route path="/updateTask" element={<UpdateTask />} />
+
 
               <Route path="*" element={<LogChecker />} />
             </Routes>

@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-export default function SpliterModal({ modalSettings, setModalSettings }) {
+export default function SpliterSettingsModal({ modalSettings, setModalSettings }) {
   const {
     isOpen,
     useFixedQuantity,
