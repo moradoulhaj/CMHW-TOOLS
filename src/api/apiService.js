@@ -43,3 +43,14 @@ export const updateEntity = async (entityId , entityInfos) => {
     throw error;
   }
 };
+// Fetch sessions by ID entity
+
+export const fetchSessions = async (entityId ) => {
+  try {
+    const response = await axiosInstance.get(`/session/getByDepId/${entityId}`); 
+    return response.data;
+  } catch (error) {
+    console.error("Error updating session statuses:", error);
+    throw error;
+  }
+};

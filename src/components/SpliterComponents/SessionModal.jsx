@@ -2,16 +2,24 @@ import React, { useState } from "react";
 import { updateSessionStatuses } from "../../api/apiService";
 import { toast } from "react-toastify";
 
-const SessionModal = ({ isOpen, onClose, sessionData }) => {
+const SessionModal = ({ isOpen, setSessionModalOpen, sessionData }) => {
   if (!isOpen) return null;
 
   const [updatedSessions, setUpdatedSessions] = useState(sessionData);
+  const [isSessionsUpdated, setIsSessionsUpdated] = useState(false);
+  // Handling the Close modal if no change made
+  const HandleModalClose = () => {
+    setUpdatedSessions(sessionData);
+    setSessionModalOpen(false);
+    
+  };
 
   // Handle status change for each session
   const handleStatusChange = (index) => {
     const newSessions = [...updatedSessions];
     newSessions[index].isActive = !newSessions[index].isActive;
     setUpdatedSessions(newSessions);
+    setIsSessionsUpdated(true);
   };
 
   // Handle Save Changes
@@ -25,7 +33,8 @@ const SessionModal = ({ isOpen, onClose, sessionData }) => {
       await updateSessionStatuses(sessionsToUpdate);
       toast.success("Session statuses updated successfully!");
 
-      onClose(); // Close modal after saving changes
+      setSessionModalOpen(false);
+      // Close modal after saving changes
     } catch (error) {
       console.error("Error updating session statuses:", error);
       toast.error("Failed to update session statuses.");
@@ -37,7 +46,7 @@ const SessionModal = ({ isOpen, onClose, sessionData }) => {
       <div className="relative bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-3xl">
         {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={HandleModalClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition duration-200"
         >
           &times;
@@ -110,17 +119,19 @@ const SessionModal = ({ isOpen, onClose, sessionData }) => {
         {/* Action Buttons */}
         <div className="flex justify-end gap-4 mt-6">
           <button
-            onClick={onClose}
+            onClick={HandleModalClose}
             className="px-6 py-2 text-lg font-semibold bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition duration-200"
           >
             Close
           </button>
-          <button
-            onClick={handleSaveChanges}
-            className="px-6 py-2 text-lg font-semibold bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
-          >
-            Save Changes
-          </button>
+          {isSessionsUpdated && (
+            <button
+              onClick={handleSaveChanges}
+              className="px-6 py-2 text-lg font-semibold bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+            >
+              Save Changes
+            </button>
+          )}
         </div>
       </div>
     </div>

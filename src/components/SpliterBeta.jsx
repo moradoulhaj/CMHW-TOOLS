@@ -15,6 +15,7 @@ import { fetchEntityId } from "../api/apiService"; // Import API function
 import SpliterSettingsModal from "./SpliterComponents/SpliterSettingsModal";
 import SessionModal from "./SpliterComponents/SessionModal";
 import TimeDropsModal from "./SpliterComponents/TimeDropsModal";
+import NextDayModal from "./SpliterComponents/NextDayModal";
 
 export default function SpliterBeta() {
   const [processedContents, setProcessedContents] = useState([]);
@@ -28,9 +29,22 @@ export default function SpliterBeta() {
   const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
   const [delimiter, setDelimiter] = useState("\n");
   const [sessionData, setSessionData] = useState([]);
-  const [isSessionModalOpen, setSessionModalOpen] = useState(false); // Modal state
-  const [isTimeDropsModalOpen, setIsTimeDropsModalOpen] = useState(false); // Modal state
+  const [nextDaySeeds, setNextDaySeeds] = useState([]);
 
+  // Modal states
+  const [isSessionModalOpen, setSessionModalOpen] = useState(false); // Modal state
+
+  const [isNextDayModalOpen, setIsNextDayModalOpen] = useState(false); // Modal state
+  const [isTimeDropsModalOpen, setIsTimeDropsModalOpen] = useState(false); // Modal state
+  // Modal Settings State
+  const [modalSettings, setModalSettings] = useState({
+    isOpen: false,
+    useFixedQuantity: false,
+    fixedQuantity: "",
+    shuffle: false,
+    fastKill: false,
+    loginNextDay: false,
+  });
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -38,27 +52,27 @@ export default function SpliterBeta() {
         const data = await fetchEntityId(entityId);
 
         console.log("Fetched Data:", data);
-      
 
         const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
         setTimeDrops(timedropsArray);
 
-        const sessionsNumber = Array.isArray(data.sessions)
-          ? data.sessions.length
+        // Count only active sessions
+        const activeSessionsCount = data.sessions
+          ? data.sessions.filter((session) => session.isActive).length
           : 0;
-        setSessionNumber(sessionsNumber);
+
+        setSessionNumber(activeSessionsCount); // Store only active count
 
         // Store session data in the state
         setSessionData(data.sessions || []);
       } catch (error) {
         toast.error("Failed to fetch data from API!");
         console.error("Error fetching data:", error);
-
       }
     };
 
     fetchData();
-  }, [selectedEntity]);
+  }, [selectedEntity, isSessionModalOpen]);
 
   // Handle opening the modal when clicking "Session Numbers"
   const handleSessionClick = () => {
@@ -76,51 +90,59 @@ export default function SpliterBeta() {
     }
     setIsTimeDropsModalOpen(true);
   };
-  
-
-  // Modal Settings State
-  const [modalSettings, setModalSettings] = useState({
-    isOpen: false,
-    useFixedQuantity: false,
-    fixedQuantity: "",
-    shuffle: false,
-    fastKill: false,
-    loginNextDay: false,
-  });
+  // Handle opening the modal when clicking "Next Day Seeds"
+  const HandleNextDaySeeds = () => {
+    setIsNextDayModalOpen(true);
+  };
 
   const handleReset = () => {
     setProcessedContents([]);
     setTagsToSplit("");
-    setSessionCount("");
-    setSeedsBySessions([]);
-    setSeedsBySessionPerDrop([]);
-    setDropNumbers(1);
   };
 
+  const handleSplitClick = () => {
+    setModalSettings((prev) => ({ ...prev, isOpen: true }));
+  };
+
+  // Here the split log
   const handleSplit = async () => {
-    if (!tagsToSplit) {
-      toast.error("No tags provided!");
+    // if no tag area is empty
+    if (tagsToSplit === "") {
+      toast.error("No tags");
       return;
     }
-
+    //Taking the first line of the input
     const firstLine = tagsToSplit.split("\n")[0];
+    // then passung the first line to return the number of sessions
     const sessionsNumber = calcSessions(firstLine);
     setSessionCount(sessionsNumber);
 
-    if (!sessionsNumber) {
-      toast.error("No valid sessions detected!");
+    if (sessionsNumber === 0) {
+      toast.error("No sessions");
+      return;
+    } else if (sessionsNumber != sessionNumber) {
+      toast.error("Session count mismatch");
       return;
     }
+    const lines = tagsToSplit
+      .split("\n")
+      .map((line) => parseNumberTagPairs(line));
 
-    const lines = tagsToSplit.split("\n").map(parseNumberTagPairs);
     const collectedData = await collectData(lines, sessionsNumber);
-
-    if (collectedData === "wrongInput") return;
-
+    
     setSeedsBySessions(collectedData);
-    setSeedsBySessionPerDrop(splitSessionsByDrops(collectedData, dropNumbers));
+    if (collectedData === "wrongIinput") {
+      return;
+    }
+    
+    
+    
+    const splitDataByDrops = splitSessionsByDrops(collectedData, timeDrops.length,modalSettings.useFixedQuantity,modalSettings.fixedQuantity);
+    console.log(splitDataByDrops);
+
+    setSeedsBySessionPerDrop(splitDataByDrops);
+    toast.success("Split successfully");
     setProcessedContents(collectedData);
-    toast.success("Splitting successful!");
   };
 
   return (
@@ -134,12 +156,10 @@ export default function SpliterBeta() {
         </h2>
         <div className="flex gap-4">
           <button
-            onClick={() =>
-              setModalSettings((prev) => ({ ...prev, isOpen: true }))
-            }
+            onClick={HandleNextDaySeeds}
             className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg shadow-md transition-transform transform hover:scale-105 active:scale-95"
           >
-            <Settings className="w-5 h-5" /> Settings
+            <Settings className="w-5 h-5" /> Next Day Seeds
           </button>
           <button
             onClick={handleReset}
@@ -209,45 +229,41 @@ export default function SpliterBeta() {
 
       {/* Buttons */}
       <div className="flex gap-6 mt-6">
-        {!processedContents.length ? (
-          <button
-            onClick={handleSplit}
-            className="px-8 py-3 text-lg font-semibold bg-purple-600 text-white rounded-lg shadow-md transition-all hover:bg-purple-700 hover:shadow-lg active:scale-95"
-          >
-            Split
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={() => generateExcel(seedsBySessionPerDrop)}
-              className="px-8 py-3 text-lg font-semibold bg-green-600 text-white rounded-lg shadow-md transition-all hover:bg-green-700 hover:shadow-lg active:scale-95"
-            >
-              Download Excel
-            </button>
-            <button
-              onClick={() => downloadZip(seedsBySessionPerDrop, delimiter)}
-              className="px-8 py-3 text-lg font-semibold bg-red-600 text-white rounded-lg shadow-md transition-all hover:bg-red-700 hover:shadow-lg active:scale-95"
-            >
-              Download Zip
-            </button>
-          </>
-        )}
+        <button
+          onClick={handleSplitClick}
+          className="px-8 py-3 text-lg font-semibold bg-purple-600 text-white rounded-lg shadow-md transition-all hover:bg-purple-700 hover:shadow-lg active:scale-95"
+        >
+          Split
+        </button>
       </div>
 
       {/* Spliter Settings Modal */}
       <SpliterSettingsModal
         modalSettings={modalSettings}
         setModalSettings={setModalSettings}
+        onApply={handleSplit}
       />
 
       {/* Session Modal */}
       <SessionModal
         isOpen={isSessionModalOpen}
-        onClose={() => setSessionModalOpen(false)}
-        sessionData={sessionData} 
+        setSessionModalOpen={setSessionModalOpen}
+        sessionData={sessionData}
+      />
+      <TimeDropsModal
+        isOpen={isTimeDropsModalOpen}
+        onClose={() => setIsTimeDropsModalOpen(false)}
+        timeDrops={timeDrops}
+        setTimeDrops={setTimeDrops}
+        entityName={selectedEntity}
       />
 
-      <TimeDropsModal isOpen={isTimeDropsModalOpen} onClose={() => setIsTimeDropsModalOpen(false)}  timeDrops ={timeDrops} setTimeDrops={setTimeDrops} entityName={selectedEntity}/>
+      <NextDayModal
+        isOpen={isNextDayModalOpen}
+        onClose={() => setIsNextDayModalOpen(false)}
+        nextDaySeeds={nextDaySeeds}
+        setNextDaySeeds={setNextDaySeeds}
+      />
     </div>
   );
 }

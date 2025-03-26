@@ -1,7 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-export default function SpliterSettingsModal({ modalSettings, setModalSettings }) {
+export default function SpliterSettingsModal({
+  modalSettings,
+  setModalSettings,
+  onApply,
+}) {
   const {
     isOpen,
     useFixedQuantity,
@@ -108,7 +112,10 @@ export default function SpliterSettingsModal({ modalSettings, setModalSettings }
             Cancel
           </button>
           <button
-            onClick={() => updateSetting("isOpen", false)}
+            onClick={() => {
+              updateSetting("isOpen", false);
+              onApply(); // Call handleSplit when Apply is clicked
+            }}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Apply

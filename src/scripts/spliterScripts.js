@@ -54,25 +54,47 @@ export const collectData = (lines, sessionsNumber) => {
 };
 
 // Function to split each session's pairs into chunks based on dropNumbers
-export const splitSessionsByDrops = (collectedData, dropNumbers) => {
+export const splitSessionsByDrops = (collectedData, dropNumbers, usingFixedQuantity, Quantity) => {
+  // Step 1: Calculate total number of profiles (seeds) across all sessions
+  const totalSeeds = collectedData.reduce((acc, session) => acc + session.length, 0);
+
   return collectedData.map((session) => {
-    const chunks = [];
-    const seedsPerDropForSession = Math.floor(session.length / dropNumbers);
-    let remainder = session.length % dropNumbers; // Remaining seeds after even split
+    const chunks = Array.from({ length: dropNumbers }, () => []);
 
-    let start = 0;
+    if (usingFixedQuantity) {
+      // Step 2: Compute each session's contribution based on proportion
+      const sessionProportion = (session.length / totalSeeds) * Quantity;
+      const seedsPerDrop = Math.floor(sessionProportion / dropNumbers);
+      let remainder = Math.round(sessionProportion % dropNumbers); // Distribute leftovers
 
-    // Distribute seeds across drops
-    for (let i = 0; i < dropNumbers; i++) {
-      let end = start + seedsPerDropForSession + (remainder > 0 ? 1 : 0);
-      chunks.push(session.slice(start, end));
-      start = end;
-      if (remainder > 0) remainder--; // Use up the remainder
+      let index = 0;
+      for (let i = 0; i < session.length; i++) {
+        chunks[index].push(session[i]);
+        index = (index + 1) % dropNumbers;
+      }
+
+      // Step 3: Push remaining seeds into the last drop
+      while (session.length > chunks.flat().length) {
+        chunks[dropNumbers - 1].push(session[chunks.flat().length]);
+      }
+    } else {
+      // Even Distribution (Default)
+      const seedsPerDrop = Math.floor(session.length / dropNumbers);
+      let remainder = session.length % dropNumbers;
+      let start = 0;
+
+      for (let i = 0; i < dropNumbers; i++) {
+        let end = start + seedsPerDrop + (remainder > 0 ? 1 : 0);
+        chunks[i] = session.slice(start, end);
+        start = end;
+        if (remainder > 0) remainder--;
+      }
     }
 
     return chunks;
   });
 };
+
 
 // Function to generate Excel file from session data
 import * as XLSX from "xlsx";
