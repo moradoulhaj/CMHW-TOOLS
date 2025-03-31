@@ -54,47 +54,56 @@ export const collectData = (lines, sessionsNumber) => {
 };
 
 // Function to split each session's pairs into chunks based on dropNumbers
-export const splitSessionsByDrops = (collectedData, dropNumbers, usingFixedQuantity, Quantity) => {
-  // Step 1: Calculate total number of profiles (seeds) across all sessions
-  const totalSeeds = collectedData.reduce((acc, session) => acc + session.length, 0);
-
-  return collectedData.map((session) => {
-    const chunks = Array.from({ length: dropNumbers }, () => []);
-
-    if (usingFixedQuantity) {
-      // Step 2: Compute each session's contribution based on proportion
-      const sessionProportion = (session.length / totalSeeds) * Quantity;
-      const seedsPerDrop = Math.floor(sessionProportion / dropNumbers);
-      let remainder = Math.round(sessionProportion % dropNumbers); // Distribute leftovers
-
-      let index = 0;
-      for (let i = 0; i < session.length; i++) {
-        chunks[index].push(session[i]);
-        index = (index + 1) % dropNumbers;
-      }
-
-      // Step 3: Push remaining seeds into the last drop
-      while (session.length > chunks.flat().length) {
-        chunks[dropNumbers - 1].push(session[chunks.flat().length]);
-      }
-    } else {
-      // Even Distribution (Default)
-      const seedsPerDrop = Math.floor(session.length / dropNumbers);
-      let remainder = session.length % dropNumbers;
+export const splitSessionsByDrops = (
+  collectedData,
+  dropNumbers,
+  usingFixedQuantity,
+  Quantity
+) => {
+  if (!usingFixedQuantity) {
+    return collectedData.map((session) => {
+      const chunks = Array.from({ length: dropNumbers }, () => []); // Create empty arrays for each drop
+      const seedsPerDropForSession = Math.floor(session.length / dropNumbers);
+      let remainder = session.length % dropNumbers; // Calculate the remaining seeds
       let start = 0;
 
       for (let i = 0; i < dropNumbers; i++) {
-        let end = start + seedsPerDrop + (remainder > 0 ? 1 : 0);
+        let extraSeed = remainder > 0 ? 1 : 0; // Distribute remainder
+        let end = start + seedsPerDropForSession + extraSeed;
         chunks[i] = session.slice(start, end);
         start = end;
-        if (remainder > 0) remainder--;
+        remainder--;
       }
+
+      return chunks;
+    });
+  }
+
+  // Total seeds across all sessions
+  const totalSeeds = collectedData.reduce(
+    (acc, session) => acc + session.length,
+    0
+  );
+
+  return collectedData.map((session, sessionIndex) => {
+    const sessionProportion = Math.round(
+      (session.length / totalSeeds) * Quantity
+    );
+
+    const chunks = [];
+    let start = 0;
+
+    for (let i = 0; i < dropNumbers - 1; i++) {
+      let end = start + sessionProportion;
+      chunks.push(session.slice(start, end));
+      start = end;
     }
 
+    // Push remaining seeds to the last drop
+    chunks.push(session.slice(start));
     return chunks;
   });
 };
-
 
 // Function to generate Excel file from session data
 import * as XLSX from "xlsx";
@@ -160,46 +169,114 @@ export const generateExceel = (seedsBySessionPerDrop) => {
 
 import JSZip from "jszip";
 import { toast } from "react-toastify";
+import { processData } from "./ramadanTask";
 
-export const downloadZip = async (seedsBySessionPerDrop, delimiter) => {
+export const downloadZip = async (
+  seedsBySessionPerDrop,
+  delimiter,
+  entityName,
+  dropTimes,
+  sessions,
+  fastKill,
+  loginNextDay,
+  nextDaySeeds
+) => {
   if (delimiter === "\\n") {
     delimiter = "\n";
+  } else if (delimiter === ";") {
+    delimiter = ";";
+  }
+
+  // ✅ Now some logic for next Day
+  if (loginNextDay) {
+    const firstLine = nextDaySeeds.split("\n")[0];
+    const sessionsNumber = calcSessions(firstLine) - 0.5;
+
+    if (sessionsNumber === 0) {
+      toast.error("No sessions");
+      return;
+    } else if (seedsBySessionPerDrop.length !== sessionsNumber) {
+      toast.error("Number of sessions in Current day and Next one mismatch");
+      return;
+    }
+
+    var { nextDay, onlyTags } = processData(nextDaySeeds);
+    const lines = onlyTags.split("\n").map((line) => parseNumberTagPairs(line));
+    var collectedData = await collectData(lines, sessionsNumber);
+    if (collectedData === "wrongInput") {
+      return;
+    }
   }
 
   const zip = new JSZip();
   const combinedDrops = [];
 
-  seedsBySessionPerDrop.forEach((session) => {
-    session.forEach((drop, dropIndex) => {
+  seedsBySessionPerDrop.forEach((sessionDrops, sessionIndex) => {
+    const session = sessions[sessionIndex];
+    sessionDrops.forEach((drop, dropIndex) => {
       if (!combinedDrops[dropIndex]) {
         combinedDrops[dropIndex] = [];
       }
       const dropTags = drop.map(([_, tag]) => tag);
       combinedDrops[dropIndex].push(...dropTags);
     });
+
+    // ✅ Store Excel files inside the "Excels" folder
+    generateSchedule(
+      sessionDrops,
+      dropTimes,
+      session.username,
+      session.config,
+      session.script,
+      fastKill,
+      loginNextDay,
+      loginNextDay ? collectedData[sessionIndex] : []
+    )
+      .then((excelBlob) => {
+        zip.file(`Excels/${session.name}.xlsx`, excelBlob);
+      })
+      .catch((error) =>
+        console.error(
+          "Error generating Excel for session:",
+          session.name,
+          error
+        )
+      );
   });
 
-  // Add text files
+  // ✅ Add text files for each drop
   combinedDrops.forEach((tags, dropIndex) => {
     const fileName = `file_${dropIndex + 1}.txt`;
     const fileContent = tags.join(delimiter);
     zip.file(fileName, fileContent);
   });
 
-  // ✅ Add the same Excel file to ZIP
+  // ✅ Store the main Excel file inside "Excels" folder
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
-  zip.file("sessions_data.xlsx", excelBlob);
+  zip.file(`Excels/${entityName}.xlsx`, excelBlob);
 
-  // ✅ Generate ZIP and trigger download
-  const zipBlob = await zip.generateAsync({ type: "blob" });
-  saveAs(zipBlob, "drops.zip");
+  setTimeout(async () => {
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    let today = new Date();
+    let formattedDate = `${String(today.getDate()).padStart(2, "0")}/${String(
+      today.getMonth() + 1
+    ).padStart(2, "0" )}-${String(today.getHours()).padStart(2, "0")}-${String(
+      today.getMinutes()
+    ).padStart(2, "0")}`;
+
+    if (loginNextDay) {
+      formattedDate += `-WithLogin${nextDay}`;
+    }
+
+    saveAs(zipBlob, `${entityName}-${formattedDate}.zip`);
+  }, 1000); // Small delay to ensure Excel files are added
 };
+
 
 export const generateExcel = (seedsBySessionPerDrop) => {
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
   saveAs(excelBlob, "sessions_data.xlsx");
 };
-
 
 export const generateExcelBlob = (seedsBySessionPerDrop) => {
   const worksheetData = [];
@@ -208,7 +285,7 @@ export const generateExcelBlob = (seedsBySessionPerDrop) => {
 
   // Prepare headers for each session
   seedsBySessionPerDrop.forEach((_, sessionIndex) => {
-    headerRow.push(`Session ${sessionIndex + 1}`, ""); 
+    headerRow.push(`Session ${sessionIndex + 1}`, "");
   });
   worksheetData.push(headerRow);
 
@@ -248,9 +325,7 @@ export const generateExcelBlob = (seedsBySessionPerDrop) => {
     const profileRow = [dropIndex + 1];
     seedsBySessionPerDrop.forEach((session) => {
       const profiles =
-        session[dropIndex]
-          ?.map((pair) => pair[0])
-          .join("|") || "";
+        session[dropIndex]?.map((pair) => pair[0]).join("|") || "";
       profileRow.push(profiles);
     });
     profileSheetData.push(profileRow);
@@ -276,246 +351,111 @@ export const generateExcelBlob = (seedsBySessionPerDrop) => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 };
+export const generateSchedule = async (
+  profilesByDrop,
+  dropTimes, // Array of predefined times ['23:55', '00:05', '01:10']
+  sessionName,
+  configName,
+  scriptName,
+  fastKill,
+  loginNextDay,
+  nextDaySeeds
+) => {
+  try {
+    const response = await fetch("/CMHW-TOOLS/template.xlsx");
+    const arrayBuffer = await response.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 
-////////////////////
-// export const downloadShedule = (seedsBySessionPerDrop) => {
-//   generateScheduleExcelForSessions(seedsBySessionPerDrop, "https://raw.githubusercontent.com/moradoulhaj/API/refs/heads/main/configsCMHW.json")
-//   .then(files => {
-//     // Handle the generated files (e.g., offer them for download)
-//     files.forEach(file => {
-//       const link = document.createElement('a');
-//       link.href = URL.createObjectURL(file.blob);
-//       link.download = file.fileName;
-//       link.click();
-//     });
-//   })
-//   .catch(error => {
-//     console.error("Error generating schedule:", error);
-//   });
-// };
+    const today = new Date();
+    let rowIndex = 2; // Start from row 2
+    let lastDropDate = new Date(today);
+    let allProfiles = []; // Collect all profiles
 
-// //////////////////////////////////////////////////
-// // export const generateScheduleExcelForSessions = async (
-// //   seedsBySessionPerDrop,
-// //   userStartTime,
-// //   timeBetweenDrops,
-// //   sessionNames,
-// //   configName,
-// //   scriptName
-// // ) => {
-// //   try {
-// //     const response = await fetch("/CMHW-TOOLS/template.xlsx");
-// //     const arrayBuffer = await response.arrayBuffer();
-// //     const templateWorkbook = XLSX.read(arrayBuffer, { type: "array" });
+    profilesByDrop.forEach((profileGroup, index) => {
+      if (profileGroup.length === 0) return; // Skip empty drops
+      const dropProfiles = profileGroup.map((p) => p[0]);
+      allProfiles.push(...dropProfiles);
 
-// //     const today = new Date();
-// //     const predefinedDate = today.toLocaleDateString("en-GB");
-// //     const [hours, minutes] = userStartTime.split(":");
-// //     const formattedDate = `${predefinedDate
-// //       .split("/")
-// //       .reverse()
-// //       .join("/")} ${hours}:${minutes}:00`;
-// //     const startingDropTime = new Date(formattedDate);
+      // Calculate the correct date for each drop
+      let [hours, minutes] = dropTimes[index].split(":").map(Number);
+      if (hours === 0) lastDropDate.setDate(today.getDate() + 1); // Move to next day
+      lastDropDate.setHours(hours, minutes + 5, 0);
 
-// //     if (isNaN(startingDropTime)) throw new Error("Invalid Date format.");
+      let formattedDate = lastDropDate.toLocaleDateString("en-GB").split("/").join("/");
+      let formattedTime = lastDropDate.toTimeString().split(" ")[0]; // HH:mm:ss
+      let scheduledTime = `${formattedDate} ${formattedTime}`;
 
-// //     let files = [];
+      worksheet[`A${rowIndex}`] = { v: index + 1 };
+      worksheet[`B${rowIndex}`] = { v: sessionName };
+      worksheet[`C${rowIndex}`] = { v: scriptName };
+      worksheet[`D${rowIndex}`] = { v: dropProfiles.join("|") };
+      worksheet[`E${rowIndex}`] = { v: scheduledTime };
+      worksheet[`F${rowIndex}`] = { v: scheduledTime };
+      worksheet[`G${rowIndex}`] = { v: configName };
+      worksheet[`H${rowIndex}`] = { v: 1 };
+      worksheet[`I${rowIndex}`] = { v: `Drop ${index + 1}` };
 
-// //     seedsBySessionPerDrop.forEach((sessionDrops, sessionIndex) => {
-// //       const workbook = XLSX.utils.book_new();
-// //       const worksheet = XLSX.utils.aoa_to_sheet([]); // Start with an empty worksheet
-// //       let currentStartTime = new Date(startingDropTime);
+      rowIndex++;
+    });
 
-// //       // Add header row
-// //       XLSX.utils.sheet_add_aoa(worksheet, [
-// //         [
-// //           "TaskId",
-// //           "Session",
-// //           "Script_Name",
-// //           "Profiles",
-// //           "Start_at",
-// //           "End_at",
-// //           "Config_name",
-// //           "Time_type",
-// //           "Description",
-// //         ],
-// //       ]);
+    // ✅ FAST_SPAM_KILL_EMPTY Task
+    if (fastKill && allProfiles.length > 0) {
+      lastDropDate.setHours(lastDropDate.getHours() + 1); // Add 1 hour
+      let fastKillDate = lastDropDate.toLocaleDateString("en-GB").split("/").join("/");
+      let fastKillTime = lastDropDate.toTimeString().split(" ")[0];
+      let fastKillScheduledTime = `${fastKillDate} ${fastKillTime}`;
 
-// //       sessionDrops.forEach((drop, dropIndex) => {
-// //         const profileGroup = drop.map((profile) => profile[0]).join("|"); // Combine profiles as numbers separated by '|'
-// //         const startTime = currentStartTime.toLocaleString(); // Start time
-// //         currentStartTime = new Date(
-// //           currentStartTime.getTime() + timeBetweenDrops * 60000
-// //         ); // Increment start time
-// //         const endTime = currentStartTime.toLocaleString(); // End time
+      worksheet[`A${rowIndex}`] = { v: rowIndex - 1 };
+      worksheet[`B${rowIndex}`] = { v: sessionName };
+      worksheet[`C${rowIndex}`] = { v: "FAST_SPAM_KILL_EMPTY.js" };
+      worksheet[`D${rowIndex}`] = { v: allProfiles.join("|") };
+      worksheet[`E${rowIndex}`] = { v: fastKillScheduledTime };
+      worksheet[`F${rowIndex}`] = { v: fastKillScheduledTime };
+      worksheet[`G${rowIndex}`] = { v: "FAST_SPAM_KILL_EMPTY" };
+      worksheet[`H${rowIndex}`] = { v: 1 };
+      worksheet[`I${rowIndex}`] = { v: "FAST_SPAM_KILL" };
 
-// //         XLSX.utils.sheet_add_aoa(
-// //           worksheet,
-// //           [
-// //             [
-// //               dropIndex + 1, // TaskId (Drop number)
-// //               sessionNames[sessionIndex], // Session name
-// //               scriptName, // Script name
-// //               profileGroup, // Profiles combined as numbers separated by |
-// //               startTime, // Start_at time
-// //               endTime, // End_at time
-// //               configName, // Config_name
-// //               "3", // Time_type
-// //               "Drop", // Description
-// //             ],
-// //           ],
-// //           { origin: -1 }
-// //         ); // Add each row at the next available row
-// //       });
+      rowIndex++;
+    }
 
-// //       XLSX.utils.book_append_sheet(workbook, worksheet, "Schedule");
-// //       const excelBlob = new Blob(
-// //         [XLSX.write(workbook, { type: "array", bookType: "xlsx" })],
-// //         {
-// //           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-// //         }
-// //       );
+    // ✅ Next-Day Login Task
+    if (loginNextDay) {
+      let nextDay = new Date(today);
+      nextDay.setDate(today.getDate() + 1);
+      let nextDayFormatted = nextDay.toLocaleDateString("en-GB").split("/").join("/");
+      let loginStartTime = `${nextDayFormatted} 09:00:00`;
+      let loginEndTime = `${nextDayFormatted} 13:00:00`;
 
-// //       files.push({
-// //         blob: excelBlob,
-// //         fileName: `${sessionNames[sessionIndex]}_Schedule.xlsx`,
-// //       });
-// //     });
+      const nextDayProfiles = nextDaySeeds.map((p) => p[0]);
 
-// //     return files;
-// //   } catch (error) {
-// //     console.error("Error updating Excel template:", error);
-// //   }
-// // };
-// /////////////////////////////////////////////////
-// export const generateScheduleExcelForSessions = async (
-//   seedsBySessionPerDrop,
-//   configUrl
-// ) => {
-//   try {
-//     // Fetch configuration from the provided URL (e.g., GitHub or Google Drive)
-//     const {
-//       sessionNames, // Array of session names
-//       scriptNames,  // Array of script names
-//       configNames,  // Array of config names
-//       timeBetweenDrops,
-//       dropsTimes,   // Specific drop times
-//     } = await fetchDynamicConfig(configUrl);
-//     ();
-//     // Fetch the template Excel file
-//     const response = await fetch("/CMHW-TOOLS/template.xlsx");
-//     const arrayBuffer = await response.arrayBuffer();
-//     const templateWorkbook = XLSX.read(arrayBuffer, { type: "array" });
+      worksheet[`A${rowIndex}`] = { v: rowIndex - 1 };
+      worksheet[`B${rowIndex}`] = { v: sessionName };
+      worksheet[`C${rowIndex}`] = { v: "Login_Gmail.js" };
+      worksheet[`D${rowIndex}`] = { v: nextDayProfiles.join("|") };
+      worksheet[`E${rowIndex}`] = { v: loginStartTime };
+      worksheet[`F${rowIndex}`] = { v: loginEndTime };
+      worksheet[`G${rowIndex}`] = { v: "check_status" };
+      worksheet[`H${rowIndex}`] = { v: 1 };
+      worksheet[`I${rowIndex}`] = { v: "NEXT_DAY_LOGIN" };
 
-//     const today = new Date();
+      rowIndex++;
+    }
 
-//     let files = [];
+    // Convert workbook to Blob
+    const excelBlob = new Blob(
+      [XLSX.write(workbook, { type: "array", bookType: "xlsx" })],
+      {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }
+    );
 
-//     seedsBySessionPerDrop.forEach((sessionDrops, sessionIndex) => {
-//       const workbook = XLSX.utils.book_new();
-//       const worksheet = XLSX.utils.aoa_to_sheet([]); // Start with an empty worksheet
-//       let currentStartTime = new Date(today); // Initialize with today's date
+    return excelBlob;
+  } catch (error) {
+    console.error("Error updating Excel template:", error);
+  }
+};
 
-//       // Add header row to the worksheet
-//       XLSX.utils.sheet_add_aoa(worksheet, [
-//         [
-//           "TaskId",
-//           "Session",
-//           "Script_Name",
-//           "Profiles",
-//           "Start_at",
-//           "End_at",
-//           "Config_name",
-//           "Time_type",
-//           "Description",
-//         ],
-//       ]);
 
-//       sessionDrops.forEach((drop, dropIndex) => {
-//         const profileGroup = drop.map((profile) => profile[0]).join("|"); // Combine profiles as numbers separated by '|'
 
-//         // Use the dropsTimes for each drop if available
-//         const dropTime = dropsTimes[dropIndex] || "00:00"; // Default to "00:00" if no time is defined
 
-//         const [hours, minutes] = dropTime.split(":");
-//         currentStartTime.setHours(hours);
-//         currentStartTime.setMinutes(minutes);
-
-//         const startTime = currentStartTime.toLocaleString(); // Start time
-
-//         // For the end time, calculate 5 minutes before the start time of the next drop
-//         let endTime;
-//         if (sessionDrops[dropIndex + 1]) {
-//           // There is a next drop
-//           let nextDropTime = dropsTimes[dropIndex + 1] || "00:00"; // Get the time for the next drop
-//           const [nextHours, nextMinutes] = nextDropTime.split(":");
-//           const nextDropStartTime = new Date(currentStartTime);
-//           nextDropStartTime.setHours(nextHours);
-//           nextDropStartTime.setMinutes(nextMinutes);
-
-//           endTime = new Date(nextDropStartTime.getTime() - 5 * 60000); // Subtract 5 minutes
-//         } else {
-//           // If no next drop, default to the current start time minus 5 minutes (or another fallback logic)
-//           endTime = new Date(currentStartTime.getTime() - 5 * 60000);
-//         }
-
-//         const endFormattedTime = endTime.toLocaleString(); // Format end time
-
-//         currentStartTime = new Date(currentStartTime.getTime() + timeBetweenDrops * 60000); // Increment start time for the next drop
-
-//         // Add each drop's row to the worksheet
-//         XLSX.utils.sheet_add_aoa(
-//           worksheet,
-//           [
-//             [
-//               dropIndex + 1, // TaskId (Drop number)
-//               sessionNames[sessionIndex], // Session name (specific to this session)
-//               scriptNames[sessionIndex], // Script name (specific to this session)
-//               profileGroup, // Profiles combined as numbers separated by |
-//               startTime, // Start_at time
-//               endFormattedTime, // End_at time (5 minutes before the next drop)
-//               configNames[sessionIndex], // Config_name (specific to this session)
-//               "3", // Time_type
-//               "Drop", // Description
-//             ],
-//           ],
-//           { origin: -1 }
-//         ); // Add each row at the next available row
-//       });
-
-//       XLSX.utils.book_append_sheet(workbook, worksheet, "Schedule");
-
-//       // Convert the workbook to a Blob
-//       const excelBlob = new Blob(
-//         [XLSX.write(workbook, { type: "array", bookType: "xlsx" })],
-//         {
-//           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-//         }
-//       );
-
-//       files.push({
-//         blob: excelBlob,
-//         fileName: `${sessionNames[sessionIndex]}_Schedule.xlsx`,
-//       });
-//     });
-
-//     return files;
-//   } catch (error) {
-//     console.error("Error generating Excel schedule:", error);
-//   }
-// };
-
-// //////////////////////////////////////////////////////////////
-// const fetchDynamicConfig = async (configUrl) => {
-//   try {
-//     const response = await fetch(configUrl);
-//     if (!response.ok) {
-//       throw new Error("Failed to fetch configuration");
-//     }
-//     const config = await response.json();
-//     return config;
-//   } catch (error) {
-//     console.error("Error fetching dynamic config:", error);
-//     throw error;
-//   }
-// };

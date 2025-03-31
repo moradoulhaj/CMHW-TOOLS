@@ -8,7 +8,10 @@ export default function TagsInput({
 }) {
   const handleInputChange = (e) => {
     setTagsToRemove(e.target.value);
-    setProcessedContents([]);
+    if (setProcessedContents) {
+      setProcessedContents([]);
+    }
+
   };
 
   // HandleInputChange

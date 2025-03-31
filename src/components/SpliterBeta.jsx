@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { RotateCcw, Settings } from "lucide-react";
+import { Eye, RotateCcw, Settings } from "lucide-react";
 import TagsInput from "./smalls/TagsInput";
 import {
   calcSessions,
@@ -23,17 +23,26 @@ export default function SpliterBeta() {
   const [sessionCount, setSessionCount] = useState("");
   const [seedsBySessions, setSeedsBySessions] = useState([]);
   const [timeDrops, setTimeDrops] = useState([]);
-  const [sessionNumber, setSessionNumber] = useState(0);
+  const [activeSessions, setActiveSessions] = useState(0);
   const [selectedEntity, setSelectedEntity] = useState("CMH1");
 
   const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
   const [delimiter, setDelimiter] = useState("\n");
   const [sessionData, setSessionData] = useState([]);
+  //Next Day Seeds
   const [nextDaySeeds, setNextDaySeeds] = useState([]);
 
   // Modal states
   const [isSessionModalOpen, setSessionModalOpen] = useState(false); // Modal state
-
+  //Entities Modal
+  const entities = [
+    ...Array.from({ length: 14 }, (_, i) => ({
+      id: i + 1,
+      name: `CMH${i + 1}`,
+    })),
+    { id: 150, name: "CMH15-Offer" },
+    { id: 16, name: "CMH16" },
+  ];
   const [isNextDayModalOpen, setIsNextDayModalOpen] = useState(false); // Modal state
   const [isTimeDropsModalOpen, setIsTimeDropsModalOpen] = useState(false); // Modal state
   // Modal Settings State
@@ -42,8 +51,8 @@ export default function SpliterBeta() {
     useFixedQuantity: false,
     fixedQuantity: "",
     shuffle: false,
-    fastKill: false,
-    loginNextDay: false,
+    fastKill: true,
+    loginNextDay: true,
   });
   useEffect(() => {
     const fetchData = async () => {
@@ -51,17 +60,15 @@ export default function SpliterBeta() {
         const entityId = selectedEntity.replace("CMH", ""); // Extract number
         const data = await fetchEntityId(entityId);
 
-        console.log("Fetched Data:", data);
-
         const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
         setTimeDrops(timedropsArray);
 
         // Count only active sessions
-        const activeSessionsCount = data.sessions
-          ? data.sessions.filter((session) => session.isActive).length
-          : 0;
-
-        setSessionNumber(activeSessionsCount); // Store only active count
+        setActiveSessions(
+          data.sessions
+            ? data.sessions.filter((session) => session.isActive)
+            : []
+        );
 
         // Store session data in the state
         setSessionData(data.sessions || []);
@@ -111,6 +118,8 @@ export default function SpliterBeta() {
       toast.error("No tags");
       return;
     }
+    console.log(activeSessions);
+
     //Taking the first line of the input
     const firstLine = tagsToSplit.split("\n")[0];
     // then passung the first line to return the number of sessions
@@ -120,7 +129,7 @@ export default function SpliterBeta() {
     if (sessionsNumber === 0) {
       toast.error("No sessions");
       return;
-    } else if (sessionsNumber != sessionNumber) {
+    } else if (sessionsNumber != activeSessions.length) {
       toast.error("Session count mismatch");
       return;
     }
@@ -129,16 +138,29 @@ export default function SpliterBeta() {
       .map((line) => parseNumberTagPairs(line));
 
     const collectedData = await collectData(lines, sessionsNumber);
-    
+
     setSeedsBySessions(collectedData);
     if (collectedData === "wrongIinput") {
       return;
     }
-    
-    
-    
-    const splitDataByDrops = splitSessionsByDrops(collectedData, timeDrops.length,modalSettings.useFixedQuantity,modalSettings.fixedQuantity);
-    console.log(splitDataByDrops);
+
+    const splitDataByDrops = splitSessionsByDrops(
+      collectedData,
+      timeDrops.length,
+      modalSettings.useFixedQuantity,
+      modalSettings.fixedQuantity
+    );
+    // generateExcel(splitDataByDrops)
+    downloadZip(
+      splitDataByDrops,
+      delimiter,
+      selectedEntity,
+      timeDrops,
+      activeSessions,
+      modalSettings.fastKill,
+      modalSettings.loginNextDay,
+      nextDaySeeds
+    );
 
     setSeedsBySessionPerDrop(splitDataByDrops);
     toast.success("Split successfully");
@@ -169,7 +191,6 @@ export default function SpliterBeta() {
           </button>
         </div>
       </div>
-
       {/* Entity Selection Dropdown */}
       <div className="flex flex-col items-center">
         <label htmlFor="entitySelect" className="text-gray-700 font-medium">
@@ -181,9 +202,9 @@ export default function SpliterBeta() {
           onChange={(e) => setSelectedEntity(e.target.value)}
           className="w-40 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
         >
-          {[...Array(16)].map((_, i) => (
-            <option key={i} value={`CMH${i + 1}`}>
-              CMH{i + 1}
+          {entities.map((entity) => (
+            <option key={entity.id} value={entity.id}>
+              {entity.name}
             </option>
           ))}
         </select>
@@ -191,31 +212,62 @@ export default function SpliterBeta() {
 
       {/* Input Fields */}
       <div className="flex flex-wrap justify-center gap-6 w-full max-w-3xl">
-        <div className="flex flex-col items-center">
+        <div
+          className="flex flex-col items-center relative"
+          onClick={handleTimeDropsClick} // Open modal on click
+        >
           <label htmlFor="dropNumbers" className="text-gray-700 font-medium">
             Drop Numbers
           </label>
-          <input
-            id="dropNumbers"
-            type="number"
-            value={timeDrops.length}
-            onClick={handleTimeDropsClick} // Open modal on click
-            readOnly
-            className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
-          />
+          <div className="relative">
+            <input
+              id="dropNumbers"
+              type="number"
+              value={timeDrops.length}
+              readOnly
+              className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500 pr-10"
+            />
+            <Eye
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+              size={20}
+            />
+          </div>
         </div>
-        <div className="flex flex-col items-center">
+        <div
+          className="flex flex-col items-center relative"
+          onClick={handleSessionClick} // Open modal on click
+        >
           <label htmlFor="sessionNumbers" className="text-gray-700 font-medium">
             Session In Repo
           </label>
-          <input
-            id="sessionNumbers"
-            type="number"
-            value={sessionNumber}
-            onClick={handleSessionClick} // Open modal on click
-            readOnly
+          <div className="relative">
+            {" "}
+            <input
+              id="sessionNumbers"
+              type="number"
+              value={activeSessions.length}
+              readOnly
+              className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500 pr-10"
+            />
+            <Eye
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+              size={20}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col items-center">
+          <label htmlFor="delimiter" className="text-gray-700 font-medium">
+            Delimiter
+          </label>
+          <select
+            id="delimiter"
+            value={delimiter}
+            onChange={(e) => setDelimiter(e.target.value)}
             className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
-          />
+          >
+            <option value="\n">New Line (\n)</option>
+            <option value=";">Semicolon (;)</option>
+          </select>
         </div>
       </div>
 

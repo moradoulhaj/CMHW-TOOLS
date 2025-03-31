@@ -43,7 +43,7 @@ const SessionModal = ({ isOpen, setSessionModalOpen, sessionData }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="relative bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-3xl">
+      <div className="relative bg-white p-6 rounded-lg shadow-xl w-full max-w-4xl">
         {/* Close Button */}
         <button
           onClick={HandleModalClose}
