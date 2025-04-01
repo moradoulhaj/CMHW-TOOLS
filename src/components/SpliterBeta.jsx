@@ -24,7 +24,7 @@ export default function SpliterBeta() {
   const [seedsBySessions, setSeedsBySessions] = useState([]);
   const [timeDrops, setTimeDrops] = useState([]);
   const [activeSessions, setActiveSessions] = useState(0);
-  const [selectedEntity, setSelectedEntity] = useState("CMH1");
+  const [selectedEntity, setSelectedEntity] = useState(1);
 
   const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
   const [delimiter, setDelimiter] = useState("\n");
@@ -36,10 +36,10 @@ export default function SpliterBeta() {
   const [isSessionModalOpen, setSessionModalOpen] = useState(false); // Modal state
   //Entities Modal
   const entities = [
-    ...Array.from({ length: 14 }, (_, i) => ({
-      id: i + 1,
-      name: `CMH${i + 1}`,
-    })),
+    ...Array.from({ length: 15 }, (_, i) => ({ id: i + 1, name: `CMH${i + 1}` })),
+    { id: 30, name: "CMH3-Offer" },
+    { id: 60, name: "CMH6-Offer" },
+  
     { id: 150, name: "CMH15-Offer" },
     { id: 16, name: "CMH16" },
   ];
@@ -55,10 +55,14 @@ export default function SpliterBeta() {
     loginNextDay: true,
   });
   useEffect(() => {
+    console.log()
     const fetchData = async () => {
       try {
-        const entityId = selectedEntity.replace("CMH", ""); // Extract number
-        const data = await fetchEntityId(entityId);
+        console.log("selectedEntity",selectedEntity)
+
+       
+
+        const data = await fetchEntityId(selectedEntity);
 
         const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
         setTimeDrops(timedropsArray);
@@ -118,7 +122,6 @@ export default function SpliterBeta() {
       toast.error("No tags");
       return;
     }
-    console.log(activeSessions);
 
     //Taking the first line of the input
     const firstLine = tagsToSplit.split("\n")[0];

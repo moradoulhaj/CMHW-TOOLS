@@ -25,18 +25,21 @@ export const fetchEntityId = async (entityId) => {
 // Update multiple session statuses
 export const updateSessionStatuses = async (sessionsStatus) => {
   try {
-    const response = await axiosInstance.put("/session/updateMultipleStatus", sessionsStatus); // Adjust the endpoint if needed
+    const response = await axiosInstance.put(
+      "/session/updateMultipleStatus",
+      sessionsStatus
+    ); // Adjust the endpoint if needed
     return response.data;
   } catch (error) {
     console.error("Error updating session statuses:", error);
     throw error;
   }
 };
-//Update entity time drops 
+//Update entity time drops
 
-export const updateEntity = async (entityId , entityInfos) => {
+export const updateEntity = async (entityId, entityInfos) => {
   try {
-    const response = await axiosInstance.put(`/dep/${entityId}`, entityInfos); 
+    const response = await axiosInstance.put(`/dep/${entityId}`, entityInfos);
     return response.data;
   } catch (error) {
     console.error("Error updating session statuses:", error);
@@ -45,12 +48,50 @@ export const updateEntity = async (entityId , entityInfos) => {
 };
 // Fetch sessions by ID entity
 
-export const fetchSessions = async (entityId ) => {
+export const fetchSessions = async (entityId) => {
   try {
-    const response = await axiosInstance.get(`/session/getByDepId/${entityId}`); 
+    const response = await axiosInstance.get(`/session/getByDepId/${entityId}`);
     return response.data;
   } catch (error) {
     console.error("Error updating session statuses:", error);
+    throw error;
+  }
+};
+
+// to delete session
+
+export const deleteSession = async (sessionId) => {
+  try {
+    const response = await axiosInstance.delete(`/session/delete/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating session statuses:", error);
+    throw error;
+  }
+};
+
+
+// to create session
+
+export const createSession = async (sessionData) => {
+  try {
+    const response = await axiosInstance.post(`/session/create`,sessionData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating session :", error);
+    throw error;
+  }
+};
+
+
+// to update session
+
+export const updateSession = async (sessionId,sessionData) => {
+  try {
+    const response = await axiosInstance.put(`/session/update/${sessionId}`,sessionData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating session :", error);
     throw error;
   }
 };

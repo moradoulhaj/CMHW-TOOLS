@@ -268,7 +268,7 @@ export const downloadZip = async (
       formattedDate += `-WithLogin${nextDay}`;
     }
 
-    saveAs(zipBlob, `${entityName}-${formattedDate}.zip`);
+    saveAs(zipBlob, `CMH${entityName}-${formattedDate}.zip`);
   }, 1000); // Small delay to ensure Excel files are added
 };
 
