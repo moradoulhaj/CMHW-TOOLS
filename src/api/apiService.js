@@ -6,7 +6,6 @@ export const fetchEntities = async () => {
     const response = await axiosInstance.get("/dep"); // Adjust endpoint if needed
     return response.data;
   } catch (error) {
-    console.error("Error fetching entities:", error);
     throw error;
   }
 };
@@ -17,7 +16,6 @@ export const fetchEntityId = async (entityId) => {
     const response = await axiosInstance.get(`/dep/${entityId}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching entity details:", error);
     throw error;
   }
 };
@@ -31,7 +29,6 @@ export const updateSessionStatuses = async (sessionsStatus) => {
     ); // Adjust the endpoint if needed
     return response.data;
   } catch (error) {
-    console.error("Error updating session statuses:", error);
     throw error;
   }
 };
@@ -42,7 +39,6 @@ export const updateEntity = async (entityId, entityInfos) => {
     const response = await axiosInstance.put(`/dep/${entityId}`, entityInfos);
     return response.data;
   } catch (error) {
-    console.error("Error updating session statuses:", error);
     throw error;
   }
 };
@@ -53,7 +49,6 @@ export const fetchSessions = async (entityId) => {
     const response = await axiosInstance.get(`/session/getByDepId/${entityId}`);
     return response.data;
   } catch (error) {
-    console.error("Error updating session statuses:", error);
     throw error;
   }
 };
@@ -65,7 +60,6 @@ export const deleteSession = async (sessionId) => {
     const response = await axiosInstance.delete(`/session/delete/${sessionId}`);
     return response.data;
   } catch (error) {
-    console.error("Error updating session statuses:", error);
     throw error;
   }
 };
@@ -78,7 +72,6 @@ export const createSession = async (sessionData) => {
     const response = await axiosInstance.post(`/session/create`,sessionData);
     return response.data;
   } catch (error) {
-    console.error("Error creating session :", error);
     throw error;
   }
 };
@@ -91,7 +84,6 @@ export const updateSession = async (sessionId,sessionData) => {
     const response = await axiosInstance.put(`/session/update/${sessionId}`,sessionData);
     return response.data;
   } catch (error) {
-    console.error("Error updating session :", error);
     throw error;
   }
 };

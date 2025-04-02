@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { Pencil, Trash, Plus } from "lucide-react";
 import SessionModal from "./DashboardComponents/SessionModal";
 import { deleteSession, fetchEntityId } from "../api/apiService";
@@ -43,9 +43,10 @@ const AdminDashboard = () => {
 
   return (
     <div className="p-8 max-w-[1500px] mx-auto bg-gray-100 min-h-screen">
+      <ToastContainer theme="colored" />
+
       <div className="flex justify-center items-center mb-6">
         <h1 className="text-4xl font-bold text-gray-800">Admin Dashboard</h1>
-        
       </div>
 
       <div className="w-full bg-white shadow-md rounded-lg p-4 mb-4 flex items-center justify-between">

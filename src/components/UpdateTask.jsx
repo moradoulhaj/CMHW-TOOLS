@@ -43,7 +43,6 @@ export default function UpdateTask() {
         const data = await parseExcelFile(file);
   
         const filteredData = filterTasksByDate(data, now);
-        console.log("Filtered data:", filteredData);
   
         if (filteredData.length > 0) {
           filteredDataArray.push(filteredData);

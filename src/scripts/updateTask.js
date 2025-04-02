@@ -79,16 +79,13 @@ const parseDate = (dateStr) => {
 // Function to filter tasks based on `End_at`
 export const filterTasksByDate = (tasks, currentTime) => {
     return tasks.filter((task) => {
-      console.log("Checking Task:", task);
   
       // Parse End_at using parseDate
       const endAt = parseDate(task.End_at);
-      console.log("Parsed End_at:", endAt);
   
       // Convert parsed date object to a JavaScript Date object for comparison
       const endDate = new Date(endAt.year, endAt.month - 1, endAt.day, endAt.hours, endAt.minutes, endAt.seconds);
   
-      console.log("End Date (JavaScript Date):", endDate);
   
       // Compare parsed date with current time
       return endDate >= currentTime;

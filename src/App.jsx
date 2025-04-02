@@ -18,13 +18,13 @@ import Login from "./components/Login";
 import ProtectedRoute from "./scripts/ProtectedRoute ";
 import AdminDashboard from "./components/AdminDashboard";
 import Cookies from "js-cookie";
+import AddSessionUsingTagsBeta from "./components/AddSessionsUsinTagsBeta";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState("");
   useEffect(() => {
     setUser(Cookies.get("admin"));
-    console.log(user);
   }, [sidebarOpen]);
   return (
     <Router>
@@ -72,7 +72,9 @@ export default function App() {
                 <Route path="/admin" element={<AdminDashboard />} />
               </Route>
               <Route path="/login" element={<Login />} />
+              <Route path="/addSessionBeta" element={<AddSessionUsingTagsBeta />} />
 
+              
               <Route path="*" element={<LogChecker />} />
             </Routes>
           </div>

@@ -10,9 +10,9 @@ export default function Sidebar({ isOpen, toggle }) {
     { path: "/delimiterSwitch", label: "Delimiter Switch" },
     { path: "/spliter", label: "Drive Spliter" },
     { path: "/logChecker", label: "Log Checker" },
-    { path: "/spamCalculator", label: "Spam Calculator" },
+    // { path: "/spamCalculator", label: "Spam Calculator" },
     { path: "/ramadanTask", label: "Next Day Login" },
-    { path: "/cleanChecker", label: "Clean Checker" },
+    { path: "/addSessionBeta", label: "Add Session Beta" },
     { path: "/spliterBeta", label: "Spliter Beta" },
 
     {path: "/updateTask" , label: "Remove TO Tasks"}
