@@ -353,7 +353,7 @@ export const generateExcelBlob = (seedsBySessionPerDrop) => {
 };
 export const generateSchedule = async (
   profilesByDrop,
-  dropTimes, // Array of predefined times ['23:55', '00:05', '01:10']
+  dropTimes,
   sessionName,
   configName,
   scriptName,
@@ -368,30 +368,37 @@ export const generateSchedule = async (
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 
     const today = new Date();
-    let rowIndex = 2; // Start from row 2
+    let rowIndex = 2;
     let lastDropDate = new Date(today);
-    let allProfiles = []; // Collect all profiles
+    let allProfiles = [];
 
+    // ✅ Drop tasks
     profilesByDrop.forEach((profileGroup, index) => {
-      if (profileGroup.length === 0) return; // Skip empty drops
+      if (profileGroup.length === 0) return;
       const dropProfiles = profileGroup.map((p) => p[0]);
       allProfiles.push(...dropProfiles);
 
-      // Calculate the correct date for each drop
       let [hours, minutes] = dropTimes[index].split(":").map(Number);
-      if (hours === 0) lastDropDate.setDate(today.getDate() + 1); // Move to next day
+      if (hours === 0) lastDropDate.setDate(today.getDate() + 1);
       lastDropDate.setHours(hours, minutes + 5, 0);
 
       let formattedDate = lastDropDate.toLocaleDateString("en-GB").split("/").join("/");
-      let formattedTime = lastDropDate.toTimeString().split(" ")[0]; // HH:mm:ss
+      let formattedTime = lastDropDate.toTimeString().split(" ")[0];
       let scheduledTime = `${formattedDate} ${formattedTime}`;
+
+      // ✅ Add 55 minutes for end time
+      let endDate = new Date(lastDropDate.getTime());
+      endDate.setMinutes(endDate.getMinutes() + 55);
+      let endFormattedDate = endDate.toLocaleDateString("en-GB").split("/").join("/");
+      let endFormattedTime = endDate.toTimeString().split(" ")[0];
+      let endScheduledTime = `${endFormattedDate} ${endFormattedTime}`;
 
       worksheet[`A${rowIndex}`] = { v: index + 1 };
       worksheet[`B${rowIndex}`] = { v: sessionName };
       worksheet[`C${rowIndex}`] = { v: scriptName };
       worksheet[`D${rowIndex}`] = { v: dropProfiles.join("|") };
       worksheet[`E${rowIndex}`] = { v: scheduledTime };
-      worksheet[`F${rowIndex}`] = { v: scheduledTime };
+      worksheet[`F${rowIndex}`] = { v: endScheduledTime };
       worksheet[`G${rowIndex}`] = { v: configName };
       worksheet[`H${rowIndex}`] = { v: 1 };
       worksheet[`I${rowIndex}`] = { v: `Drop ${index + 1}` };
@@ -399,19 +406,28 @@ export const generateSchedule = async (
       rowIndex++;
     });
 
-    // ✅ FAST_SPAM_KILL_EMPTY Task
+    // ✅ FAST_SPAM_KILL_EMPTY
     if (fastKill && allProfiles.length > 0) {
-      lastDropDate.setHours(lastDropDate.getHours() + 1); // Add 1 hour
-      let fastKillDate = lastDropDate.toLocaleDateString("en-GB").split("/").join("/");
-      let fastKillTime = lastDropDate.toTimeString().split(" ")[0];
+      lastDropDate.setMinutes(lastDropDate.getMinutes() + 55); // Start after last drop ends
+      let fastKillStartDate = new Date(lastDropDate.getTime());
+
+      let fastKillEndDate = new Date(fastKillStartDate.getTime());
+      fastKillEndDate.setMinutes(fastKillEndDate.getMinutes() + 55); // ✅ Add 55min
+
+      let fastKillDate = fastKillStartDate.toLocaleDateString("en-GB").split("/").join("/");
+      let fastKillTime = fastKillStartDate.toTimeString().split(" ")[0];
       let fastKillScheduledTime = `${fastKillDate} ${fastKillTime}`;
+
+      let fastKillEndDateStr = fastKillEndDate.toLocaleDateString("en-GB").split("/").join("/");
+      let fastKillEndTimeStr = fastKillEndDate.toTimeString().split(" ")[0];
+      let fastKillScheduledEndTime = `${fastKillEndDateStr} ${fastKillEndTimeStr}`;
 
       worksheet[`A${rowIndex}`] = { v: rowIndex - 1 };
       worksheet[`B${rowIndex}`] = { v: sessionName };
       worksheet[`C${rowIndex}`] = { v: "FAST_SPAM_KILL_EMPTY.js" };
       worksheet[`D${rowIndex}`] = { v: allProfiles.join("|") };
       worksheet[`E${rowIndex}`] = { v: fastKillScheduledTime };
-      worksheet[`F${rowIndex}`] = { v: fastKillScheduledTime };
+      worksheet[`F${rowIndex}`] = { v: fastKillScheduledEndTime };
       worksheet[`G${rowIndex}`] = { v: "FAST_SPAM_KILL_EMPTY" };
       worksheet[`H${rowIndex}`] = { v: 1 };
       worksheet[`I${rowIndex}`] = { v: "FAST_SPAM_KILL" };
@@ -419,13 +435,18 @@ export const generateSchedule = async (
       rowIndex++;
     }
 
-    // ✅ Next-Day Login Task
+    // ✅ NEXT_DAY_LOGIN
     if (loginNextDay) {
       let nextDay = new Date(today);
       nextDay.setDate(today.getDate() + 1);
-      let nextDayFormatted = nextDay.toLocaleDateString("en-GB").split("/").join("/");
-      let loginStartTime = `${nextDayFormatted} 09:00:00`;
-      let loginEndTime = `${nextDayFormatted} 13:00:00`;
+      nextDay.setHours(9, 0, 0); // 09:00:00
+
+      let loginStartDate = new Date(nextDay);
+      let loginEndDate = new Date(loginStartDate.getTime());
+      loginEndDate.setMinutes(loginEndDate.getMinutes() + 55); // ✅ Add 55 min
+
+      let loginStartFormatted = `${loginStartDate.toLocaleDateString("en-GB").split("/").join("/")} ${loginStartDate.toTimeString().split(" ")[0]}`;
+      let loginEndFormatted = `${loginEndDate.toLocaleDateString("en-GB").split("/").join("/")} ${loginEndDate.toTimeString().split(" ")[0]}`;
 
       const nextDayProfiles = nextDaySeeds.map((p) => p[0]);
 
@@ -433,8 +454,8 @@ export const generateSchedule = async (
       worksheet[`B${rowIndex}`] = { v: sessionName };
       worksheet[`C${rowIndex}`] = { v: "Login_Gmail.js" };
       worksheet[`D${rowIndex}`] = { v: nextDayProfiles.join("|") };
-      worksheet[`E${rowIndex}`] = { v: loginStartTime };
-      worksheet[`F${rowIndex}`] = { v: loginEndTime };
+      worksheet[`E${rowIndex}`] = { v: loginStartFormatted };
+      worksheet[`F${rowIndex}`] = { v: loginEndFormatted };
       worksheet[`G${rowIndex}`] = { v: "check_status" };
       worksheet[`H${rowIndex}`] = { v: 1 };
       worksheet[`I${rowIndex}`] = { v: "NEXT_DAY_LOGIN" };
@@ -442,7 +463,7 @@ export const generateSchedule = async (
       rowIndex++;
     }
 
-    // Convert workbook to Blob
+    // ⬇️ Return Excel blob
     const excelBlob = new Blob(
       [XLSX.write(workbook, { type: "array", bookType: "xlsx" })],
       {

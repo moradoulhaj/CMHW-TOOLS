@@ -50,7 +50,7 @@ export default function App() {
               <AlignJustify size={28} />
             </button>
             <h1 className="mr-3 text-lg font-semibold">
-              {user ? `CMHW - ${user}`.toUpperCase() : "CMHW - TOOLS"}
+              {user ? `SIMPLIFY - ${user}`.toUpperCase() : "CMHW - SIMPLIFY"}
             </h1>
           </nav>
 
