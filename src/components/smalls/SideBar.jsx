@@ -6,14 +6,18 @@ export default function Sidebar({ isOpen, toggle }) {
   const links = [
     { path: "/readAndShow", label: "Read and Show" },
     { path: "/removeTags", label: "Remove Sessions" },
-    { path: "/addUsingTags", label: "Add Session Using Tags" },
+    { path: "/addUsingTags", label: "Add Session" },
     { path: "/delimiterSwitch", label: "Delimiter Switch" },
-    { path: "/spliter", label: "Spliter" },
-    { path: "/logChecker", label: "Checker" },
-    { path: "/spamCalculator", label: "Spam Calculator" },
-    { path: "/ramadanTask", label: "Ramadan Task" },
-    { path: "/cleanChecker", label: "Clean Checker" },
+    { path: "/spliter", label: "Drive Spliter" },
+    { path: "/logChecker", label: "Log Checker" },
+    { path: "/logCheckerBeta", label: "Log Checker - TEST" },
+
+    // { path: "/spamCalculator", label: "Spam Calculator" },
+    { path: "/ramadanTask", label: "Next Day Login" },
+    { path: "/addSessionBeta", label: "Add Session Beta" },
     { path: "/spliterBeta", label: "Spliter Beta" },
+
+    {path: "/updateTask" , label: "Remove TO Tasks"}
 
   ];
 

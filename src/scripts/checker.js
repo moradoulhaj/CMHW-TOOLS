@@ -146,3 +146,12 @@ export const checkCleanLogs = (profiles, logs) => {
     spamDeleted,
   };
 };
+export const extractColumns234 = (text) => {
+  return text
+    .split("\n")
+    .map((line) => {
+      const parts = line.split("\t");
+      return [parts[1], parts[2], parts[3]].join("\t");
+    })
+    .join("\n");
+};

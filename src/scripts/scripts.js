@@ -130,7 +130,8 @@ export const handleExcel = (processedContents) => {
   const currentDate = new Date().toLocaleDateString("fr-FR").replace(/\//g, "-");
 
   // Create headers (timing for each file)
-  const headers = processedContents.map((_, index) => `${startHour + index}:00`);
+  const headers = processedContents.map((_, index) => startHour + index <24 ?`${startHour + index}:00` :`${index-13}:00`);
+  
   excelData.push(headers);
 
   // Determine the max number of tags in any file

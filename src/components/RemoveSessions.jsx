@@ -31,9 +31,7 @@ export default function RemoveSessions() {
     setIsModalOpen(false);
     setSeparator("");
   };
-  useEffect(() => {
-    console.log(entityName);
-  }, [entityName]);
+  
   const handleRemoveTags = async () => {
     if (!tagsToRemove) {
       toast.error("Please specify tags to remove.");
