@@ -10,6 +10,8 @@ export default function Sidebar({ isOpen, toggle }) {
     { path: "/delimiterSwitch", label: "Delimiter Switch" },
     { path: "/spliter", label: "Drive Spliter" },
     { path: "/logChecker", label: "Log Checker" },
+    { path: "/logCheckerBeta", label: "Log Checker - TEST" },
+
     // { path: "/spamCalculator", label: "Spam Calculator" },
     { path: "/ramadanTask", label: "Next Day Login" },
     { path: "/addSessionBeta", label: "Add Session Beta" },

@@ -12,7 +12,7 @@ export default function SpliterSettingsModal({
     fixedQuantity,
     shuffle,
     fastKill,
-    loginNextDay,
+    loginNextDay,timeType,scheduleTasks
   } = modalSettings;
 
   if (!isOpen) return null;
@@ -61,7 +61,18 @@ export default function SpliterSettingsModal({
             />
           </div>
         )}
+        {/* Time Type Input*/}
 
+        <div className="mt-4 flex justify-between items-center">
+          <span className="text-gray-700 font-medium">Time Type</span>
+          <input
+              type="number"
+              value={timeType}
+              onChange={(e) => updateSetting("timeType", e.target.value)}
+              className="w-[3.5rem] px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:border-blue-500"
+            />
+       
+        </div>
         {/* Shuffle Toggle */}
         <div className="mt-4 flex justify-between items-center">
           <span className="text-gray-700 font-medium">Apply Shuffle</span>
@@ -74,6 +85,21 @@ export default function SpliterSettingsModal({
             {shuffle ? "Yes" : "No"}
           </button>
         </div>
+
+        
+        {/* Fast Kill Toggle */}
+        <div className="mt-4 flex justify-between items-center">
+          <span className="text-gray-700 font-medium">Schedule Tasks</span>
+          <button
+            onClick={() => updateSetting("scheduleTasks", !scheduleTasks)}
+            className={`px-4 py-2 rounded-lg transition ${
+              scheduleTasks ? "bg-green-600 text-white" : "bg-gray-300 text-gray-700"
+            }`}
+          >
+            {scheduleTasks ? "Yes" : "No"}
+          </button>
+        </div>
+
 
         {/* Fast Kill Toggle */}
         <div className="mt-4 flex justify-between items-center">

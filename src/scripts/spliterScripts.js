@@ -179,7 +179,9 @@ export const downloadZip = async (
   sessions,
   fastKill,
   loginNextDay,
-  nextDaySeeds
+  nextDaySeeds,
+  timeType,
+  scheduleTasks
 ) => {
   if (delimiter === "\\n") {
     delimiter = "\n";
@@ -230,7 +232,9 @@ export const downloadZip = async (
       session.script,
       fastKill,
       loginNextDay,
-      loginNextDay ? collectedData[sessionIndex] : []
+      loginNextDay ? collectedData[sessionIndex] : [],
+      timeType,
+      scheduleTasks
     )
       .then((excelBlob) => {
         zip.file(`Excels/${session.name}.xlsx`, excelBlob);
@@ -260,7 +264,7 @@ export const downloadZip = async (
     let today = new Date();
     let formattedDate = `${String(today.getDate()).padStart(2, "0")}/${String(
       today.getMonth() + 1
-    ).padStart(2, "0" )}-${String(today.getHours()).padStart(2, "0")}-${String(
+    ).padStart(2, "0")}-${String(today.getHours()).padStart(2, "0")}-${String(
       today.getMinutes()
     ).padStart(2, "0")}`;
 
@@ -271,7 +275,6 @@ export const downloadZip = async (
     saveAs(zipBlob, `CMH${entityName}-${formattedDate}.zip`);
   }, 1000); // Small delay to ensure Excel files are added
 };
-
 
 export const generateExcel = (seedsBySessionPerDrop) => {
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
@@ -359,7 +362,9 @@ export const generateSchedule = async (
   scriptName,
   fastKill,
   loginNextDay,
-  nextDaySeeds
+  nextDaySeeds,
+  timeType,
+  scheduleTasks
 ) => {
   try {
     const response = await fetch("/CMHW-TOOLS/template.xlsx");
@@ -373,6 +378,7 @@ export const generateSchedule = async (
     let allProfiles = [];
 
     // ✅ Drop tasks
+
     profilesByDrop.forEach((profileGroup, index) => {
       if (profileGroup.length === 0) return;
       const dropProfiles = profileGroup.map((p) => p[0]);
@@ -382,28 +388,35 @@ export const generateSchedule = async (
       if (hours === 0) lastDropDate.setDate(today.getDate() + 1);
       lastDropDate.setHours(hours, minutes + 5, 0);
 
-      let formattedDate = lastDropDate.toLocaleDateString("en-GB").split("/").join("/");
+      let formattedDate = lastDropDate
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .join("/");
       let formattedTime = lastDropDate.toTimeString().split(" ")[0];
       let scheduledTime = `${formattedDate} ${formattedTime}`;
 
       // ✅ Add 55 minutes for end time
       let endDate = new Date(lastDropDate.getTime());
       endDate.setMinutes(endDate.getMinutes() + 55);
-      let endFormattedDate = endDate.toLocaleDateString("en-GB").split("/").join("/");
+      let endFormattedDate = endDate
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .join("/");
       let endFormattedTime = endDate.toTimeString().split(" ")[0];
       let endScheduledTime = `${endFormattedDate} ${endFormattedTime}`;
+      if (scheduleTasks) {
+        worksheet[`A${rowIndex}`] = { v: index + 1 };
+        worksheet[`B${rowIndex}`] = { v: sessionName };
+        worksheet[`C${rowIndex}`] = { v: scriptName };
+        worksheet[`D${rowIndex}`] = { v: dropProfiles.join("|") };
+        worksheet[`E${rowIndex}`] = { v: scheduledTime };
+        worksheet[`F${rowIndex}`] = { v: endScheduledTime };
+        worksheet[`G${rowIndex}`] = { v: configName };
+        worksheet[`H${rowIndex}`] = { v: timeType };
+        worksheet[`I${rowIndex}`] = { v: `Drop ${index + 1}` };
 
-      worksheet[`A${rowIndex}`] = { v: index + 1 };
-      worksheet[`B${rowIndex}`] = { v: sessionName };
-      worksheet[`C${rowIndex}`] = { v: scriptName };
-      worksheet[`D${rowIndex}`] = { v: dropProfiles.join("|") };
-      worksheet[`E${rowIndex}`] = { v: scheduledTime };
-      worksheet[`F${rowIndex}`] = { v: endScheduledTime };
-      worksheet[`G${rowIndex}`] = { v: configName };
-      worksheet[`H${rowIndex}`] = { v: 1 };
-      worksheet[`I${rowIndex}`] = { v: `Drop ${index + 1}` };
-
-      rowIndex++;
+        rowIndex++;
+      }
     });
 
     // ✅ FAST_SPAM_KILL_EMPTY
@@ -414,11 +427,17 @@ export const generateSchedule = async (
       let fastKillEndDate = new Date(fastKillStartDate.getTime());
       fastKillEndDate.setMinutes(fastKillEndDate.getMinutes() + 55); // ✅ Add 55min
 
-      let fastKillDate = fastKillStartDate.toLocaleDateString("en-GB").split("/").join("/");
+      let fastKillDate = fastKillStartDate
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .join("/");
       let fastKillTime = fastKillStartDate.toTimeString().split(" ")[0];
       let fastKillScheduledTime = `${fastKillDate} ${fastKillTime}`;
 
-      let fastKillEndDateStr = fastKillEndDate.toLocaleDateString("en-GB").split("/").join("/");
+      let fastKillEndDateStr = fastKillEndDate
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .join("/");
       let fastKillEndTimeStr = fastKillEndDate.toTimeString().split(" ")[0];
       let fastKillScheduledEndTime = `${fastKillEndDateStr} ${fastKillEndTimeStr}`;
 
@@ -429,7 +448,7 @@ export const generateSchedule = async (
       worksheet[`E${rowIndex}`] = { v: fastKillScheduledTime };
       worksheet[`F${rowIndex}`] = { v: fastKillScheduledEndTime };
       worksheet[`G${rowIndex}`] = { v: "FAST_SPAM_KILL_EMPTY" };
-      worksheet[`H${rowIndex}`] = { v: 1 };
+      worksheet[`H${rowIndex}`] = { v: timeType };
       worksheet[`I${rowIndex}`] = { v: "FAST_SPAM_KILL" };
 
       rowIndex++;
@@ -445,8 +464,14 @@ export const generateSchedule = async (
       let loginEndDate = new Date(loginStartDate.getTime());
       loginEndDate.setMinutes(loginEndDate.getMinutes() + 55); // ✅ Add 55 min
 
-      let loginStartFormatted = `${loginStartDate.toLocaleDateString("en-GB").split("/").join("/")} ${loginStartDate.toTimeString().split(" ")[0]}`;
-      let loginEndFormatted = `${loginEndDate.toLocaleDateString("en-GB").split("/").join("/")} ${loginEndDate.toTimeString().split(" ")[0]}`;
+      let loginStartFormatted = `${loginStartDate
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .join("/")} ${loginStartDate.toTimeString().split(" ")[0]}`;
+      let loginEndFormatted = `${loginEndDate
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .join("/")} ${loginEndDate.toTimeString().split(" ")[0]}`;
 
       const nextDayProfiles = nextDaySeeds.map((p) => p[0]);
 
@@ -457,7 +482,7 @@ export const generateSchedule = async (
       worksheet[`E${rowIndex}`] = { v: loginStartFormatted };
       worksheet[`F${rowIndex}`] = { v: loginEndFormatted };
       worksheet[`G${rowIndex}`] = { v: "check_status" };
-      worksheet[`H${rowIndex}`] = { v: 1 };
+      worksheet[`H${rowIndex}`] = { v: timeType };
       worksheet[`I${rowIndex}`] = { v: "NEXT_DAY_LOGIN" };
 
       rowIndex++;
@@ -476,7 +501,3 @@ export const generateSchedule = async (
     console.error("Error updating Excel template:", error);
   }
 };
-
-
-
-

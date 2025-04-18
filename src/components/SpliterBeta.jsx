@@ -36,7 +36,10 @@ export default function SpliterBeta() {
   const [isSessionModalOpen, setSessionModalOpen] = useState(false); // Modal state
   //Entities Modal
   const entities = [
-    ...Array.from({ length: 15 }, (_, i) => ({ id: i + 1, name: `CMH${i + 1}` })),
+    ...Array.from({ length: 15 }, (_, i) => ({
+      id: i + 1,
+      name: `CMH${i + 1}`,
+    })),
     { id: 30, name: "CMH3-Offer" },
     { id: 60, name: "CMH6-Offer" },
     { id: 120, name: "CMH12-Offer" },
@@ -54,14 +57,14 @@ export default function SpliterBeta() {
     shuffle: false,
     fastKill: true,
     loginNextDay: true,
+    timeType: 1,
+    scheduleTasks : true
   });
   useEffect(() => {
-    console.log()
+    console.log();
     const fetchData = async () => {
       try {
-        console.log("selectedEntity",selectedEntity)
-
-       
+        console.log("selectedEntity", selectedEntity);
 
         const data = await fetchEntityId(selectedEntity);
 
@@ -163,7 +166,10 @@ export default function SpliterBeta() {
       activeSessions,
       modalSettings.fastKill,
       modalSettings.loginNextDay,
-      nextDaySeeds
+      nextDaySeeds,
+      modalSettings.timeType,modalSettings.scheduleTasks
+
+      
     );
 
     setSeedsBySessionPerDrop(splitDataByDrops);
