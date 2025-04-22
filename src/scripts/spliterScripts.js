@@ -372,6 +372,7 @@ export const generateSchedule = async (
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 
+
     const today = new Date();
     let rowIndex = 2;
     let lastDropDate = new Date(today);

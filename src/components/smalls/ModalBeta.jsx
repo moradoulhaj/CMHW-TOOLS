@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { fetchEntityId } from "../../api/apiService";
+import { toast } from "react-toastify";
 
 export default function ModalBeta({
   isModalOpen,
   setIsModalOpen,
   onSave,
   selectedEntity,
+  modalSettings,
 }) {
   const [pausedSessions, setPausedSessions] = useState([]); // Store fetched sessions
   const [selectedSession, setSelectedSession] = useState(""); // Selected session
@@ -16,23 +18,24 @@ export default function ModalBeta({
   // Handle starting drop number change
   const handleDropChange = (e) => {
     let value = Number(e.target.value); // Ensure it's a number
-  
+
     if (value <= timedrops.length && value >= 1) {
       setStartingTimeDrops(value);
-      const newTimeDrops = timedrops.slice(value - 1); 
+      const newTimeDrops = timedrops.slice(value - 1);
       setNewTimedrops(newTimeDrops);
     } else {
       setStartingTimeDrops(1);
       setNewTimedrops(timedrops); // Ensure full list remains when invalid input
     }
   };
-  
+
   // Fetch paused sessions when modal opens
   useEffect(() => {
     if (isModalOpen) {
       fetchPausedSessions();
     }
   }, [isModalOpen]);
+
 
   const fetchPausedSessions = async () => {
     try {
@@ -43,8 +46,7 @@ export default function ModalBeta({
       const timedropsArray = response.timedrops.split(",");
       setTimeDrops(timedropsArray);
       setPausedSessions(paused);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   return (
@@ -71,7 +73,6 @@ export default function ModalBeta({
                 (session) => session.id.toString() === selectedId
               );
               setSelectedSession(selectedObj || "");
-              
             }}
             className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
           >
@@ -121,8 +122,12 @@ export default function ModalBeta({
           <button
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
             onClick={() => {
+              if (!selectedSession) {
+                toast.error("Select one session at least");
+                return; // Do nothing if no session selected
+              }
+              onSave(selectedSession, newTimedrops, startingTimeDrops);
               setIsModalOpen(false);
-              onSave(selectedSession,newTimedrops,startingTimeDrops);
             }}
           >
             Save

@@ -42,6 +42,7 @@ export default function SpliterBeta() {
     })),
     { id: 30, name: "CMH3-Offer" },
     { id: 60, name: "CMH6-Offer" },
+    { id: 80, name: "CMH8-Offer" },
     { id: 120, name: "CMH12-Offer" },
 
     { id: 150, name: "CMH15-Offer" },
@@ -58,7 +59,7 @@ export default function SpliterBeta() {
     fastKill: true,
     loginNextDay: true,
     timeType: 1,
-    scheduleTasks : true
+    scheduleTasks: true,
   });
   useEffect(() => {
     console.log();
@@ -167,9 +168,8 @@ export default function SpliterBeta() {
       modalSettings.fastKill,
       modalSettings.loginNextDay,
       nextDaySeeds,
-      modalSettings.timeType,modalSettings.scheduleTasks
-
-      
+      modalSettings.timeType,
+      modalSettings.scheduleTasks
     );
 
     setSeedsBySessionPerDrop(splitDataByDrops);
