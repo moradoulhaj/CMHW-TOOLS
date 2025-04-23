@@ -9,6 +9,7 @@ import {
   downloadZip,
   generateExcel,
   parseNumberTagPairs,
+  splitProportionedAndRemainder,
   splitSessionsByDrops,
 } from "../scripts/spliterScripts";
 import { fetchEntityId } from "../api/apiService"; // Import API function
@@ -60,7 +61,13 @@ export default function SpliterBeta() {
     loginNextDay: true,
     timeType: 1,
     scheduleTasks: true,
+    coversationOff: false,
+    morningDrops: 7,
+    morningDropsQuantity: 50,
+    nightDrops: 0,
+    nightDropsQuantity: 100,
   });
+
   useEffect(() => {
     console.log();
     const fetchData = async () => {
@@ -122,15 +129,12 @@ export default function SpliterBeta() {
 
   // Here the split log
   const handleSplit = async () => {
-    // if no tag area is empty
     if (tagsToSplit === "") {
       toast.error("No tags");
       return;
     }
 
-    //Taking the first line of the input
     const firstLine = tagsToSplit.split("\n")[0];
-    // then passung the first line to return the number of sessions
     const sessionsNumber = calcSessions(firstLine);
     setSessionCount(sessionsNumber);
 
@@ -141,26 +145,64 @@ export default function SpliterBeta() {
       toast.error("Session count mismatch");
       return;
     }
+
     const lines = tagsToSplit
       .split("\n")
       .map((line) => parseNumberTagPairs(line));
 
     const collectedData = await collectData(lines, sessionsNumber);
-
     setSeedsBySessions(collectedData);
+
     if (collectedData === "wrongIinput") {
       return;
     }
 
-    const splitDataByDrops = splitSessionsByDrops(
-      collectedData,
-      timeDrops.length,
-      modalSettings.useFixedQuantity,
-      modalSettings.fixedQuantity
-    );
-    // generateExcel(splitDataByDrops)
+    let finalSplitData = [];
+
+    // CLH7 Logic
+    if (selectedEntity == 7) {
+      const totalMorningSeeds =
+        modalSettings.morningDropsQuantity * modalSettings.morningDrops;
+      const totalNightSeeds =
+        modalSettings.nightDrops * modalSettings.nightDropsQuantity;
+
+      const { proportioned, remainder } = splitProportionedAndRemainder(
+        collectedData,
+        totalMorningSeeds
+      );
+
+      const dropsFromProportioned = splitSessionsByDrops(
+        proportioned,
+        modalSettings.morningDrops,
+        true,
+        modalSettings.morningDropsQuantity
+      );
+
+      const dropsFromRemainder = splitSessionsByDrops(
+        remainder,
+        modalSettings.nightDrops,
+        true,
+        modalSettings.nightDropsQuantity
+      );
+
+      finalSplitData = dropsFromProportioned.map(
+        (morningSessionDrops, index) => {
+          const nightSessionDrops = dropsFromRemainder[index];
+          return [...morningSessionDrops, ...nightSessionDrops];
+        }
+      );
+    } else {
+      // Standard logic
+      finalSplitData = splitSessionsByDrops(
+        collectedData,
+        timeDrops.length,
+        modalSettings.useFixedQuantity,
+        modalSettings.fixedQuantity
+      );
+    }
+    
     downloadZip(
-      splitDataByDrops,
+      finalSplitData,
       delimiter,
       selectedEntity,
       timeDrops,
@@ -169,10 +211,12 @@ export default function SpliterBeta() {
       modalSettings.loginNextDay,
       nextDaySeeds,
       modalSettings.timeType,
-      modalSettings.scheduleTasks
+      modalSettings.scheduleTasks,
+      modalSettings.coversationOff
     );
 
-    setSeedsBySessionPerDrop(splitDataByDrops);
+    setSeedsBySessionPerDrop(finalSplitData);
+
     toast.success("Split successfully");
     setProcessedContents(collectedData);
   };
@@ -251,7 +295,6 @@ export default function SpliterBeta() {
             Session In Repo
           </label>
           <div className="relative">
-            {" "}
             <input
               id="sessionNumbers"
               type="number"
@@ -304,6 +347,8 @@ export default function SpliterBeta() {
         modalSettings={modalSettings}
         setModalSettings={setModalSettings}
         onApply={handleSplit}
+        selectedEntity={selectedEntity}
+        timedrops={timeDrops}
       />
 
       {/* Session Modal */}
