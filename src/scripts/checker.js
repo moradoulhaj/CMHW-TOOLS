@@ -80,7 +80,7 @@ export const checkLogs = (profiles, logs) => {
         case "phone_number":
           phoneNumberProfiles.push(profilesArr[i]);
           break;
-        case "unusual_activity":
+        case "unusual_activity" || "account_disabled_unusual":
           unusualActivityProfiles.push(profilesArr[i]);
           break;
         case "wrong_browser":

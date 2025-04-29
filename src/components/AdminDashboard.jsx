@@ -6,6 +6,8 @@ import { deleteSession, fetchEntityId } from "../api/apiService";
 
 const entities = [
   ...Array.from({ length: 15 }, (_, i) => ({ id: i + 1, name: `CMH${i + 1}` })),
+  { id: 70, name: "CMH7-Mobile" },
+
   { id: 30, name: "CMH3-Offer" },
   { id: 60, name: "CMH6-Offer" },
   { id: 80, name: "CMH8-Offer" },
