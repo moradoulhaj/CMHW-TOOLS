@@ -84,7 +84,6 @@ export const splitSessionsByDrops = (
     (acc, session) => acc + session.length,
     0
   );
-
   return collectedData.map((session, sessionIndex) => {
     const sessionProportion = Math.round(
       (session.length / totalSeeds) * Quantity
@@ -103,6 +102,54 @@ export const splitSessionsByDrops = (
     chunks.push(session.slice(start));
     return chunks;
   });
+};
+
+// // function to calcumate propportion
+// export const calcProportion = (collectedData, totalMorningSeeds) => {
+//   const totalSeeds = collectedData.reduce(
+//     (acc, session) => acc + session.length,
+//     0
+//   );
+
+//   return collectedData.map((session) =>
+//     Math.round((session.length / totalSeeds) * totalMorningSeeds)
+//   );
+// };
+export const splitProportionedAndRemainder = (collectedData, Quantity) => {
+  const totalSeeds = collectedData.reduce(
+    (acc, session) => acc + session.length,
+    0
+  );
+
+  let remainingQuantity = Quantity;
+
+  const proportioned = [];
+  const remainder = [];
+
+  for (let i = 0; i < collectedData.length; i++) {
+    const session = collectedData[i];
+    let sessionProportion = Math.round(
+      (session.length / totalSeeds) * Quantity
+    );
+    // Last session takes the rest to fix rounding issues
+    if (i === collectedData.length - 1) {
+      sessionProportion = remainingQuantity;
+    }
+
+    remainingQuantity -= sessionProportion;
+
+    // Split session
+    const extracted = session.slice(0, sessionProportion);
+    const leftOver = session.slice(sessionProportion);
+
+    proportioned.push(extracted);
+    remainder.push(leftOver);
+  }
+
+  return {
+    proportioned,
+    remainder,
+  };
 };
 
 // Function to generate Excel file from session data
@@ -181,7 +228,8 @@ export const downloadZip = async (
   loginNextDay,
   nextDaySeeds,
   timeType,
-  scheduleTasks
+  scheduleTasks,
+  coversationOff
 ) => {
   if (delimiter === "\\n") {
     delimiter = "\n";
@@ -189,7 +237,7 @@ export const downloadZip = async (
     delimiter = ";";
   }
 
-  // ✅ Now some logic for next Day
+  // ✅ Logic for Next Day
   if (loginNextDay) {
     const firstLine = nextDaySeeds.split("\n")[0];
     const sessionsNumber = calcSessions(firstLine) - 0.5;
@@ -213,6 +261,7 @@ export const downloadZip = async (
   const zip = new JSZip();
   const combinedDrops = [];
 
+  // ✅ Iterate over sessions and drops to populate combinedDrops
   seedsBySessionPerDrop.forEach((sessionDrops, sessionIndex) => {
     const session = sessions[sessionIndex];
     sessionDrops.forEach((drop, dropIndex) => {
@@ -234,17 +283,14 @@ export const downloadZip = async (
       loginNextDay,
       loginNextDay ? collectedData[sessionIndex] : [],
       timeType,
-      scheduleTasks
+      scheduleTasks,
+      coversationOff
     )
       .then((excelBlob) => {
         zip.file(`Excels/${session.name}.xlsx`, excelBlob);
       })
       .catch((error) =>
-        console.error(
-          "Error generating Excel for session:",
-          session.name,
-          error
-        )
+        console.error("Error generating Excel for session:", session.name, error)
       );
   });
 
@@ -255,10 +301,15 @@ export const downloadZip = async (
     zip.file(fileName, fileContent);
   });
 
+  // ✅ Generate and add a text log file for drop summary
+  const dropLogTxt = generateDropLogTxt(seedsBySessionPerDrop);
+  zip.file(`Excels/Drop_Seed_Log.txt`, dropLogTxt);
+
   // ✅ Store the main Excel file inside "Excels" folder
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
-  zip.file(`Excels/${entityName}.xlsx`, excelBlob);
+  zip.file(`Excels/CMH${entityName}.xlsx`, excelBlob);
 
+  // ✅ Generate the zip file
   setTimeout(async () => {
     const zipBlob = await zip.generateAsync({ type: "blob" });
     let today = new Date();
@@ -272,15 +323,40 @@ export const downloadZip = async (
       formattedDate += `-WithLogin${nextDay}`;
     }
 
+    // Download the zip file
     saveAs(zipBlob, `CMH${entityName}-${formattedDate}.zip`);
   }, 1000); // Small delay to ensure Excel files are added
 };
 
-export const generateExcel = (seedsBySessionPerDrop) => {
-  const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
-  saveAs(excelBlob, "sessions_data.xlsx");
+// Helper function to generate a drop log in text format
+const generateDropLogTxt = (seedsBySessionPerDrop) => {
+  const dropCount = seedsBySessionPerDrop[0]?.length || 0;
+  let log = "";
+
+  // Iterate over each drop
+  for (let dropIndex = 0; dropIndex < dropCount; dropIndex++) {
+    log += `Drop ${dropIndex + 1}\n-----------------\n`;
+    let total = 0;
+
+    // Iterate over each session
+    seedsBySessionPerDrop.forEach((session, sessionIndex) => {
+      const drop = session[dropIndex] || [];
+      const count = drop.length;
+      total += count;
+      log += `Session ${sessionIndex + 1}: ${count} seed${count !== 1 ? "s" : ""}\n`;
+    });
+
+    log += `Total: ${total} seed${total !== 1 ? "s" : ""}\n\n`;
+  }
+
+  return log;
 };
 
+
+export const generateExcel = (seedsBySessionPerDrop,entityName) => {
+  const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
+  saveAs(excelBlob, `CMH${entityName}.xlsx`);
+};
 export const generateExcelBlob = (seedsBySessionPerDrop) => {
   const worksheetData = [];
   const profileSheetData = [];
@@ -364,7 +440,8 @@ export const generateSchedule = async (
   loginNextDay,
   nextDaySeeds,
   timeType,
-  scheduleTasks
+  scheduleTasks,
+  coversationOff
 ) => {
   try {
     const response = await fetch("/CMHW-TOOLS/template.xlsx");
@@ -453,8 +530,8 @@ export const generateSchedule = async (
 
       rowIndex++;
     }
-
     // ✅ NEXT_DAY_LOGIN
+
     if (loginNextDay) {
       let nextDay = new Date(today);
       nextDay.setDate(today.getDate() + 1);
@@ -487,6 +564,40 @@ export const generateSchedule = async (
 
       rowIndex++;
     }
+    // ✅ Deactivate Convversation task
+
+    if (coversationOff) {
+      let nextDay = new Date(today);
+      nextDay.setDate(today.getDate() + 1);
+      nextDay.setHours(9, 0, 0); // 09:00:00
+
+      let loginStartDate = new Date(nextDay);
+      let loginEndDate = new Date(loginStartDate.getTime());
+      loginEndDate.setMinutes(loginEndDate.getMinutes() + 55); // ✅ Add 55 min
+
+      let loginStartFormatted = `${loginStartDate
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .join("/")} ${loginStartDate.toTimeString().split(" ")[0]}`;
+      let loginEndFormatted = `${loginEndDate
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .join("/")} ${loginEndDate.toTimeString().split(" ")[0]}`;
+
+      const nextDayProfiles = nextDaySeeds.map((p) => p[0]);
+
+      worksheet[`A${rowIndex}`] = { v: rowIndex - 1 };
+      worksheet[`B${rowIndex}`] = { v: sessionName };
+      worksheet[`C${rowIndex}`] = { v: "Login_Gmail.js" };
+      worksheet[`D${rowIndex}`] = { v: nextDayProfiles.join("|") };
+      worksheet[`E${rowIndex}`] = { v: loginStartFormatted };
+      worksheet[`F${rowIndex}`] = { v: loginEndFormatted };
+      worksheet[`G${rowIndex}`] = { v: "check_status" };
+      worksheet[`H${rowIndex}`] = { v: timeType };
+      worksheet[`I${rowIndex}`] = { v: "Deactivate Conversation" };
+
+      rowIndex++;
+    }
 
     // ⬇️ Return Excel blob
     const excelBlob = new Blob(
@@ -501,3 +612,4 @@ export const generateSchedule = async (
     console.error("Error updating Excel template:", error);
   }
 };
+

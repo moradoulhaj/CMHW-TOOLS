@@ -34,11 +34,25 @@ export default function SpamCalculator() {
       rows.map((row) => [row[colIndex], ""]).filter(([profile]) => profile)
     );
 
-    // Step 3: Convert profilesWithSpam input into a lookup map
+    // // Step 3: Convert profilesWithSpam input into a lookup map
+    // const profilesWithSpamArr = profilesWithSpamData
+    //   .split("\n")
+    //   .map((line) => line.split("\t"));
+
     const profilesWithSpamArr = profilesWithSpamData
       .split("\n")
-      .map((line) => line.split("\t"));
+      .filter((line) => /^\d+\s+❯\s+\d+\s+-/.test(line)) // lines with profile ❯ spam
+      .map((line) => {
+        const match = line.match(/^(\d+)\s+❯\s+(\d+)/);
+        return match ? [match[1], match[2]] : null;
+      })
+      .filter(Boolean); // remove null entries
+    console.log(profilesWithSpamArr);
     const spamMap = new Map(profilesWithSpamArr);
+    // const profilesWithSpamArr = profilesWithSpamData
+    //   .split("\n")
+    //   .map((line) => line.split("\t"));
+    // const spamMap = new Map(profilesWithSpamArr);
 
     // Step 4: Count occurrences of each profile
     const profileCount = new Map();
@@ -131,7 +145,10 @@ export default function SpamCalculator() {
 
         {/* Render table only if matchedSessions has data */}
         {matchedSessions.length > 0 && (
-          <TableDisplay matchedSessions={matchedSessions} modeToTable={modeToTable}/>
+          <TableDisplay
+            matchedSessions={matchedSessions}
+            modeToTable={modeToTable}
+          />
         )}
       </div>
 

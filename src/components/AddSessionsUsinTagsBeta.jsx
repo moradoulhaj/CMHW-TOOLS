@@ -13,22 +13,32 @@ import Modal from "./smalls/Modal";
 import ModalBeta from "./smalls/ModalBeta";
 import {
   collectData,
+  generateSchedule,
   parseNumberTagPairs,
   splitSessionsByDrops,
 } from "../scripts/spliterScripts";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 export default function AddSessionUsingTagsBeta() {
   const [oldFiles, setOldFiles] = useState([]);
   const [processedFiles, setprocessedFiles] = useState([]);
   const [tagsToAdd, setTagsToAdd] = useState("");
+  const [selectedEntity, setSelectedEntity] = useState(1);
   const [startingDropNbr, setStartingDropNbr] = useState(1);
+
   const [isDragging, setIsDragging] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [profilesByDrop, setProfilesByDrop] = useState([]);
   const [excelBlob, setExcelBlob] = useState(null);
   const oldFileInputRef = useRef(null);
+  // States for Schedule settings
 
-  const [selectedEntity, setSelectedEntity] = useState(1);
+  const [modalSettings, setModalSettings] = useState({
+    fastKill: true,
+    loginNextDay: false,
+    timeType: 3,
+    // scheduleTasks : true
+  });
 
   const entities = [
     ...Array.from({ length: 15 }, (_, i) => ({
@@ -75,6 +85,9 @@ export default function AddSessionUsingTagsBeta() {
       0
     );
     let indexToAdd = 0;
+
+    const zip = new JSZip(); // <- initialize here
+
     const modifiedFiles = await Promise.all(
       oldFiles.map(async (file) => {
         const match = file.name.match(/file_(\d+)/);
@@ -82,47 +95,56 @@ export default function AddSessionUsingTagsBeta() {
 
         const content = await readFileContent(file);
         if (fileIndex < startingTimeDrops) {
-          console.log(file.name, content);
-
+          zip.file(`${file.name}`, content); // Add original content
           return { name: file.name, content };
         }
 
         const tagsToAppend = (splitDataByDrops[0][indexToAdd] || []).map(
           ([_, tag]) => tag
-        ); // Extract only tags
+        );
         const modifiedContent = tagsToAppend.length
           ? `${content}\n${tagsToAppend.join("\n")}`
           : content;
 
         indexToAdd++;
-        console.log(file.name, modifiedContent);
+        zip.file(`${file.name}`, modifiedContent); // Add modified content
 
         return { name: file.name, content: modifiedContent };
       })
     );
-    generateSchedule(
-      sessionDrops,
-      newTimedrops,
-      selectedSession.username,
-      selectedSession.config,
-      selectedSession.script,
-      true,
-      false,
-      "loginNextDay ? collectedData[sessionIndex] : []"
-    )
-      .then((excelBlob) => {
-        zip.file(`Excels/${session.name}.xlsx`, excelBlob);
-      })
-      .catch((error) =>
-        console.error(
-          "Error generating Excel for session:",
-          session.name,
-          error
-        )
+
+    try {
+      const excelBlob = await generateSchedule(
+        splitDataByDrops[0],
+        newTimedrops,
+        selectedSession.username,
+        selectedSession.config,
+        selectedSession.script,
+        modalSettings.fastKill,
+        false,
+        [],
+        modalSettings.timeType,
+        true
       );
-    
-    setprocessedFiles(modifiedFiles); // ✅ Update state
-    toast.success("Files processed successfully!");
+
+      zip.file(`Excels/${selectedSession.name}.xlsx`, excelBlob);
+
+      // Generate and trigger the zip download
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(
+        zipBlob,
+        `${selectedSession.name.split("_")[0]}_WithSessionAdded.zip`
+      );
+
+      toast.success("ZIP file downloaded with files and Excel!");
+    } catch (error) {
+      console.error(
+        "Error generating Excel for session:",
+        selectedSession.name,
+        error
+      );
+      toast.error("Failed to generate Excel.");
+    }
   };
 
   return (
@@ -214,6 +236,8 @@ export default function AddSessionUsingTagsBeta() {
         // Suggested code may be subject to a license. Learn more: ~LicenseLog:3731383436.
         onSave={processFiles}
         selectedEntity={selectedEntity}
+        modalSettings={modalSettings}
+
       />
     </div>
   );

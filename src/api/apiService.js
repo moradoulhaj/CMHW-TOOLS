@@ -16,9 +16,14 @@ export const fetchEntityId = async (entityId) => {
     const response = await axiosInstance.get(`/dep/${entityId}`);
     return response.data;
   } catch (error) {
-    throw error;
+    if (error.response && error.response.status === 404) {
+      throw new Error("Entity not found");
+    } else {
+      throw new Error("Failed to fetch entity data");
+    }
   }
 };
+
 
 // Update multiple session statuses
 export const updateSessionStatuses = async (sessionsStatus) => {
