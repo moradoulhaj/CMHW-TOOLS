@@ -57,7 +57,7 @@ export default function Spliter() {
     }
     const splitDataByDrops = splitSessionsByDrops(collectedData, dropNumbers);
     toast.success("Split successfully");
-    generateExcel(splitDataByDrops);
+    generateExcel(splitDataByDrops,entityName);
   };
 
   return (

@@ -307,7 +307,7 @@ export const downloadZip = async (
 
   // ✅ Store the main Excel file inside "Excels" folder
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
-  zip.file(`Excels/${entityName}.xlsx`, excelBlob);
+  zip.file(`Excels/CMH${entityName}.xlsx`, excelBlob);
 
   // ✅ Generate the zip file
   setTimeout(async () => {
@@ -353,11 +353,10 @@ const generateDropLogTxt = (seedsBySessionPerDrop) => {
 };
 
 
-export const generateExcel = (seedsBySessionPerDrop) => {
+export const generateExcel = (seedsBySessionPerDrop,entityName) => {
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
-  saveAs(excelBlob, "sessions_data.xlsx");
+  saveAs(excelBlob, `CMH${entityName}.xlsx`);
 };
-
 export const generateExcelBlob = (seedsBySessionPerDrop) => {
   const worksheetData = [];
   const profileSheetData = [];
