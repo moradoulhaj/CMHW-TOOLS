@@ -16,6 +16,7 @@ export default function Monitor({ result }) {
     ...(result?.notLogsProfiles || []),
     ...(result?.disconnectedProfiles || []),
     ...(result?.othersProfiles || []),
+    ...(result?.wrongBrowserProfiles || []),
   ];
 
   // Keydown listener for modal toggle
@@ -43,7 +44,11 @@ export default function Monitor({ result }) {
       { id: "proxyDown", label: "Proxy Down", data: result?.proxyDownProfiles },
       { id: "spamDeleted", label: "Spam Deleted", data: result?.spamDeleted },
 
-      { id: "spamNotDeleted", label: "Spam Not Deleted", data: result?.spamNotDeleted },
+      {
+        id: "spamNotDeleted",
+        label: "Spam Not Deleted",
+        data: result?.spamNotDeleted,
+      },
 
       {
         id: "maxExecutionTime",
@@ -109,6 +114,7 @@ export default function Monitor({ result }) {
             label={label}
             value={data.join("\n")}
             setModalogs={setModalogs}
+            logs={result?.othersLogs}
           />
         );
       }

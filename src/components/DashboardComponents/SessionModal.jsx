@@ -10,6 +10,7 @@ const SessionModal = ({ isOpen, onClose, session, setSessionData, entityId }) =>
     config: "",
     isActive: false,
     dep: entityId, 
+    index:"",
   });
 
   useEffect(() => {
@@ -74,6 +75,21 @@ const SessionModal = ({ isOpen, onClose, session, setSessionData, entityId }) =>
           {session ? "Edit Session" : "Add Session"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Session Order <span className="text-red-500">*</span>
+            </label>
+            <input
+              name="index"
+              value={formData.index}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
+              placeholder="Enter session name"
+              required
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Session Name <span className="text-red-500">*</span>

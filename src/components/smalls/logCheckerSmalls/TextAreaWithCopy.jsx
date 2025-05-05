@@ -2,11 +2,33 @@ import { useEffect, useRef, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProxiesModal from "../ProxiesModal";
+import { postTicket } from "../../../api/apiService";
+import { Tag } from "lucide-react";
 
-export default function TextAreaWithCopy({ id, label, value ,forProxies , setModalogs }) {
-
+export default function TextAreaWithCopy({
+  id,
+  label,
+  value,
+  forProxies,
+  setModalogs,
+  logs,
+}) {
   const textAreaRef = useRef(null);
+  const handlePost = () => {
+    setModalogs(true);
+    let profileAndTags = value.split("\n");
+    let profileAndTagsAndLogs = profileAndTags.map(
+      (profile, i) => `${profile}\t${logs[i]}`
+    );
+    // Create a message string (joined by newlines)
+    const message = profileAndTagsAndLogs.join("\n");
 
+    // POST to backend only if message has content
+    if (message.trim()) {
+      postTicket(message);
+      toast.success("Ticket Posted Succesfully");
+    }
+  };
   const countLines = (text) => (text ? text.split("\n").length : 0);
   const copyToProfilesAndTagsToClipboard = () => {
     navigator.clipboard
@@ -21,16 +43,17 @@ export default function TextAreaWithCopy({ id, label, value ,forProxies , setMod
 
   const copyProfilesNumbersToClipboard = () => {
     // Extract profile numbers
-    const profileNumbers = id === "pairedList" 
-      ? value
-          .split("\n")
-          .map((line) => line.split(";")[0]) // Assuming `;` is the delimiter for `pairedList`
-          .join("\n")
-      : value
-          .split("\n")
-          .map((line) => line.split("\t")[0]) // Assuming `\t` is the delimiter for other cases
-          .join("\n");
-  
+    const profileNumbers =
+      id === "pairedList"
+        ? value
+            .split("\n")
+            .map((line) => line.split(";")[0]) // Assuming `;` is the delimiter for `pairedList`
+            .join("\n")
+        : value
+            .split("\n")
+            .map((line) => line.split("\t")[0]) // Assuming `\t` is the delimiter for other cases
+            .join("\n");
+
     // Copy to clipboard
     navigator.clipboard
       .writeText(profileNumbers)
@@ -41,15 +64,15 @@ export default function TextAreaWithCopy({ id, label, value ,forProxies , setMod
         toast.error("Failed to copy profile numbers.");
       });
   };
-  
 
   return (
     <>
       <div
-        className={`w-full ${forProxies ? "sm:w-[100%]" :"sm:w-[30%]"} max-w-xl border p-5 border-gray-300 rounded-lg shadow-lg ${
+        className={`w-full ${
+          forProxies ? "sm:w-[100%]" : "sm:w-[30%]"
+        } max-w-xl border p-5 border-gray-300 rounded-lg shadow-lg ${
           label == "Active" ? "bg-green-300" : "bg-white-white"
         }`}
-        onClick={()=>setModalogs(true)}
       >
         <label
           htmlFor={id}
@@ -87,7 +110,15 @@ export default function TextAreaWithCopy({ id, label, value ,forProxies , setMod
           >
             <i className="ri-clipboard-line"></i>
           </button>
-       
+          {id === "others" && (
+            <button
+              onClick={handlePost}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
+              title="Copy profiles and their associated tags to clipboard"
+            >
+              <Tag className="w-5 h-5"/>
+            </button>
+          )}
         </div>
       </div>
     </>

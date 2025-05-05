@@ -20,6 +20,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import Cookies from "js-cookie";
 import AddSessionUsingTagsBeta from "./components/AddSessionsUsinTagsBeta";
 import LogCheckerBeta from "./components/LogCheckerBeta";
+import LogCheckerNew from "./components/LogCheckerNew";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -65,6 +66,7 @@ export default function App() {
               <Route path="/spliter" element={<Spliter />} />
               <Route path="/logChecker" element={<LogChecker />} />              <Route path="/logChecker" element={<LogChecker />} />
               <Route path="/logCheckerbeta" element={<LogCheckerBeta/>} />              <Route path="/logChecker" element={<LogChecker />} />
+              <Route path="/logCheckerNew" element={<LogCheckerNew/>} />              <Route path="/logChecker" element={<LogChecker />} />
 
               <Route path="/spamCalculator" element={<SpamCalculator />} />
               <Route path="/ramadanTask" element={<RamadanTask />} />
