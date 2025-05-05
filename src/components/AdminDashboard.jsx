@@ -1,37 +1,48 @@
 import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import { Pencil, Trash, Plus } from "lucide-react";
+import { Pencil, Trash, Plus, FolderSymlink } from "lucide-react";
 import SessionModal from "./DashboardComponents/SessionModal";
-import { deleteSession, fetchEntityId } from "../api/apiService";
-
-const entities = [
-  ...Array.from({ length: 15 }, (_, i) => ({ id: i + 1, name: `CMH${i + 1}` })),
-  { id: 70, name: "CMH7-Mobile" },
-
-  { id: 30, name: "CMH3-Offer" },
-  { id: 60, name: "CMH6-Offer" },
-  { id: 80, name: "CMH8-Offer" },
-  { id: 120, name: "CMH12-Offer" },
-
-  { id: 150, name: "CMH15-Offer" },
-  { id: 16, name: "CMH16" },
-];
+import { deleteSession, fetchEntityId, fetchEntities } from "../api/apiService";
+import MoveSessionModal from "./DashboardComponents/MoveSessionModal ";
 
 const AdminDashboard = () => {
-  const [selectedEntity, setSelectedEntity] = useState(1);
+  const [selectedEntity, setSelectedEntity] = useState(null);
   const [sessionData, setSessionData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editSession, setEditSession] = useState(null);
   const [timeDrops, setTimeDrops] = useState([]);
+  const [entities, setEntities] = useState([]);
 
+  const [moveModalOpen, setMoveModalOpen] = useState(false);
+  const [sessionToMove, setSessionToMove] = useState(null);
+
+  // Fetch all entities on mount
+  useEffect(() => {
+    const loadEntities = async () => {
+      try {
+        const data = await fetchEntities();
+        setEntities(data);
+        if (data.length > 0) setSelectedEntity(data[0].id);
+      } catch (error) {
+        toast.error("Failed to fetch entities.");
+      }
+    };
+    loadEntities();
+  }, []);
+
+  // Fetch sessions and timeDrops when selectedEntity changes
   useEffect(() => {
     const fetchData = async () => {
+      if (!selectedEntity) return;
       try {
         const data = await fetchEntityId(selectedEntity);
-        setSessionData(data.sessions || []);
-        setTimeDrops(data.timedrops.split(",") || []);
+        const sortedSessions = (data.sessions || []).sort(
+          (a, b) => a.index - b.index
+        );
+        setSessionData(sortedSessions);
+        setTimeDrops(data.timedrops?.split(",") || []);
       } catch (error) {
-        toast.error("Failed to fetch data from API!");
+        toast.error("Failed to fetch session data.");
       }
     };
     fetchData();
@@ -39,10 +50,18 @@ const AdminDashboard = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this session?")) {
-      await deleteSession(id);
-      setSessionData((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Session deleted successfully!");
+      try {
+        await deleteSession(id);
+        setSessionData((prev) => prev.filter((s) => s.id !== id));
+        toast.success("Session deleted successfully!");
+      } catch {
+        toast.error("Failed to delete session.");
+      }
     }
+  };
+  const handleMove = (session) => {
+    setSessionToMove(session);
+    setMoveModalOpen(true);
   };
 
   return (
@@ -55,11 +74,12 @@ const AdminDashboard = () => {
 
       <div className="w-full bg-white shadow-md rounded-lg p-4 mb-4 flex items-center justify-between">
         <div>
-          {" "}
           <label htmlFor="entitySelect" className="text-gray-700 font-medium">
             Select Entity:
           </label>
           <select
+            id="entitySelect"
+            value={selectedEntity || ""}
             onChange={(e) => setSelectedEntity(parseInt(e.target.value))}
             className="w-48 py-2 px-3 border shadow-md rounded focus:ring focus:border-blue-500 transition ml-4"
           >
@@ -71,7 +91,6 @@ const AdminDashboard = () => {
           </select>
         </div>
         <div>
-          {" "}
           <button
             onClick={() => setModalOpen(true)}
             className="flex items-center bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition"
@@ -100,7 +119,7 @@ const AdminDashboard = () => {
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-blue-100 text-gray-700">
-                <th className="border p-3">ID</th>
+                <th className="border p-3">Order</th>
                 <th className="border p-3">Name</th>
                 <th className="border p-3">Username</th>
                 <th className="border p-3">Script</th>
@@ -116,7 +135,7 @@ const AdminDashboard = () => {
                     key={session.id}
                     className="text-center hover:bg-gray-50 transition"
                   >
-                    <td className="border p-2">{session.id}</td>
+                    <td className="border p-2">{session.index}</td>
                     <td className="border p-2">{session.name}</td>
                     <td className="border p-2">{session.username || "N/A"}</td>
                     <td className="border p-2">{session.script || "N/A"}</td>
@@ -142,6 +161,13 @@ const AdminDashboard = () => {
                       >
                         <Pencil className="w-4 h-4 mr-2" />
                       </button>
+                      <button
+                        onClick={() => handleMove(session)}
+                        className="flex items-center bg-red-600 text-white px-3 py-2 rounded-md shadow-md hover:bg-red-700 transition"
+                      >
+                        <FolderSymlink className="w-4 h-4 mr-2" />
+                      </button>
+
                       <button
                         onClick={() => handleDelete(session.id)}
                         className="flex items-center bg-red-600 text-white px-3 py-2 rounded-md shadow-md hover:bg-red-700 transition"
@@ -175,6 +201,18 @@ const AdminDashboard = () => {
           entityId={selectedEntity}
         />
       )}
+      {moveModalOpen && sessionToMove && (
+        <MoveSessionModal
+          isOpen={moveModalOpen}
+          onClose={() => setMoveModalOpen(false)}
+          session={sessionToMove}
+          entities={entities}
+          onSessionMoved={(movedId) => {
+            setSessionData((prev) => prev.filter((s) => s.id !== movedId));
+          }}
+        />
+      )}
+      
     </div>
   );
 };

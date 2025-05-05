@@ -28,9 +28,7 @@ export const checkLogs = (profiles, logs) => {
       connectedProfiles.push(profilesArr[i]);
     } else if (log.includes("proxy down") || log.includes("proxy problem")) {
       proxyDownProfiles.push(profilesArr[i]);
-    } else if (
-      log.includes("account_disabled_check")
-    ) {
+    } else if (log.includes("account_disabled_check")) {
       accountDisabledProfiles.push(profilesArr[i]);
     } else if (
       log.includes("captcha verification") ||
@@ -120,6 +118,138 @@ export const checkLogs = (profiles, logs) => {
     othersLogs,
   };
 };
+
+// New check logs
+export const checkLogsNew = (profiles, logs) => {
+  const profilesArr = profiles.split("\n");
+  const logsArr = logs.split("\n");
+
+  let notLogsProfiles = [];
+  let connectedProfiles = [];
+  let proxyDownProfiles = [];
+  let maxExecutionTimeProfiles = [];
+  let accountRestrictedProfiles = [];
+  let captchaVerificationProfiles = [];
+  let wrongPasswordProfiles = [];
+  let phoneNumberProfiles = [];
+  let unusualActivityProfiles = [];
+  let accountDisabledProfiles = [];
+  let othersProfiles = [];
+  let othersLogs = [];
+
+  let wrongBrowserProfiles = [];
+  let wrongRecoveryProfiles = [];
+  let disconnectedProfiles = [];
+
+  logsArr.forEach((rawLog, i) => {
+    const profile = profilesArr[i];
+    let primarylog = rawLog.toLowerCase().trim();
+    let log = primarylog;
+
+    if (log === "") {
+      notLogsProfiles.push(profile);
+      return;
+    }
+
+    // STEP 1: Get last semicolon part
+    const semicolonParts = log.split(";");
+    const lastSemicolonPart = semicolonParts[semicolonParts.length - 1].trim();
+    if (lastSemicolonPart.includes("by =>")) {
+      proxyDownProfiles.push(profile);
+      return;
+    }
+
+    // STEP 2: Check for max_execution_time and look before it
+    if (log.includes("max_execution_time")) {
+      const beforeMax = log.split("max_execution_time")[0];
+      if (beforeMax.includes("connected")) {
+        connectedProfiles.push(profile);
+        return;
+      } else {
+        maxExecutionTimeProfiles.push(profile);
+        return;
+      }
+    }
+
+    // STEP 3: Clean further
+    log = lastSemicolonPart;
+
+    if (log.includes("update_status")) {
+      log = log.split("update_status").pop().trim();
+    }
+
+    if (log.includes(":")) {
+      log = log.split(":").pop().trim();
+    }
+
+    // STEP 4: Match status
+    switch (log) {
+      case "connected":
+      case "active":
+      case "matched":
+      case "critical alert":
+        connectedProfiles.push(profile);
+        break;
+      case "proxy down":
+        proxyDownProfiles.push(profile);
+        break;
+      case "account_restricted":
+        accountRestrictedProfiles.push(profile);
+        break;
+      case "captcha_verification":
+      case "captcha_text":
+        captchaVerificationProfiles.push(profile);
+        break;
+      case "wrong_password":
+        wrongPasswordProfiles.push(profile);
+        break;
+      case "phone_number":
+        phoneNumberProfiles.push(profile);
+        break;
+      case "wrong_browser":
+        wrongBrowserProfiles.push(profile);
+        break;
+      case "profile disconnected": 
+      case  "verifyyou task":
+        disconnectedProfiles.push(profile);
+        break;
+      case "wrong_recovery":
+        wrongRecoveryProfiles.push(profile);
+        break;
+      case "account_disabled":
+      case "account_disabled_check":
+        accountDisabledProfiles.push(profile);
+        break;
+      case "unusual_activity":
+      case "account_disabled_unusual":
+        unusualActivityProfiles.push(profile);
+        break;
+      default:
+        othersProfiles.push(profile);
+        othersLogs.push(primarylog);
+        break;
+    }
+  });
+
+  return {
+    notLogsProfiles,
+    connectedProfiles,
+    proxyDownProfiles,
+    maxExecutionTimeProfiles,
+    accountRestrictedProfiles,
+    captchaVerificationProfiles,
+    wrongPasswordProfiles,
+    phoneNumberProfiles,
+    unusualActivityProfiles,
+    accountDisabledProfiles,
+    othersProfiles,
+    wrongBrowserProfiles,
+    wrongRecoveryProfiles,
+    disconnectedProfiles,
+    othersLogs,
+  };
+};
+
 export const checkCleanLogs = (profiles, logs) => {
   const profilesArr = profiles.split("\n");
   const logsArr = logs.split("\n");

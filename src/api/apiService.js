@@ -92,3 +92,27 @@ export const updateSession = async (sessionId,sessionData) => {
     throw error;
   }
 };
+
+
+// To move session from entity to other 
+export const moveSession = async (sessionId, depId) => {
+  try {
+    // The request body will send the new depId to the backend
+    const response = await axiosInstance.put(`/session/move/${sessionId}`, { depId });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+// Function to post ticket
+export const postTicket = async (message) => {
+  try {
+    // The request body will send the message to the backend
+    const response = await axiosInstance.post('/telegram/send', { message });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

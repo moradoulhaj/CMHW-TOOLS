@@ -81,16 +81,22 @@ export default function SpliterBeta() {
 
         const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
         setTimeDrops(timedropsArray);
+        // Sort sessions based on their index
+
+        const sortedSessions = (data.sessions || []).sort(
+          (a, b) => a.index - b.index
+        );
 
         // Count only active sessions
         setActiveSessions(
-          data.sessions
-            ? data.sessions.filter((session) => session.isActive)
+          sortedSessions
+            ? sortedSessions.filter((session) => session.isActive)
             : []
         );
 
         // Store session data in the state
-        setSessionData(data.sessions || []);
+
+        setSessionData(sortedSessions);
       } catch (error) {
         toast.error("Failed to fetch data from API!");
         console.error("Error fetching data:", error);

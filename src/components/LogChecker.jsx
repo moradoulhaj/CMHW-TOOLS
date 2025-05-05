@@ -47,6 +47,11 @@ export default function LogChecker() {
   return (
     <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col items-center py-10">
       <div className="px-5 mt-4 w-full max-w-5xl">
+        <div>
+          <p className="text-center bg-red-500 text-white">
+            NEW VERSION OF LOG CHECKER IS AVAILABLE ON : <a className="bg- text-blue-700 underline" href="https://moradoulhaj.github.io/CMHW-TOOLS/#/logCheckerNew">Here</a>
+          </p>
+        </div>
         <form className="space-y-8">
           <div className="flex flex-col md:flex-row gap-6 justify-center">
             <div className="w-full md:w-full">
@@ -56,7 +61,6 @@ export default function LogChecker() {
                 value={combined}
                 onChange={(e) => setCombined(e.target.value)}
                 placeholder="Enter profiles with their logs"
-         
               />
             </div>
           </div>
@@ -68,7 +72,7 @@ export default function LogChecker() {
           <Monitor result={result} />
         </div>
       )}
-<ToastContainer theme="colored" autoClose={1500} />
+      <ToastContainer theme="colored" autoClose={1500} />
     </main>
   );
 }
