@@ -162,7 +162,7 @@ export const checkLogsNew = (profiles, logs) => {
     // STEP 2: Check for max_execution_time and look before it
     if (log.includes("max_execution_time")) {
       const beforeMax = log.split("max_execution_time")[0];
-      if (beforeMax.includes("connected")) {
+      if (/\b(connected|active)\b/.test(beforeMax)) {
         connectedProfiles.push(profile);
         return;
       } else {
@@ -191,6 +191,7 @@ export const checkLogsNew = (profiles, logs) => {
         connectedProfiles.push(profile);
         break;
       case "proxy down":
+      case "proxy problem":
         proxyDownProfiles.push(profile);
         break;
       case "account_restricted":
@@ -198,22 +199,30 @@ export const checkLogsNew = (profiles, logs) => {
         break;
       case "captcha_verification":
       case "captcha_text":
+      case "device verification":
+      case "captcha verification":
         captchaVerificationProfiles.push(profile);
         break;
       case "wrong_password":
+        case "wrong password":
+
         wrongPasswordProfiles.push(profile);
         break;
       case "phone_number":
+      case "confirm phone number":
         phoneNumberProfiles.push(profile);
         break;
       case "wrong_browser":
+      case "wrong browser":
         wrongBrowserProfiles.push(profile);
         break;
-      case "profile disconnected": 
-      case  "verifyyou task":
+      case "profile disconnected":
+      case "verifyyou task":
         disconnectedProfiles.push(profile);
         break;
       case "wrong_recovery":
+      case "recovery verification":
+      case "wrong_2fa":
         wrongRecoveryProfiles.push(profile);
         break;
       case "account_disabled":

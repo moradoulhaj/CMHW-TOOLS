@@ -9,10 +9,12 @@ import {
   downloadZip,
   generateExcel,
   parseNumberTagPairs,
+  reassignUniqueFoldersToFirstTags,
+  shuffleTagsInSessions,
   splitProportionedAndRemainder,
   splitSessionsByDrops,
 } from "../scripts/spliterScripts";
-import { fetchEntityId } from "../api/apiService"; // Import API function
+import { fetchEntities, fetchEntityId } from "../api/apiService"; // Import API function
 import SpliterSettingsModal from "./SpliterComponents/SpliterSettingsModal";
 import SessionModal from "./SpliterComponents/SessionModal";
 import TimeDropsModal from "./SpliterComponents/TimeDropsModal";
@@ -27,6 +29,7 @@ export default function SpliterBeta() {
   const [activeSessions, setActiveSessions] = useState(0);
   const [selectedEntity, setSelectedEntity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [entities, setEntities] = useState([]);
 
   const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
   const [delimiter, setDelimiter] = useState("\n");
@@ -37,22 +40,22 @@ export default function SpliterBeta() {
   // Modal states
   const [isSessionModalOpen, setSessionModalOpen] = useState(false); // Modal state
   //Entities Modal
-  const entities = [
-    ...Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      name: `CMH${i + 1}`,
-    })),
-    { id: 70, name: "CMH7-Mobile" },
+  // const entities = [
+  //   ...Array.from({ length: 15 }, (_, i) => ({
+  //     id: i + 1,
+  //     name: `CMH${i + 1}`,
+  //   })),
+  //   { id: 70, name: "CMH7-Mobile" },
 
-    { id: 30, name: "CMH3-Offer" },
-    { id: 60, name: "CMH6-Offer" },
+  //   { id: 30, name: "CMH3-Offer" },
+  //   { id: 60, name: "CMH6-Offer" },
 
-    { id: 80, name: "CMH8-Offer" },
-    { id: 120, name: "CMH12-Offer" },
+  //   { id: 80, name: "CMH8-Offer" },
+  //   { id: 120, name: "CMH12-Offer" },
 
-    { id: 150, name: "CMH15-Offer" },
-    { id: 16, name: "CMH16" },
-  ];
+  //   { id: 150, name: "CMH15-Offer" },
+  //   { id: 16, name: "CMH16" },
+  // ];
   const [isNextDayModalOpen, setIsNextDayModalOpen] = useState(false); // Modal state
   const [isTimeDropsModalOpen, setIsTimeDropsModalOpen] = useState(false); // Modal state
   // Modal Settings State
@@ -71,6 +74,20 @@ export default function SpliterBeta() {
     nightDrops: 0,
     nightDropsQuantity: 100,
   });
+
+  // Fetch all entities on mount
+  useEffect(() => {
+    const loadEntities = async () => {
+      try {
+        const data = await fetchEntities();
+        setEntities(data);
+        if (data.length > 0) setSelectedEntity(data[0].id);
+      } catch (error) {
+        toast.error("Failed to fetch entities.");
+      }
+    };
+    loadEntities();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,9 +176,12 @@ export default function SpliterBeta() {
       .split("\n")
       .map((line) => parseNumberTagPairs(line));
 
-    const collectedData = await collectData(lines, sessionsNumber);
+    let collectedData = await collectData(lines, sessionsNumber);
     setSeedsBySessions(collectedData);
-
+    if (modalSettings.shuffle) {
+      collectedData = shuffleTagsInSessions(collectedData);
+      console.log(collectedData);
+    }
     if (collectedData === "wrongIinput") {
       return;
     }
@@ -190,7 +210,7 @@ export default function SpliterBeta() {
       const dropsFromRemainder = splitSessionsByDrops(
         remainder,
         modalSettings.nightDrops,
-        true,
+        modalSettings.nightDropsQuantity == 0 ? false : true,
         modalSettings.nightDropsQuantity
       );
 
@@ -209,6 +229,17 @@ export default function SpliterBeta() {
         modalSettings.fixedQuantity
       );
     }
+
+    // 🔁 Clean duplicate folders if entity is CMH mobile
+    console.log("Selected Entity:", selectedEntity);
+    if (selectedEntity == 70) {
+      finalSplitData = finalSplitData.map(session =>
+        session.map(drop => reassignUniqueFoldersToFirstTags(drop))
+      );
+      
+      
+    }
+
 
     downloadZip(
       finalSplitData,

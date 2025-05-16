@@ -158,7 +158,7 @@ export default function SpliterSettingsModal({
           />
         </div>
         {/* Shuffle Toggle */}
-        {/* <div className="mt-4 flex justify-between items-center">
+         <div className="mt-4 flex justify-between items-center">
           <span className="text-gray-700 font-medium">Apply Shuffle</span>
           <button
             onClick={() => updateSetting("shuffle", !shuffle)}
@@ -168,7 +168,7 @@ export default function SpliterSettingsModal({
           >
             {shuffle ? "Yes" : "No"}
           </button>
-        </div> */}
+        </div> 
 
         {/* ScheduleTasks Toggle */}
         <div className="mt-4 flex justify-between items-center">
