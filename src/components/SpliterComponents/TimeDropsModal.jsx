@@ -8,10 +8,12 @@ const TimeDropsModal = ({
   onClose,
   timeDrops,
   setTimeDrops,
+  entityId,
   entityName,
 }) => {
   if (!isOpen) return null;
 
+  
   // State to track textarea value
   const [editedTimeDrops, setEditedTimeDrops] = useState(timeDrops.join("\n"));
   const [IstimeDropsChanged, setIsTimeDropsChanged] = useState(false);
@@ -20,15 +22,16 @@ const TimeDropsModal = ({
   const handleChange = (event) => {
     setEditedTimeDrops(event.target.value);
     setIsTimeDropsChanged(true);
+  
+
   };
 
   // Function to send data to API
   const handleSaveChanges = async () => {
     const formattedData = {
-      name: entityName, // Use the actual entity name
+       name: entityName, // Use the actual entity name
       timedrops: editedTimeDrops.replace(/\n/g, ","), // Convert new lines to commas
     };
-    const entityId = entityName.replace("CMH", ""); // Extract number
 
     try {
       const response = await updateEntity(entityId, formattedData);

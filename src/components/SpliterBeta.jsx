@@ -28,6 +28,8 @@ export default function SpliterBeta() {
   const [timeDrops, setTimeDrops] = useState([]);
   const [activeSessions, setActiveSessions] = useState(0);
   const [selectedEntity, setSelectedEntity] = useState(1);
+  const [selectedEntityName, setSelectedEntityName] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [entities, setEntities] = useState([]);
 
@@ -95,7 +97,7 @@ export default function SpliterBeta() {
         const data = await fetchEntityId(selectedEntity);
 
         setLoading(false); // Only call this after data is fetched
-
+        setSelectedEntityName(data.name)
         const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
         setTimeDrops(timedropsArray);
         // Sort sessions based on their index
@@ -443,7 +445,9 @@ export default function SpliterBeta() {
         onClose={() => setIsTimeDropsModalOpen(false)}
         timeDrops={timeDrops}
         setTimeDrops={setTimeDrops}
-        entityName={selectedEntity}
+        entityId={selectedEntity}
+        entityName={selectedEntityName}
+        
       />
 
       <NextDayModal

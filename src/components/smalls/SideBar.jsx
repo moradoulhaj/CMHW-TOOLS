@@ -23,6 +23,7 @@ const links = [
     { path: "/spliterBeta", label: "Spliter Beta", category: "tool", status: "active" },
     { path: "/updateTask", label: "Remove TO Tasks", category: "tool", status: "active" },
     { path: "/sheduleGenerator", label: "Shedule Generator", category: "tool", status: "active" },
+    { path: "/spamCalculatorBeta", label: "Spam Calculator -Noureddin", category: "tool", status: "active" },
 
     { path: "/logAnalyser", label: "Log Analyse", category: "desktop", status: "active" },
     { path: "/emailDuplicateChecker", label: "Email Duplicate Checker", category: "desktop", status: "active" },

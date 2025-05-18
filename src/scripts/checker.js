@@ -154,13 +154,13 @@ export const checkLogsNew = (profiles, logs) => {
     // STEP 1: Get last semicolon part
     const semicolonParts = log.split(";");
     const lastSemicolonPart = semicolonParts[semicolonParts.length - 1].trim();
-    if (lastSemicolonPart.includes("by =>")) {
+    if (lastSemicolonPart.includes("by =>") || lastSemicolonPart.includes("proxyloadingtime")) {
       proxyDownProfiles.push(profile);
       return;
     }
 
     // STEP 2: Check for max_execution_time and look before it
-    if (log.includes("max_execution_time")) {
+    if (lastSemicolonPart.includes("max_execution_time")) {
       const beforeMax = log.split("max_execution_time")[0];
       if (/\b(connected|active)\b/.test(beforeMax)) {
         connectedProfiles.push(profile);
@@ -197,6 +197,8 @@ export const checkLogsNew = (profiles, logs) => {
       case "account_restricted":
         accountRestrictedProfiles.push(profile);
         break;
+        
+      case "captcha_verificaion":
       case "captcha_verification":
       case "captcha_text":
       case "device verification":

@@ -27,6 +27,7 @@ import CheckDouble from "./components/Desktop/EmailDuplicateChecker";
 import EmailDuplicateChecker from "./components/Desktop/EmailDuplicateChecker";
 import TwoListsComparetor from "./components/Desktop/TwoListsComparetor";
 import SheduleGenerator from "./components/SheduleGenerator";
+import SpamCalculatorBeta from "./components/SpamCalculatorBeta";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -80,6 +81,7 @@ export default function App() {
               <Route path="/spliterBeta" element={<SpliterBeta />} />
               <Route path="/updateTask" element={<UpdateTask />} />
               <Route path="/sheduleGenerator" element={<SheduleGenerator />} />
+              <Route path="/spamCalculatorBeta" element={<SpamCalculatorBeta />} />
 
               
               <Route element={<ProtectedRoute />}>
