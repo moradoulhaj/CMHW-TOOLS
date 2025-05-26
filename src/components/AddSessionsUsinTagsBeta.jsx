@@ -19,6 +19,7 @@ import {
 } from "../scripts/spliterScripts";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { fetchEntities } from "../api/apiService";
 
 export default function AddSessionUsingTagsBeta() {
   const [oldFiles, setOldFiles] = useState([]);
@@ -26,6 +27,7 @@ export default function AddSessionUsingTagsBeta() {
   const [tagsToAdd, setTagsToAdd] = useState("");
   const [selectedEntity, setSelectedEntity] = useState(1);
   const [startingDropNbr, setStartingDropNbr] = useState(1);
+  const [entities, setEntities] = useState([]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -40,16 +42,30 @@ export default function AddSessionUsingTagsBeta() {
     // scheduleTasks : true
   });
 
-  const entities = [
-    ...Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      name: `CMH${i + 1}`,
-    })),
-    { id: 30, name: "CMH3-Offer" },
-    { id: 60, name: "CMH6-Offer" },
-    { id: 150, name: "CMH15-Offer" },
-    { id: 16, name: "CMH16" },
-  ];
+  // const entities = [
+  //   ...Array.from({ length: 15 }, (_, i) => ({
+  //     id: i + 1,
+  //     name: `CMH${i + 1}`,
+  //   })),
+  //   { id: 30, name: "CMH3-Offer" },
+  //   { id: 60, name: "CMH6-Offer" },
+  //   { id: 150, name: "CMH15-Offer" },
+  //   { id: 16, name: "CMH16" },
+  // ];
+     // Fetch all entities on mount
+     useEffect(() => {
+      const loadEntities = async () => {
+        try {
+          
+          const data = await fetchEntities();
+          setEntities(data);
+          if (data.length > 0) setSelectedEntity(data[0].id);
+        } catch (error) {
+          toast.error("Failed to fetch entities.");
+        }
+      };
+      loadEntities();
+    }, []);
 
   const HandleOpenSettings = () => {
     setIsSettingsOpen(true);

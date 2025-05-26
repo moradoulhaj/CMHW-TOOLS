@@ -21,6 +21,13 @@ import Cookies from "js-cookie";
 import AddSessionUsingTagsBeta from "./components/AddSessionsUsinTagsBeta";
 import LogCheckerBeta from "./components/LogCheckerBeta";
 import LogCheckerNew from "./components/LogCheckerNew";
+import LogAnalyse from "./components/Desktop/LogAnalyse";
+import Loading from "./components/Desktop/Loading";
+import CheckDouble from "./components/Desktop/EmailDuplicateChecker";
+import EmailDuplicateChecker from "./components/Desktop/EmailDuplicateChecker";
+import TwoListsComparetor from "./components/Desktop/TwoListsComparetor";
+import SheduleGenerator from "./components/SheduleGenerator";
+import SpamCalculatorBeta from "./components/SpamCalculatorBeta";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,7 +59,7 @@ export default function App() {
               <AlignJustify size={28} />
             </button>
             <h1 className="mr-3 text-lg font-semibold">
-              {user ? `SIMPLIFY - ${user}`.toUpperCase() : "CMHW - SIMPLIFY"}
+              {user ? `SIMPLIFY - ${user}`.toUpperCase() : "CMHW - SIMPLIFY V1.5"}
             </h1>
           </nav>
 
@@ -64,22 +71,38 @@ export default function App() {
               <Route path="/addUsingTags" element={<AddSessionUsingTags />} />
               <Route path="/delimiterSwitch" element={<DelimiterSwitch />} />
               <Route path="/spliter" element={<Spliter />} />
-              <Route path="/logChecker" element={<LogChecker />} />              <Route path="/logChecker" element={<LogChecker />} />
-              <Route path="/logCheckerbeta" element={<LogCheckerBeta/>} />              <Route path="/logChecker" element={<LogChecker />} />
-              <Route path="/logCheckerNew" element={<LogCheckerNew/>} />              <Route path="/logChecker" element={<LogChecker />} />
+              <Route path="/logChecker" element={<LogChecker />} />
+              <Route path="/logCheckerbeta" element={<LogCheckerBeta />} />
+              <Route path="/logCheckerNew" element={<LogCheckerNew />} />
 
               <Route path="/spamCalculator" element={<SpamCalculator />} />
               <Route path="/ramadanTask" element={<RamadanTask />} />
               <Route path="/cleanChecker" element={<CleanChecker />} />
               <Route path="/spliterBeta" element={<SpliterBeta />} />
               <Route path="/updateTask" element={<UpdateTask />} />
+              <Route path="/sheduleGenerator" element={<SheduleGenerator />} />
+              <Route path="/spamCalculatorBeta" element={<SpamCalculatorBeta />} />
+
+              
               <Route element={<ProtectedRoute />}>
                 <Route path="/admin" element={<AdminDashboard />} />
               </Route>
               <Route path="/login" element={<Login />} />
-              <Route path="/addSessionBeta" element={<AddSessionUsingTagsBeta />} />
+              <Route
+                path="/addSessionBeta"
+                element={<AddSessionUsingTagsBeta />}
+              />
+              {/* // Desktop Routes */}
+              <Route path="/logAnalyser" element={<LogAnalyse />} />
+              <Route path="/emailDuplicateChecker" element={<EmailDuplicateChecker />} />
 
               
+              <Route path="/logAnalyser" element={<Loading />} />
+              <Route path="/compareTwoLists" element={<TwoListsComparetor />} />
+              <Route path="/notExistingProfiles" element={<Loading />} />
+              <Route path="/emailsOfProfiles" element={<Loading />} />
+              <Route path="/profilesOfEmails" element={<Loading />} />
+
               <Route path="*" element={<LogChecker />} />
             </Routes>
           </div>

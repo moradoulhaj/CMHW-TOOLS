@@ -26,14 +26,14 @@ export default function FileViewer({
           <div className="">
           <button
                 onClick={handleCopyContent}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all duration-200 font-medium"
+                className="flex items-center gap-2P p-4 w-full bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all duration-200 font-medium"
               >
                 <Copy className="w-5 h-5" />
                 Copy Content
               </button>
           </div>
 
-          <div className=" text-center">
+          <div className=" text-center m-2">
             <span className="text-gray-600 font-medium text-xl">
               File {currentPage + 1} of {totalFiles}
             </span>

@@ -80,6 +80,17 @@ export const createSession = async (sessionData) => {
     throw error;
   }
 };
+// to create Entity
+
+export const createEntity = async (entityData) => {
+  try {
+    const response = await axiosInstance.post(`/dep`,entityData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 
 // to update session
@@ -116,3 +127,20 @@ export const postTicket = async (message) => {
     throw error;
   }
 };
+
+// Function to remove deplucate emails
+export const removeDup = async (emailList) => {
+  try {
+    // The request body will send the message to the backend
+    const response = await axiosInstance.post('/email/deduplicate', { emails: emailList });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+
+
+

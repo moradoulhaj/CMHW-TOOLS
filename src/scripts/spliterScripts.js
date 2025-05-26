@@ -1,3 +1,19 @@
+//Function to shuffle Tags
+export function shuffleTagsInSessions(data) {
+  return data.map((session) => {
+    // Copy the session array to avoid mutating the original
+    const shuffled = [...session];
+
+    // Fisher-Yates shuffle inside the session
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled;
+  });
+}
+
 export const calcSessions = (firstLine) => {
   // Split the first line by tab to detect the number of sessions
 
@@ -21,6 +37,28 @@ export const parseNumberTagPairs = (line) => {
 
   return result;
 };
+// CMH7 mobile to remove duplicates folders
+export function reassignUniqueFoldersToFirstTags(dropData) {
+  const uniqueFolders = [
+    ...new Set(dropData.map(([folder]) => folder).filter(Boolean)),
+  ];
+  const result = [];
+
+  let folderIndex = 0;
+  for (let i = 0; i < dropData.length; i++) {
+    const [, tag] = dropData[i];
+
+    if (folderIndex < uniqueFolders.length) {
+      result.push([uniqueFolders[folderIndex], tag]);
+      folderIndex++;
+    } else {
+      result.push(["", tag]);
+    }
+  }
+
+  return result;
+}
+
 // to split tags by sesions
 export const collectData = (lines, sessionsNumber) => {
   // Initialize the grouped structure with empty subarrays for each position
@@ -88,6 +126,11 @@ export const splitSessionsByDrops = (
     const sessionProportion = Math.round(
       (session.length / totalSeeds) * Quantity
     );
+    let remainder = session.length % dropNumbers; // Calculate the remaining seeds
+    console.log(session.length);
+
+    console.log((session.length / totalSeeds) * Quantity);
+    console.log("remainder", remainder);
 
     const chunks = [];
     let start = 0;
@@ -103,6 +146,7 @@ export const splitSessionsByDrops = (
     return chunks;
   });
 };
+
 
 // // function to calcumate propportion
 // export const calcProportion = (collectedData, totalMorningSeeds) => {
@@ -221,7 +265,7 @@ import { processData } from "./ramadanTask";
 export const downloadZip = async (
   seedsBySessionPerDrop,
   delimiter,
-  entityName,
+  selectedEntityName,
   dropTimes,
   sessions,
   fastKill,
@@ -236,14 +280,14 @@ export const downloadZip = async (
   } else if (delimiter === ";") {
     delimiter = ";";
   }
-
+  console.log(selectedEntityName)
   // ✅ Logic for Next Day
   if (loginNextDay) {
     const firstLine = nextDaySeeds.split("\n")[0];
     const sessionsNumber = calcSessions(firstLine) - 0.5;
 
     if (sessionsNumber === 0) {
-      toast.error("No sessions");
+      toast.error("Plese check Next day Seeds format and re-check");
       return;
     } else if (seedsBySessionPerDrop.length !== sessionsNumber) {
       toast.error("Number of sessions in Current day and Next one mismatch");
@@ -287,16 +331,20 @@ export const downloadZip = async (
       coversationOff
     )
       .then((excelBlob) => {
-        zip.file(`Excels/${session.name}.xlsx`, excelBlob);
+        zip.file(`Excels/${session.index}.${session.name}.xlsx`, excelBlob);
       })
       .catch((error) =>
-        console.error("Error generating Excel for session:", session.name, error)
+        console.error(
+          "Error generating Excel for session:",
+          session.name,
+          error
+        )
       );
   });
 
   // ✅ Add text files for each drop
   combinedDrops.forEach((tags, dropIndex) => {
-    const fileName = `file_${dropIndex + 1}.txt`;
+    const fileName = `${selectedEntityName.split("-")[0]}_file_${dropIndex + 1}.txt`;
     const fileContent = tags.join(delimiter);
     zip.file(fileName, fileContent);
   });
@@ -305,9 +353,13 @@ export const downloadZip = async (
   const dropLogTxt = generateDropLogTxt(seedsBySessionPerDrop);
   zip.file(`Excels/Drop_Seed_Log.txt`, dropLogTxt);
 
+  // ✅ Add raw array dump like in console.log
+  const rawArrayTxt = JSON.stringify(seedsBySessionPerDrop, null, 2); // pretty-printed JSON
+  zip.file("Excels/seedsBySessionPerDrop.txt", rawArrayTxt);
+
   // ✅ Store the main Excel file inside "Excels" folder
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
-  zip.file(`Excels/CMH${entityName}.xlsx`, excelBlob);
+  zip.file(`Excels/${selectedEntityName}.xlsx`, excelBlob);
 
   // ✅ Generate the zip file
   setTimeout(async () => {
@@ -324,7 +376,7 @@ export const downloadZip = async (
     }
 
     // Download the zip file
-    saveAs(zipBlob, `CMH${entityName}-${formattedDate}.zip`);
+    saveAs(zipBlob, `${selectedEntityName}-${formattedDate}.zip`);
   }, 1000); // Small delay to ensure Excel files are added
 };
 
@@ -343,7 +395,9 @@ const generateDropLogTxt = (seedsBySessionPerDrop) => {
       const drop = session[dropIndex] || [];
       const count = drop.length;
       total += count;
-      log += `Session ${sessionIndex + 1}: ${count} seed${count !== 1 ? "s" : ""}\n`;
+      log += `Session ${sessionIndex + 1}: ${count} seed${
+        count !== 1 ? "s" : ""
+      }\n`;
     });
 
     log += `Total: ${total} seed${total !== 1 ? "s" : ""}\n\n`;
@@ -352,8 +406,7 @@ const generateDropLogTxt = (seedsBySessionPerDrop) => {
   return log;
 };
 
-
-export const generateExcel = (seedsBySessionPerDrop,entityName) => {
+export const generateExcel = (seedsBySessionPerDrop, entityName) => {
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
   saveAs(excelBlob, `CMH${entityName}.xlsx`);
 };
@@ -462,7 +515,7 @@ export const generateSchedule = async (
       allProfiles.push(...dropProfiles);
 
       let [hours, minutes] = dropTimes[index].split(":").map(Number);
-      if (hours === 0) lastDropDate.setDate(today.getDate() + 1);
+      if (hours >= 0 && hours<=9) lastDropDate.setDate(today.getDate() + 1);
       lastDropDate.setHours(hours, minutes + 5, 0);
 
       let formattedDate = lastDropDate
@@ -612,4 +665,3 @@ export const generateSchedule = async (
     console.error("Error updating Excel template:", error);
   }
 };
-

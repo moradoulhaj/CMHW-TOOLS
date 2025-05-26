@@ -18,11 +18,12 @@ export default function ModalBeta({
   // Handle starting drop number change
   const handleDropChange = (e) => {
     let value = Number(e.target.value); // Ensure it's a number
-
+    console.log("VALUE", value);
     if (value <= timedrops.length && value >= 1) {
       setStartingTimeDrops(value);
-      const newTimeDrops = timedrops.slice(value - 1);
-      setNewTimedrops(newTimeDrops);
+      setNewTimedrops(timedrops.slice(value - 1));
+      console.log("newTimeDrops", newTimedrops);
+
     } else {
       setStartingTimeDrops(1);
       setNewTimedrops(timedrops); // Ensure full list remains when invalid input
@@ -35,7 +36,6 @@ export default function ModalBeta({
       fetchPausedSessions();
     }
   }, [isModalOpen]);
-
 
   const fetchPausedSessions = async () => {
     try {
@@ -126,7 +126,9 @@ export default function ModalBeta({
                 toast.error("Select one session at least");
                 return; // Do nothing if no session selected
               }
+              console.log(newTimedrops)
               onSave(selectedSession, newTimedrops, startingTimeDrops);
+              
               setIsModalOpen(false);
             }}
           >
