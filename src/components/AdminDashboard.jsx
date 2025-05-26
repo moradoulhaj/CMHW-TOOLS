@@ -2,19 +2,45 @@ import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Pencil, Trash, Plus, FolderSymlink } from "lucide-react";
 import SessionModal from "./DashboardComponents/SessionModal";
-import { deleteSession, fetchEntityId, fetchEntities } from "../api/apiService";
+
+import {
+  deleteSession,
+  fetchEntityId,
+  fetchEntities,
+  updateEntity,
+} from "../api/apiService";
 import MoveSessionModal from "./DashboardComponents/MoveSessionModal ";
+import EntityModal from "./DashboardComponents/EntityModal";
 
 const AdminDashboard = () => {
   const [selectedEntity, setSelectedEntity] = useState(null);
+  const [selectedEntityName, setSelectedEntityName] = useState(null);
+
   const [sessionData, setSessionData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [entityModalOpen, setEntityModalOpen] = useState(false);
+
   const [editSession, setEditSession] = useState(null);
   const [timeDrops, setTimeDrops] = useState([]);
   const [entities, setEntities] = useState([]);
 
   const [moveModalOpen, setMoveModalOpen] = useState(false);
   const [sessionToMove, setSessionToMove] = useState(null);
+
+  // updating time drops
+  const handleSaveTimeDrops = async () => {
+    try {
+      const formattedData = {
+        name: selectedEntityName,
+        timedrops: timeDrops.filter(Boolean).join(","),
+      };
+
+      const response = await updateEntity(selectedEntity, formattedData);
+      toast.success("Time drops updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update time drops.");
+    }
+  };
 
   // Fetch all entities on mount
   useEffect(() => {
@@ -36,6 +62,8 @@ const AdminDashboard = () => {
       if (!selectedEntity) return;
       try {
         const data = await fetchEntityId(selectedEntity);
+        console.log(data);
+        setSelectedEntityName(data.name);
         const sortedSessions = (data.sessions || []).sort(
           (a, b) => a.index - b.index
         );
@@ -46,7 +74,7 @@ const AdminDashboard = () => {
       }
     };
     fetchData();
-  }, [selectedEntity]);
+  }, [selectedEntity,entityModalOpen]);
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this session?")) {
@@ -68,8 +96,15 @@ const AdminDashboard = () => {
     <div className="p-8 max-w-[1500px] mx-auto bg-gray-100 min-h-screen">
       <ToastContainer theme="colored" />
 
-      <div className="flex justify-center items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-4xl font-bold text-gray-800">Admin Dashboard</h1>
+        <button
+          className="flex items-center bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition"
+          type="button"
+          onClick={() => setEntityModalOpen(true)}
+        >
+          Add Entity
+        </button>
       </div>
 
       <div className="w-full bg-white shadow-md rounded-lg p-4 mb-4 flex items-center justify-between">
@@ -110,9 +145,15 @@ const AdminDashboard = () => {
           </label>
           <textarea
             value={timeDrops.join("\n")}
-            readOnly
-            className="flex-grow p-3 border rounded bg-gray-100 resize-none cursor-not-allowed mt-2 text-center"
+            onChange={(e) => setTimeDrops(e.target.value.split("\n"))}
+            className="flex-grow p-3 border rounded bg-white resize-none mt-2 text-center"
           />
+          <button
+            onClick={handleSaveTimeDrops}
+            className="mt-2 bg-green-600 text-white py-2 rounded shadow-md hover:bg-green-700 transition"
+          >
+            Save Time Drops
+          </button>
         </div>
 
         <div className="w-full md:w-[86%] bg-white shadow-md rounded-lg overflow-x-auto">
@@ -201,6 +242,15 @@ const AdminDashboard = () => {
           entityId={selectedEntity}
         />
       )}
+
+      {entityModalOpen && (
+        <EntityModal
+          isOpen={entityModalOpen}
+          onClose={() => {
+            setEntityModalOpen(false);
+          }}
+        />
+      )}
       {moveModalOpen && sessionToMove && (
         <MoveSessionModal
           isOpen={moveModalOpen}
@@ -212,7 +262,6 @@ const AdminDashboard = () => {
           }}
         />
       )}
-      
     </div>
   );
 };

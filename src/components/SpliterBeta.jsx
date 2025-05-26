@@ -82,6 +82,12 @@ export default function SpliterBeta() {
     const loadEntities = async () => {
       try {
         const data = await fetchEntities();
+        data.sort((a, b) => {
+          const numA = parseInt(a.name.match(/\d+/));
+          const numB = parseInt(b.name.match(/\d+/));
+          return numA - numB;
+        });
+
         setEntities(data);
         if (data.length > 0) setSelectedEntity(data[0].id);
       } catch (error) {
@@ -97,7 +103,7 @@ export default function SpliterBeta() {
         const data = await fetchEntityId(selectedEntity);
 
         setLoading(false); // Only call this after data is fetched
-        setSelectedEntityName(data.name)
+        setSelectedEntityName(data.name);
         const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
         setTimeDrops(timedropsArray);
         // Sort sessions based on their index
@@ -152,7 +158,22 @@ export default function SpliterBeta() {
   };
 
   const handleSplitClick = () => {
-    setModalSettings((prev) => ({ ...prev, isOpen: true }));
+    if (tagsToSplit != "") {
+      nextDaySeeds == ""
+        ? setModalSettings((prev) => ({
+            ...prev,
+            loginNextDay: false,
+            isOpen: true,
+          }))
+        : setModalSettings((prev) => ({
+            ...prev,
+            loginNextDay: true,
+            isOpen: true,
+          }));
+    } else {
+      toast.error("No tags to split found ");
+      return;
+    }
   };
 
   // Here the split log
@@ -161,6 +182,10 @@ export default function SpliterBeta() {
       toast.error("No tags");
       return;
     }
+    // if (modalSettings.loginNextDay  && nextDaySeeds == "") {
+    //   toast.error ("Next day tags not found")
+    //   return;
+    // }
 
     const firstLine = tagsToSplit.split("\n")[0];
     const sessionsNumber = calcSessions(firstLine);
@@ -182,7 +207,6 @@ export default function SpliterBeta() {
     setSeedsBySessions(collectedData);
     if (modalSettings.shuffle) {
       collectedData = shuffleTagsInSessions(collectedData);
-      console.log(collectedData);
     }
     if (collectedData === "wrongIinput") {
       return;
@@ -201,7 +225,6 @@ export default function SpliterBeta() {
         collectedData,
         totalMorningSeeds
       );
-
       const dropsFromProportioned = splitSessionsByDrops(
         proportioned,
         modalSettings.morningDrops,
@@ -233,20 +256,16 @@ export default function SpliterBeta() {
     }
 
     // 🔁 Clean duplicate folders if entity is CMH mobile
-    console.log("Selected Entity:", selectedEntity);
     if (selectedEntity == 70) {
-      finalSplitData = finalSplitData.map(session =>
-        session.map(drop => reassignUniqueFoldersToFirstTags(drop))
+      finalSplitData = finalSplitData.map((session) =>
+        session.map((drop) => reassignUniqueFoldersToFirstTags(drop))
       );
-      
-      
     }
-
 
     downloadZip(
       finalSplitData,
       delimiter,
-      selectedEntity,
+      selectedEntityName,
       timeDrops,
       activeSessions,
       modalSettings.fastKill,
@@ -256,6 +275,21 @@ export default function SpliterBeta() {
       modalSettings.scheduleTasks,
       modalSettings.coversationOff
     );
+    if (selectedEntityName == "CMH12") {
+      downloadZip(
+        finalSplitData,
+        delimiter,
+        "CMH13",
+        timeDrops,
+        activeSessions,
+        modalSettings.fastKill,
+        modalSettings.loginNextDay,
+        nextDaySeeds,
+        modalSettings.timeType,
+        modalSettings.scheduleTasks,
+        modalSettings.coversationOff
+      );
+    }
 
     setSeedsBySessionPerDrop(finalSplitData);
 
@@ -432,6 +466,7 @@ export default function SpliterBeta() {
         onApply={handleSplit}
         selectedEntity={selectedEntity}
         timedrops={timeDrops}
+        nextDaySeeds={nextDaySeeds}
       />
 
       {/* Session Modal */}
@@ -447,7 +482,6 @@ export default function SpliterBeta() {
         setTimeDrops={setTimeDrops}
         entityId={selectedEntity}
         entityName={selectedEntityName}
-        
       />
 
       <NextDayModal

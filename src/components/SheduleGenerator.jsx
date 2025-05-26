@@ -204,7 +204,7 @@ export default function SheduleGenerator() {
             onClick={handleSaveTimeDrops}
             className="w-full flex items-center justify-center gap-1 px-3 py-2 mt-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-md"
           >
-            <Check size={16} /> Save Drops
+            <Check size={16} /> Save Drops (Locally)
           </button>
         </div>
 

@@ -64,6 +64,19 @@ export default function TextAreaWithCopy({
         toast.error("Failed to copy profile numbers.");
       });
   };
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setModalogs?.(false); // Optional chaining to avoid crashes
+      }
+    };
+  
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+  
 
   return (
     <>

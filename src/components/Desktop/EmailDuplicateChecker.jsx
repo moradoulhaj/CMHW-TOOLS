@@ -1,14 +1,20 @@
 import React, { useState } from "react";
 import TextAreaWithCopyDesktop from "./Small Components/TextAreaWithCopyDesktop";
 import { ToastContainer } from "react-toastify";
-import { FileIcon } from "lucide-react"; // Import the FileIcon from Lucid
+import { FileIcon } from "lucide-react";
+import { removeDup } from "../../api/apiService";
+import VirtualizedTextListWithCopy from "./Small Components/VirtualizedTextListWithCopy.jsx";
 
 export default function EmailDuplicateChecker() {
-  const [inputMode, setInputMode] = useState("paste"); // 'paste' or 'file'
+  const [inputMode, setInputMode] = useState("paste");
+  const [count, setCount] = useState(0);
+
   const [emailsInput, setEmailsInput] = useState("");
   const [fileEmails, setFileEmails] = useState("");
-  const [fileName, setFileName] = useState(""); // State to store the file name
-  const [error, setError] = useState("Nothing"); // State for erroooooooooor
+  const [fileName, setFileName] = useState("");
+  const [error, setError] = useState("Nothing");
+
+  const [loading, setLoading] = useState(false);
 
   const [results, setResults] = useState({
     duplicates: "",
@@ -16,11 +22,6 @@ export default function EmailDuplicateChecker() {
     withoutDuplicates: "",
   });
 
-  // const normalizeAlias = (email) => {
-  //   const [alias, domain] = email.trim().split("@");
-
-  //   return alias.toLowerCase() + "@" + domain.toLowerCase();
-  // };
   const normalizeAlias = (email, position) => {
     try {
       const [alias, domain] = email.trim().split("@");
@@ -35,6 +36,7 @@ export default function EmailDuplicateChecker() {
       return null;
     }
   };
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -45,55 +47,34 @@ export default function EmailDuplicateChecker() {
       setEmailsInput(event.target.result);
     };
     reader.readAsText(file);
-
-    // Store the file name to display to the user
     setFileName(file.name);
-
-    // Clear the file input after reading the file to force React to detect the change
     e.target.value = null;
   };
 
-  const processEmails = () => {
-    setError("Nothing")
+  const processEmails = async () => {
+    setError("Nothing");
+    setLoading(true);
+
     const input = inputMode === "paste" ? emailsInput : fileEmails;
 
-    const allEmails = input
+    const emailList = input
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
 
-    const seen = {};
-    const duplicates = new Set();
-    const normalizedMap = {};
-    var i = 1;
-    for (const email of allEmails) {
-      const normalized = normalizeAlias(email ,i);
-      if(!normalized){
-        return ;
-      }
-      if (seen[normalized]) {
-        duplicates.add(seen[normalized]);
-        duplicates.add(email);
-      } else {
-        seen[normalized] = email;
-        normalizedMap[normalized] = email;
-      }
-      i++;
+    try {
+      const data = await removeDup(emailList);
+
+      setResults({
+        duplicates: data.duplicates.join("\n"),
+        uniques: data.uniques.join("\n"),
+        withoutDuplicates: data.withoutDuplicates.join("\n"),
+      });
+    } catch (err) {
+      setError("❌ " + err.message);
+    } finally {
+      setLoading(false);
     }
-
-    const uniqueOriginals = allEmails.filter(
-      (email) =>
-        !duplicates.has(email) &&
-        Object.values(seen).filter((v) => v === email).length === 1
-    );
-
-    const withoutDuplicates = Array.from(new Set(Object.values(normalizedMap)));
-
-    setResults({
-      duplicates: Array.from(duplicates).sort().join("\n"),
-      uniques: uniqueOriginals.join("\n"),
-      withoutDuplicates: withoutDuplicates.join("\n"),
-    });
   };
 
   const renderResultTextAreas = () => {
@@ -107,52 +88,55 @@ export default function EmailDuplicateChecker() {
       },
     ];
 
-    return categories.map(({ id, label, data }) => {
-      if (!data?.length) return null;
-      return (
-        <TextAreaWithCopyDesktop key={id} id={id} label={label} value={data} />
-      );
-    });
+    return categories.map(({ id, label, data }) =>
+      data?.length ? (
+        <VirtualizedTextListWithCopy key={id} id={id} label={label} data={data} />
+      ) : null
+    );
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white shadow-md rounded-xl">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">
-        Email Deduplicator
+    <div className="p-6 md:p-10 max-w-5xl mx-auto bg-white shadow-xl rounded-2xl border border-gray-100">
+      <h2 className="text-4xl font-extrabold mb-8 text-center text-gray-800 tracking-tight">
+        ✉️ Email Deduplicator v2
       </h2>
+
+      {/* Progress Bar */}
+      {loading && (
+  <div className="flex justify-center mb-6">
+    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+)}
+
 
       {/* Toggle Buttons */}
       <div className="flex justify-center mb-6 space-x-4">
-        <button
-          className={`px-4 py-2 rounded-md font-medium ${
-            inputMode === "paste"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700"
-          }`}
-          onClick={() => setInputMode("paste")}
-        >
-          Paste Emails
-        </button>
-        <button
-          className={`px-4 py-2 rounded-md font-medium ${
-            inputMode === "file"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700"
-          }`}
-          onClick={() => setInputMode("file")}
-        >
-          Upload File
-        </button>
+        {["paste", "file"].map((mode) => (
+          <button
+            key={mode}
+            className={`px-5 py-2 rounded-full font-semibold transition duration-200 shadow-sm ${
+              inputMode === mode
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+            onClick={() => setInputMode(mode)}
+            disabled={loading}
+          >
+            {mode === "paste" ? "📋 Paste Emails" : "📁 Upload File"}
+          </button>
+        ))}
       </div>
-      {/* Error div */}
+
+      {/* Error Message */}
       {error !== "Nothing" && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-center mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-center mb-6">
           <strong className="font-bold">Error: </strong>
-          <span className=" ">{error}</span>
+          <span>{error}</span>
         </div>
       )}
-      {/* Input Section */}
-      <div className="mb-6">
+
+      {/* Input Area */}
+      <div className="mb-8">
         {inputMode === "paste" ? (
           <div>
             <label className="block mb-2 font-semibold text-gray-700">
@@ -160,11 +144,18 @@ export default function EmailDuplicateChecker() {
             </label>
             <textarea
               rows="10"
-              className="w-full p-3 border rounded-md shadow-sm resize-none"
+              className="w-full p-3 border border-gray-300 rounded-md shadow-inner resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={emailsInput}
-              onChange={(e) => setEmailsInput(e.target.value)}
+              onChange={(e) => {
+                setEmailsInput(e.target.value);
+                setCount(e.target.value.split("\n").length);
+              }}
               placeholder="Paste one email per line..."
+              disabled={loading}
             />
+            <p className="mt-2 text-sm text-gray-500">
+              Total lines: <strong>{count}</strong>
+            </p>
           </div>
         ) : (
           <div>
@@ -172,30 +163,35 @@ export default function EmailDuplicateChecker() {
               Upload .txt or .csv File:
             </label>
             <input
-              key={Date.now()} // Adding key to force re-render
+              key={Date.now()}
               type="file"
               accept=".txt,.csv"
-              className="block w-full border rounded-md p-2"
+              disabled={loading}
+              className="block w-full border border-gray-300 rounded-md p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
               onChange={handleFileUpload}
             />
-            {/* Display the file name and icon if it's uploaded */}
             {fileName && (
-              <div className="mt-2 flex items-center space-x-2 text-sm text-gray-600">
-                <FileIcon size={18} /> {/* Lucid File Icon */}
-                <p>Uploaded File: {fileName}</p>
+              <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                <FileIcon size={18} />
+                <p className="truncate">Uploaded File: {fileName}</p>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Process Button */}
-      <div className="text-center mb-6">
+      {/* Submit Button */}
+      <div className="text-center mb-10">
         <button
-          className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition"
           onClick={processEmails}
+          disabled={loading}
+          className={`px-6 py-3 rounded-lg transition transform shadow-md ${
+            loading
+              ? "bg-gray-400 text-white cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700 hover:scale-105"
+          }`}
         >
-          Process Emails
+          {loading ? "⏳ Processing..." : "🚀 Process Emails"}
         </button>
       </div>
 

@@ -126,6 +126,11 @@ export const splitSessionsByDrops = (
     const sessionProportion = Math.round(
       (session.length / totalSeeds) * Quantity
     );
+    let remainder = session.length % dropNumbers; // Calculate the remaining seeds
+    console.log(session.length);
+
+    console.log((session.length / totalSeeds) * Quantity);
+    console.log("remainder", remainder);
 
     const chunks = [];
     let start = 0;
@@ -141,6 +146,7 @@ export const splitSessionsByDrops = (
     return chunks;
   });
 };
+
 
 // // function to calcumate propportion
 // export const calcProportion = (collectedData, totalMorningSeeds) => {
@@ -259,7 +265,7 @@ import { processData } from "./ramadanTask";
 export const downloadZip = async (
   seedsBySessionPerDrop,
   delimiter,
-  entityName,
+  selectedEntityName,
   dropTimes,
   sessions,
   fastKill,
@@ -274,14 +280,14 @@ export const downloadZip = async (
   } else if (delimiter === ";") {
     delimiter = ";";
   }
-
+  console.log(selectedEntityName)
   // ✅ Logic for Next Day
   if (loginNextDay) {
     const firstLine = nextDaySeeds.split("\n")[0];
     const sessionsNumber = calcSessions(firstLine) - 0.5;
 
     if (sessionsNumber === 0) {
-      toast.error("No sessions");
+      toast.error("Plese check Next day Seeds format and re-check");
       return;
     } else if (seedsBySessionPerDrop.length !== sessionsNumber) {
       toast.error("Number of sessions in Current day and Next one mismatch");
@@ -301,7 +307,6 @@ export const downloadZip = async (
 
   // ✅ Iterate over sessions and drops to populate combinedDrops
   seedsBySessionPerDrop.forEach((sessionDrops, sessionIndex) => {
-    console.log("sessionDrops",sessionDrops)
     const session = sessions[sessionIndex];
     sessionDrops.forEach((drop, dropIndex) => {
       if (!combinedDrops[dropIndex]) {
@@ -326,7 +331,7 @@ export const downloadZip = async (
       coversationOff
     )
       .then((excelBlob) => {
-        zip.file(`Excels/${session.name}.xlsx`, excelBlob);
+        zip.file(`Excels/${session.index}.${session.name}.xlsx`, excelBlob);
       })
       .catch((error) =>
         console.error(
@@ -339,7 +344,7 @@ export const downloadZip = async (
 
   // ✅ Add text files for each drop
   combinedDrops.forEach((tags, dropIndex) => {
-    const fileName = `file_${dropIndex + 1}.txt`;
+    const fileName = `${selectedEntityName.split("-")[0]}_file_${dropIndex + 1}.txt`;
     const fileContent = tags.join(delimiter);
     zip.file(fileName, fileContent);
   });
@@ -354,7 +359,7 @@ export const downloadZip = async (
 
   // ✅ Store the main Excel file inside "Excels" folder
   const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
-  zip.file(`Excels/CMH${entityName}.xlsx`, excelBlob);
+  zip.file(`Excels/${selectedEntityName}.xlsx`, excelBlob);
 
   // ✅ Generate the zip file
   setTimeout(async () => {
@@ -371,7 +376,7 @@ export const downloadZip = async (
     }
 
     // Download the zip file
-    saveAs(zipBlob, `CMH${entityName}-${formattedDate}.zip`);
+    saveAs(zipBlob, `${selectedEntityName}-${formattedDate}.zip`);
   }, 1000); // Small delay to ensure Excel files are added
 };
 
@@ -510,7 +515,7 @@ export const generateSchedule = async (
       allProfiles.push(...dropProfiles);
 
       let [hours, minutes] = dropTimes[index].split(":").map(Number);
-      if (hours === 0) lastDropDate.setDate(today.getDate() + 1);
+      if (hours >= 0 && hours<=9) lastDropDate.setDate(today.getDate() + 1);
       lastDropDate.setHours(hours, minutes + 5, 0);
 
       let formattedDate = lastDropDate

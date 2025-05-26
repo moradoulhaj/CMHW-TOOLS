@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 export default function SpliterSettingsModal({
   modalSettings,
   setModalSettings,
   onApply,
   selectedEntity,
-  timedrops,
+  timedrops,nextDaySeeds
 }) {
   const {
     isOpen,
@@ -30,6 +31,11 @@ export default function SpliterSettingsModal({
     setModalSettings((prev) => ({ ...prev, nightDrops: 0 }));
   }, []);
   const updateSetting = (key, value) => {
+    if (key == "loginNextDay" && nextDaySeeds == ""){
+      toast.error("Next Day tags is empty")
+      return;
+
+    }
     setModalSettings((prev) => ({ ...prev, [key]: value }));
   };
 

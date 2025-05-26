@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { toast } from 'react-toastify'
 
-export default function TextAreaWithCopy({ id, label, value }) {
+export default function TextAreaWithCopyDesktop({ id, label, value }) {
   const textAreaRef = useRef(null)
 
   const countLines = text => (text ? text.split('\n').length : 0)
