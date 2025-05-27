@@ -139,6 +139,16 @@ export const removeDup = async (emailList) => {
   }
 };
 
+export const handleLogin = async (credentials) => {
+  try {
+    const response = await axiosInstance.post("/user/login", credentials);
+    const token = response.data.token;
+    localStorage.setItem("token", token);
+  } catch (err) {
+    throw new Error("Login failed");  // <-- add this line
+  }
+};
+
 
 
 

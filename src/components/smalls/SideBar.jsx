@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, LogOut } from "lucide-react";
 
 export default function Sidebar({ isOpen, toggle }) {
   const [deprecatedOpen, setDeprecatedOpen] = useState({});
@@ -8,7 +8,9 @@ export default function Sidebar({ isOpen, toggle }) {
     tool: true,
     desktop: true,
   });
-const links = [
+
+  const links = [
+    // Tool links
     { path: "/readAndShow", label: "Read and Show", category: "tool", status: "active" },
     { path: "/removeTags", label: "Remove Sessions", category: "tool", status: "active" },
     { path: "/addUsingTags", label: "Add Session", category: "tool", status: "deprecated" },
@@ -22,12 +24,12 @@ const links = [
     { path: "/addSessionBeta", label: "Add Session Beta", category: "tool", status: "active" },
     { path: "/spliterBeta", label: "Spliter Beta", category: "tool", status: "active" },
     { path: "/updateTask", label: "Remove TO Tasks", category: "tool", status: "active" },
-    { path: "/sheduleGenerator", label: "Shedule Generator", category: "tool", status: "active" },
+    { path: "/sheduleGenerator", label: "Schedule Generator", category: "tool", status: "active" },
     { path: "/spamCalculatorBeta", label: "Spam Calculator -Noureddin", category: "tool", status: "active" },
-
+    
+    // Desktop links
     { path: "/logAnalyser", label: "Log Analyse", category: "desktop", status: "active" },
     { path: "/emailDuplicateChecker", label: "Email Duplicate Checker", category: "desktop", status: "active" },
-
     { path: "/compareTwoLists", label: "Compare Two Lists", category: "desktop", status: "active" },
     { path: "/notExistingProfiles", label: "Not Existing Profiles", category: "desktop", status: "active" },
     { path: "/emailsOfProfiles", label: "Emails of Profiles", category: "desktop", status: "active" },
@@ -58,8 +60,10 @@ const links = [
           <NavLink
             to={link.path}
             className={({ isActive }) =>
-              `block text-sm font-medium px-4 py-2 rounded transition duration-300 text-white ${
-                isActive ? "bg-blue-800 shadow-md" : "hover:bg-blue-700"
+              `block text-sm px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                isActive 
+                  ? "bg-white text-blue-600 font-semibold shadow-sm"
+                  : "text-blue-100 hover:bg-blue-700 hover:text-white"
               }`
             }
             onClick={toggle}
@@ -71,57 +75,88 @@ const links = [
 
   return (
     <div
-      className={`fixed top-0 left-0 h-screen w-64 bg-gradient-to-b from-blue-500 to-blue-600 shadow-lg p-4 overflow-y-auto transition-transform duration-300 ${
-        isOpen ? "translate-x-0" : "-translate-x-64"
+      className={`fixed top-0 left-0 h-screen w-70 bg-gradient-to-b from-blue-600 to-blue-800 shadow-xl p-2 overflow-y-auto transition-all duration-300 z-50 ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      <h2 className="text-white text-xl font-bold mb-6 text-center">Menu</h2>
+      <div className="sticky top-0 bg-blue-600 pt-2  -mx-5 px-5">
+        <h2 className="text-white text-2xl font-bold mb-2 text-center">Admin Dashboard</h2>
+        
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            window.location.reload();
+          }}
+          className="flex items-center justify-center w-full gap-2 text-sm text-white px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition-all mb-6"
+        >
+          <LogOut size={16} />
+          Log Out
+        </button>
+      </div>
 
-      {categories.map((category) => {
-        const hasDeprecated = links.some(
-          (link) => link.category === category && link.status === "deprecated"
-        );
+      <div className="space-y-6 mt-2">
+        {categories.map((category) => {
+          const hasDeprecated = links.some(
+            (link) => link.category === category && link.status === "deprecated"
+          );
 
-        return (
-          <div key={category} className="mb-6">
-            <button
-              onClick={() => toggleCategory(category)}
-              className="flex items-center justify-between w-full text-lg font-semibold text-white capitalize mb-2 hover:bg-blue-700 px-2 py-1 rounded transition"
-            >
-              <span>{category}</span>
-              {categoryOpen[category] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-            </button>
-
-            {categoryOpen[category] && (
-              <>
-                <ul className="space-y-2">{renderLinks(category, "active")}</ul>
-
-                {hasDeprecated && (
-                  <>
-                    <button
-                      onClick={() => toggleDropdown(category)}
-                      className="flex items-center justify-between w-full text-sm text-blue-100 italic mt-3 px-2 py-1 rounded hover:bg-blue-700 transition"
-                    >
-                      <span>Deprecated</span>
-                      {deprecatedOpen[category] ? (
-                        <ChevronUp size={16} />
-                      ) : (
-                        <ChevronDown size={16} />
-                      )}
-                    </button>
-
-                    {deprecatedOpen[category] && (
-                      <ul className="space-y-1 ml-3 border-l border-blue-300 pl-2">
-                        {renderLinks(category, "deprecated")}
-                      </ul>
-                    )}
-                  </>
+          return (
+            <div key={category} className="bg-blue-700/20 rounded-xl p-2">
+              <button
+                onClick={() => toggleCategory(category)}
+                className="flex items-center justify-between w-full text-base font-semibold text-white capitalize px-3 py-2.5 rounded-lg hover:bg-blue-700/50 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="capitalize">{category}</span>
+                  <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">
+                    {links.filter(l => l.category === category && l.status === "active").length}
+                  </span>
+                </span>
+                {categoryOpen[category] ? (
+                  <ChevronUp size={18} className="text-blue-200" />
+                ) : (
+                  <ChevronDown size={18} className="text-blue-200" />
                 )}
-              </>
-            )}
-          </div>
-        );
-      })}
+              </button>
+
+              {categoryOpen[category] && (
+                <>
+                  <ul className="space-y-1 mt-2 pl-1">
+                    {renderLinks(category, "active")}
+                  </ul>
+
+                  {hasDeprecated && (
+                    <>
+                      <button
+                        onClick={() => toggleDropdown(category)}
+                        className="flex items-center justify-between w-full text-xs text-blue-200 px-3 py-2 rounded-lg hover:bg-blue-700/30 transition-all mt-2"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>Deprecated Tools</span>
+                          <span className="text-xs bg-blue-600/70 text-blue-100 px-2 py-0.5 rounded-full">
+                            {links.filter(l => l.category === category && l.status === "deprecated").length}
+                          </span>
+                        </span>
+                        {deprecatedOpen[category] ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        )}
+                      </button>
+
+                      {deprecatedOpen[category] && (
+                        <ul className="space-y-1 ml-4 border-l-2 border-blue-500/30 pl-3 py-1">
+                          {renderLinks(category, "deprecated")}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
