@@ -84,7 +84,7 @@ export default function TextAreaWithCopy({
         className={`w-full ${
           forProxies ? "sm:w-[100%]" : "sm:w-[30%]"
         } max-w-xl border p-5 border-gray-300 rounded-lg shadow-lg ${
-          label == "Active" ? "bg-green-300" : "bg-white-white"
+          label == "Active" ? "bg-green-600" : "bg-white-white"
         }`}
       >
         <label
@@ -111,7 +111,7 @@ export default function TextAreaWithCopy({
         <div className="flex justify-center gap-6 mt-4">
           <button
             onClick={copyProfilesNumbersToClipboard}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
+            className="bg-gray-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md"
             title="Copy profile numbers to clipboard"
           >
             <i className="ri-numbers-line"></i>

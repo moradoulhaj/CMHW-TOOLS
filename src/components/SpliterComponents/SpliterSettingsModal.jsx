@@ -7,7 +7,8 @@ export default function SpliterSettingsModal({
   setModalSettings,
   onApply,
   selectedEntity,
-  timedrops,nextDaySeeds
+  timedrops,
+  nextDaySeeds,
 }) {
   const {
     isOpen,
@@ -31,10 +32,9 @@ export default function SpliterSettingsModal({
     setModalSettings((prev) => ({ ...prev, nightDrops: 0 }));
   }, []);
   const updateSetting = (key, value) => {
-    if (key == "loginNextDay" && nextDaySeeds == ""){
-      toast.error("Next Day tags is empty")
+    if (key == "loginNextDay" && nextDaySeeds == "") {
+      toast.error("Next Day tags is empty");
       return;
-
     }
     setModalSettings((prev) => ({ ...prev, [key]: value }));
   };
@@ -152,6 +152,7 @@ export default function SpliterSettingsModal({
           </>
         )}
 
+    
         {/* Time Type Input*/}
 
         <div className="mt-4 flex justify-between items-center">
@@ -164,7 +165,7 @@ export default function SpliterSettingsModal({
           />
         </div>
         {/* Shuffle Toggle */}
-         <div className="mt-4 flex justify-between items-center">
+        <div className="mt-4 flex justify-between items-center">
           <span className="text-gray-700 font-medium">Apply Shuffle</span>
           <button
             onClick={() => updateSetting("shuffle", !shuffle)}
@@ -174,7 +175,7 @@ export default function SpliterSettingsModal({
           >
             {shuffle ? "Yes" : "No"}
           </button>
-        </div> 
+        </div>
 
         {/* ScheduleTasks Toggle */}
         <div className="mt-4 flex justify-between items-center">
