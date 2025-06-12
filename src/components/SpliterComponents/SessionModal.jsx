@@ -1,20 +1,19 @@
 import React, { useState } from "react";
 import { updateSessionStatuses } from "../../api/apiService";
 import { toast } from "react-toastify";
+import { X, Save } from "lucide-react";
 
 const SessionModal = ({ isOpen, setSessionModalOpen, sessionData }) => {
   if (!isOpen) return null;
 
   const [updatedSessions, setUpdatedSessions] = useState(sessionData);
   const [isSessionsUpdated, setIsSessionsUpdated] = useState(false);
-  // Handling the Close modal if no change made
+
   const HandleModalClose = () => {
     setUpdatedSessions(sessionData);
     setSessionModalOpen(false);
-    
   };
 
-  // Handle status change for each session
   const handleStatusChange = (index) => {
     const newSessions = [...updatedSessions];
     newSessions[index].isActive = !newSessions[index].isActive;
@@ -22,7 +21,6 @@ const SessionModal = ({ isOpen, setSessionModalOpen, sessionData }) => {
     setIsSessionsUpdated(true);
   };
 
-  // Handle Save Changes
   const handleSaveChanges = async () => {
     try {
       const sessionsToUpdate = updatedSessions.map((session) => ({
@@ -32,9 +30,7 @@ const SessionModal = ({ isOpen, setSessionModalOpen, sessionData }) => {
 
       await updateSessionStatuses(sessionsToUpdate);
       toast.success("Session statuses updated successfully!");
-
       setSessionModalOpen(false);
-      // Close modal after saving changes
     } catch (error) {
       console.error("Error updating session statuses:", error);
       toast.error("Failed to update session statuses.");
@@ -42,93 +38,95 @@ const SessionModal = ({ isOpen, setSessionModalOpen, sessionData }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="relative bg-white p-6 rounded-lg shadow-xl w-full max-w-4xl">
-        {/* Close Button */}
-        <button
-          onClick={HandleModalClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition duration-200"
-        >
-          &times;
-        </button>
-
-        <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
-          Session Details
-        </h2>
-
-        {/* Session Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="px-4 py-2 text-left border border-gray-300">
-                  Name
-                </th>
-                <th className="px-4 py-2 text-left border border-gray-300">
-                  Username
-                </th>
-                <th className="px-4 py-2 text-left border border-gray-300">
-                  Script
-                </th>
-                <th className="px-4 py-2 text-left border border-gray-300">
-                  Config
-                </th>
-                <th className="px-4 py-2 text-left border border-gray-300">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {updatedSessions.map((session, index) => (
-                <tr
-                  key={index}
-                  className="border-b hover:bg-gray-100 transition duration-200"
-                >
-                  <td className="px-4 py-3 border border-gray-300">
-                    {session.name}
-                  </td>
-                  <td className="px-4 py-3 border border-gray-300">
-                    {session.username}
-                  </td>
-                  <td className="px-4 py-3 border border-gray-300">
-                    {session.script}
-                  </td>
-                  <td className="px-4 py-3 border border-gray-300">
-                    {session.config}
-                  </td>
-                  <td
-                    className="px-4 py-3 border border-gray-300 cursor-pointer"
-                    onClick={() => handleStatusChange(index)}
-                  >
-                    <span
-                      className={`px-3 py-1 rounded-full text-white text-xs font-semibold transition duration-200 ${
-                        session.isActive
-                          ? "bg-green-500 hover:bg-green-600"
-                          : "bg-red-500 hover:bg-red-600"
-                      }`}
-                    >
-                      {session.isActive ? "In Repo" : "Paused"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-4 mt-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+      <div className="relative w-full max-w-4xl mx-4 bg-white rounded-xl shadow-2xl overflow-hidden">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-gray-50">
+          <h2 className="text-2xl font-bold text-gray-800">Session Management</h2>
           <button
             onClick={HandleModalClose}
-            className="px-6 py-2 text-lg font-semibold bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition duration-200"
+            className="p-1 text-gray-500 rounded-full hover:bg-gray-200 transition-colors"
           >
-            Close
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="max-h-[70vh] overflow-y-auto p-6">
+          <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Username
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Script
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Config
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {updatedSessions.map((session, index) => (
+                  <tr
+                    key={index}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {session.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {session.username}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {session.script}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {session.config}
+                    </td>
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                      onClick={() => handleStatusChange(index)}
+                    >
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          session.isActive
+                            ? "bg-green-100 text-green-800 hover:bg-green-200"
+                            : "bg-red-100 text-red-800 hover:bg-red-200"
+                        } transition-colors`}
+                      >
+                        {session.isActive ? "Active" : "Paused"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+          <button
+            onClick={HandleModalClose}
+            className="flex items-center gap-2 px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+          >
+            Cancel
           </button>
           {isSessionsUpdated && (
             <button
               onClick={handleSaveChanges}
-              className="px-6 py-2 text-lg font-semibold bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+              className="flex items-center gap-2 px-5 py-2 text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition-colors"
             >
+              <Save className="w-4 h-4" />
               Save Changes
             </button>
           )}

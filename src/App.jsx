@@ -28,6 +28,7 @@ import EmailDuplicateChecker from "./components/Desktop/EmailDuplicateChecker";
 import TwoListsComparetor from "./components/Desktop/TwoListsComparetor";
 import SheduleGenerator from "./components/SheduleGenerator";
 import SpamCalculatorBeta from "./components/SpamCalculatorBeta";
+import LogAnalyseV2 from "./components/Desktop/LogAnalyseV2";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -101,7 +102,9 @@ export default function App() {
                   element={<AddSessionUsingTagsBeta />}
                 />
                 {/* Desktop routes */}
-                <Route path="/logAnalyser" element={<LogAnalyse />} />
+                
+                {/* <Route path="/logAnalyser" element={<LogAnalyse />} /> */}
+                <Route path="/logAnalyser" element={<LogAnalyseV2 />} />
                 <Route
                   path="/emailDuplicateChecker"
                   element={<EmailDuplicateChecker />}

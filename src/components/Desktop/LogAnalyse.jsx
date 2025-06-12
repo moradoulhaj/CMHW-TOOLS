@@ -27,9 +27,8 @@ export default function LogAnalyse() {
     // Parse each log line
     for (let line of logLines) {
       const parts = line.trim().split(',');
-
       // Ensure line has enough parts to parse
-      if (parts.length < 6) continue;
+    //  if (parts.length < 6) continue;
 
       const index = parseInt(parts[1]); // second item is the index
       const email = parts[2];           // third item is the email
@@ -48,10 +47,11 @@ export default function LogAnalyse() {
 
     // Loop through the range of indices
     for (let i = fromId; i <= toId; i++) {
+
       const title = entries[i] || '';
       const email = emails[i] || '';
-
       // Categorize based on title and presence of data
+      console.log(title)
       if (!(i in entries)) {
         recheck.push(`${i},not exist`);
       } else if (title === 'Gmail') {

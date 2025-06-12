@@ -1,70 +1,74 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, X, Save } from "lucide-react";
 
 const NextDayModal = ({ isOpen, onClose, nextDaySeeds, setNextDaySeeds }) => {
   if (!isOpen) return null;
 
-  // State to track textarea value
   const [isNextDayEdited, setIsNextDayEdited] = useState(false);
 
-  // Handle changes in the textarea
   const handleChange = (event) => {
     setNextDaySeeds(event.target.value);
     setIsNextDayEdited(true);
   };
 
-  // Function to send data to API
-  const handleReset = async () => {
+  const handleReset = () => {
     setNextDaySeeds("");
+    setIsNextDayEdited(true);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="relative bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
-
-       {/* Modal Title */}
-       <div>
-          <h2 className="text-2xl font-semibold text-center  text-gray-800">
-            Next Day Seeds
-          </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+      <div className="relative w-full max-w-2xl mx-4 bg-white rounded-xl shadow-2xl overflow-hidden">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-gray-50">
+          <h2 className="text-2xl font-bold text-gray-800">Next Day Seeds Configuration</h2>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleReset}
+              className="p-2 text-blue-600 rounded-full hover:bg-blue-100 transition-colors"
+              title="Reset seeds"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-500 rounded-full hover:bg-gray-200 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Reset Button */}
-        <div className=" text-gray-600 hover:text-gray-900 text-2xl font-bold transition duration-200">
-          <RotateCcw
-            className="w-5 h-5 text-blue-600 cursor-pointer "
-            onClick={handleReset}
-          />
+        {/* Modal Body */}
+        <div className="p-6">
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Enter seeds for next day invluding the day number.
+            </label>
+            <textarea
+              className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+              value={nextDaySeeds}
+              onChange={handleChange}
+              placeholder="Enter seeds here..."
+            />
+          </div>
         </div>
 
-
-        </div>
- 
-        {/* Textarea for Time Drops */}
-        <div className="w-full">
-          <textarea
-            className="w-full h-40 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={nextDaySeeds}
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-4 mt-6">
+        {/* Modal Footer */}
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-6 py-2 text-lg font-semibold bg-gray-400 text-white rounded-lg shadow-md hover:bg-gray-500 transition duration-200"
+            className="flex items-center gap-2 px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
           >
-            Close
+            Cancel
           </button>
           {isNextDayEdited && (
             <button
               onClick={onClose}
-              className="px-6 py-2 text-lg font-semibold bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+              className="flex items-center gap-2 px-5 py-2 text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition-colors"
             >
+              <Save className="w-4 h-4" />
               Save Changes
             </button>
           )}

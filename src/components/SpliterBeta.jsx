@@ -14,7 +14,7 @@ import {
   splitProportionedAndRemainder,
   splitSessionsByDrops,
 } from "../scripts/spliterScripts";
-import { fetchEntities, fetchEntityId } from "../api/apiService"; // Import API function
+import { fetchEntities, fetchEntityId } from "../api/apiService";
 import SpliterSettingsModal from "./SpliterComponents/SpliterSettingsModal";
 import SessionModal from "./SpliterComponents/SessionModal";
 import TimeDropsModal from "./SpliterComponents/TimeDropsModal";
@@ -29,38 +29,18 @@ export default function SpliterBeta() {
   const [activeSessions, setActiveSessions] = useState(0);
   const [selectedEntity, setSelectedEntity] = useState(1);
   const [selectedEntityName, setSelectedEntityName] = useState("");
-
   const [loading, setLoading] = useState(true);
   const [entities, setEntities] = useState([]);
-
   const [seedsBySessionPerDrop, setSeedsBySessionPerDrop] = useState([]);
   const [delimiter, setDelimiter] = useState("\n");
   const [sessionData, setSessionData] = useState([]);
-  //Next Day Seeds
   const [nextDaySeeds, setNextDaySeeds] = useState([]);
 
   // Modal states
-  const [isSessionModalOpen, setSessionModalOpen] = useState(false); // Modal state
-  //Entities Modal
-  // const entities = [
-  //   ...Array.from({ length: 15 }, (_, i) => ({
-  //     id: i + 1,
-  //     name: `CMH${i + 1}`,
-  //   })),
-  //   { id: 70, name: "CMH7-Mobile" },
-
-  //   { id: 30, name: "CMH3-Offer" },
-  //   { id: 60, name: "CMH6-Offer" },
-
-  //   { id: 80, name: "CMH8-Offer" },
-  //   { id: 120, name: "CMH12-Offer" },
-
-  //   { id: 150, name: "CMH15-Offer" },
-  //   { id: 16, name: "CMH16" },
-  // ];
-  const [isNextDayModalOpen, setIsNextDayModalOpen] = useState(false); // Modal state
-  const [isTimeDropsModalOpen, setIsTimeDropsModalOpen] = useState(false); // Modal state
-  // Modal Settings State
+  const [isSessionModalOpen, setSessionModalOpen] = useState(false);
+  const [isNextDayModalOpen, setIsNextDayModalOpen] = useState(false);
+  const [isTimeDropsModalOpen, setIsTimeDropsModalOpen] = useState(false);
+  
   const [modalSettings, setModalSettings] = useState({
     isOpen: false,
     useFixedQuantity: false,
@@ -77,7 +57,6 @@ export default function SpliterBeta() {
     nightDropsQuantity: 100,
   });
 
-  // Fetch all entities on mount
   useEffect(() => {
     const loadEntities = async () => {
       try {
@@ -87,7 +66,6 @@ export default function SpliterBeta() {
           const numB = parseInt(b.name.match(/\d+/));
           return numA - numB;
         });
-
         setEntities(data);
         if (data.length > 0) setSelectedEntity(data[0].id);
       } catch (error) {
@@ -101,37 +79,27 @@ export default function SpliterBeta() {
     const fetchData = async () => {
       try {
         const data = await fetchEntityId(selectedEntity);
-
-        setLoading(false); // Only call this after data is fetched
+        setLoading(false);
         setSelectedEntityName(data.name);
         const timedropsArray = data.timedrops ? data.timedrops.split(",") : [];
         setTimeDrops(timedropsArray);
-        // Sort sessions based on their index
-
         const sortedSessions = (data.sessions || []).sort(
           (a, b) => a.index - b.index
         );
-
-        // Count only active sessions
         setActiveSessions(
           sortedSessions
             ? sortedSessions.filter((session) => session.isActive)
             : []
         );
-
-        // Store session data in the state
-
         setSessionData(sortedSessions);
       } catch (error) {
         toast.error("Failed to fetch data from API!");
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
   }, [selectedEntity, isSessionModalOpen]);
 
-  // Handle opening the modal when clicking "Session Numbers"
   const handleSessionClick = () => {
     if (sessionData.length === 0) {
       toast.error("No session data available!");
@@ -139,7 +107,7 @@ export default function SpliterBeta() {
     }
     setSessionModalOpen(true);
   };
-  // Handle opening the modal when clicking "Time Drops"
+
   const handleTimeDropsClick = () => {
     if (timeDrops.length === 0) {
       toast.error("No TimeDrops data available!");
@@ -147,7 +115,7 @@ export default function SpliterBeta() {
     }
     setIsTimeDropsModalOpen(true);
   };
-  // Handle opening the modal when clicking "Next Day Seeds"
+
   const HandleNextDaySeeds = () => {
     setIsNextDayModalOpen(true);
   };
@@ -176,16 +144,11 @@ export default function SpliterBeta() {
     }
   };
 
-  // Here the split log
   const handleSplit = async () => {
     if (tagsToSplit === "") {
       toast.error("No tags");
       return;
     }
-    // if (modalSettings.loginNextDay  && nextDaySeeds == "") {
-    //   toast.error ("Next day tags not found")
-    //   return;
-    // }
 
     const firstLine = tagsToSplit.split("\n")[0];
     const sessionsNumber = calcSessions(firstLine);
@@ -214,7 +177,6 @@ export default function SpliterBeta() {
 
     let finalSplitData = [];
 
-    // CLH7 Logic
     if (selectedEntity == 7) {
       const totalMorningSeeds =
         modalSettings.morningDropsQuantity * modalSettings.morningDrops;
@@ -246,7 +208,6 @@ export default function SpliterBeta() {
         }
       );
     } else {
-      // Standard logic
       finalSplitData = splitSessionsByDrops(
         collectedData,
         timeDrops.length,
@@ -255,7 +216,6 @@ export default function SpliterBeta() {
       );
     }
 
-    // 🔁 Clean duplicate folders if entity is CMH mobile
     if (selectedEntity == 70) {
       finalSplitData = finalSplitData.map((session) =>
         session.map((drop) => reassignUniqueFoldersToFirstTags(drop))
@@ -275,6 +235,7 @@ export default function SpliterBeta() {
       modalSettings.scheduleTasks,
       modalSettings.coversationOff
     );
+    
     if (selectedEntityName == "CMH12") {
       downloadZip(
         finalSplitData,
@@ -292,174 +253,166 @@ export default function SpliterBeta() {
     }
 
     setSeedsBySessionPerDrop(finalSplitData);
-
     toast.success("Split successfully");
     setProcessedContents(collectedData);
   };
 
   return (
-    <div className="flex flex-col items-center p-10 space-y-8 bg-gray-100 ">
-      <ToastContainer theme="colored" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      <div className="max-w-6xl mx-auto">
+        <ToastContainer 
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
 
-      {/* Header */}
-      <div className="w-full max-w-4xl flex justify-between items-center bg-blue-500 p-4 rounded-lg shadow-lg">
-        <h2 className="text-4xl font-bold text-white drop-shadow-md">
-          Spliter
-        </h2>
-        <div className="flex gap-4">
-          <button
-            onClick={HandleNextDaySeeds}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg shadow-md transition-transform transform hover:scale-105 active:scale-95"
-          >
-            <Settings className="w-5 h-5" /> Next Day Seeds
-          </button>
-          <button
-            onClick={handleReset}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg shadow-md transition-transform transform hover:scale-105 active:scale-95"
-          >
-            <RotateCcw className="w-5 h-5" /> Reset
-          </button>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 p-6 bg-white rounded-xl shadow-lg">
+          <h1 className="text-3xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Spliter Tool
+          </h1>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={HandleNextDaySeeds}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition-all"
+            >
+              <Settings className="w-5 h-5" />
+              <span>Next Day Seeds</span>
+            </button>
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-md transition-all"
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Controls */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Entity Selection */}
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Entity Configuration
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Entity
+                  </label>
+                  <select
+                    value={selectedEntity}
+                    onChange={(e) => {
+                      setSelectedEntity(e.target.value);
+                      setSessionData([]);
+                      setTimeDrops([]);
+                      setActiveSessions(0);
+                    }}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  >
+                    {entities.map((entity) => (
+                      <option key={entity.id} value={entity.id}>
+                        {entity.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div 
+                    className="bg-blue-50 p-3 rounded-lg cursor-pointer hover:bg-blue-100 transition"
+                    onClick={handleTimeDropsClick}
+                  >
+                    <div className="text-sm text-gray-600">Drop Numbers</div>
+                    {loading ? (
+                      <div className="h-8 bg-gray-200 rounded animate-pulse mt-1"></div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {timeDrops.length}
+                        </div>
+                        <Eye className="text-gray-500" size={18} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div 
+                    className="bg-purple-50 p-3 rounded-lg cursor-pointer hover:bg-purple-100 transition"
+                    onClick={handleSessionClick}
+                  >
+                    <div className="text-sm text-gray-600">Active Sessions</div>
+                    {loading ? (
+                      <div className="h-8 bg-gray-200 rounded animate-pulse mt-1"></div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {activeSessions.length}
+                        </div>
+                        <Eye className="text-gray-500" size={18} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Delimiter Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Delimiter
+                  </label>
+                  <select
+                    value={delimiter}
+                    onChange={(e) => setDelimiter(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  >
+                    <option value="\n">New Line (\n)</option>
+                    <option value=";">Semicolon (;)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Button */}
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <button
+                onClick={handleSplitClick}
+                disabled={!tagsToSplit}
+                className={`w-full py-3 px-4 text-lg font-semibold rounded-lg shadow-md transition-all ${
+                  tagsToSplit 
+                    ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                Split Tags
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column - Tags Input */}
+          <div className="lg:col-span-2">
+            <div className="bg-white p-6 rounded-xl shadow-md h-full">
+              <TagsInput
+                tagsToRemove={tagsToSplit}
+                setTagsToRemove={setTagsToSplit}
+                setProcessedContents={setProcessedContents}
+                content="Tags to split"
+              />
+            </div>
+          </div>
         </div>
       </div>
-      {/* Entity Selection Dropdown */}
-      <div className="flex flex-col items-center">
-        <label htmlFor="entitySelect" className="text-gray-700 font-medium">
-          Select Entity
-        </label>
-        <select
-          id="entitySelect"
-          value={selectedEntity}
-          onChange={(e) => {
-            setSelectedEntity(e.target.value);
-            setSessionData([]);
-            setTimeDrops([]);
-            setActiveSessions(0);
-          }}
-          className="w-40 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
-        >
-          {entities.map((entity) => (
-            <option key={entity.id} value={entity.id}>
-              {entity.name}
-            </option>
-          ))}
-        </select>
-      </div>
 
-      {/* Input Fields */}
-      {/* Input Fields */}
-      <div className="flex flex-wrap justify-center gap-6 w-full max-w-3xl">
-        {loading ? (
-          <>
-            {/* Drop Numbers Skeleton */}
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-20 h-4 bg-gray-300 rounded animate-pulse" />
-              <div className="w-32 h-10 bg-gray-300 rounded animate-pulse relative" />
-            </div>
-
-            {/* Session In Repo Skeleton */}
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-24 h-4 bg-gray-300 rounded animate-pulse" />
-              <div className="w-32 h-10 bg-gray-300 rounded animate-pulse relative" />
-            </div>
-
-            {/* Delimiter Skeleton */}
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-20 h-4 bg-gray-300 rounded animate-pulse" />
-              <div className="w-32 h-10 bg-gray-300 rounded animate-pulse" />
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Drop Numbers */}
-            <div
-              className="flex flex-col items-center relative"
-              onClick={handleTimeDropsClick}
-            >
-              <label
-                htmlFor="dropNumbers"
-                className="text-gray-700 font-medium"
-              >
-                Drop Numbers
-              </label>
-              <div className="relative">
-                <input
-                  id="dropNumbers"
-                  type="number"
-                  value={timeDrops.length}
-                  readOnly
-                  className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500 pr-10"
-                />
-                <Eye
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-                  size={20}
-                />
-              </div>
-            </div>
-
-            {/* Session In Repo */}
-            <div
-              className="flex flex-col items-center relative"
-              onClick={handleSessionClick}
-            >
-              <label
-                htmlFor="sessionNumbers"
-                className="text-gray-700 font-medium"
-              >
-                Session In Repo
-              </label>
-              <div className="relative">
-                <input
-                  id="sessionNumbers"
-                  type="number"
-                  value={activeSessions.length}
-                  readOnly
-                  className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500 pr-10"
-                />
-                <Eye
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-                  size={20}
-                />
-              </div>
-            </div>
-
-            {/* Delimiter */}
-            <div className="flex flex-col items-center">
-              <label htmlFor="delimiter" className="text-gray-700 font-medium">
-                Delimiter
-              </label>
-              <select
-                id="delimiter"
-                value={delimiter}
-                onChange={(e) => setDelimiter(e.target.value)}
-                className="w-32 py-2 px-3 rounded border border-gray-300 shadow-md focus:ring focus:border-blue-500"
-              >
-                <option value="\n">New Line (\n)</option>
-                <option value=";">Semicolon (;)</option>
-              </select>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Tags Input */}
-      <TagsInput
-        tagsToRemove={tagsToSplit}
-        setTagsToRemove={setTagsToSplit}
-        setProcessedContents={setProcessedContents}
-        content="Tags to split"
-      />
-
-      {/* Buttons */}
-      <div className="flex gap-6 mt-6">
-        <button
-          onClick={handleSplitClick}
-          className="px-8 py-3 text-lg font-semibold bg-purple-600 text-white rounded-lg shadow-md transition-all hover:bg-purple-700 hover:shadow-lg active:scale-95"
-        >
-          Split
-        </button>
-      </div>
-
-      {/* Spliter Settings Modal */}
+      {/* Modals */}
       <SpliterSettingsModal
         modalSettings={modalSettings}
         setModalSettings={setModalSettings}
@@ -469,12 +422,12 @@ export default function SpliterBeta() {
         nextDaySeeds={nextDaySeeds}
       />
 
-      {/* Session Modal */}
       <SessionModal
         isOpen={isSessionModalOpen}
         setSessionModalOpen={setSessionModalOpen}
         sessionData={sessionData}
       />
+
       <TimeDropsModal
         isOpen={isTimeDropsModalOpen}
         onClose={() => setIsTimeDropsModalOpen(false)}

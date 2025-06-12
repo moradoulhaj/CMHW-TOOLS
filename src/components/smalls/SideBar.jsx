@@ -11,29 +11,136 @@ export default function Sidebar({ isOpen, toggle }) {
 
   const links = [
     // Tool links
-    { path: "/readAndShow", label: "Read and Show", category: "tool", status: "active" },
-    { path: "/removeTags", label: "Remove Sessions", category: "tool", status: "active" },
-    { path: "/addUsingTags", label: "Add Session", category: "tool", status: "deprecated" },
-    { path: "/delimiterSwitch", label: "Delimiter Switch", category: "tool", status: "deprecated" },
-    { path: "/spliter", label: "Drive Spliter", category: "tool", status: "active" },
-    { path: "/logChecker", label: "Log Checker", category: "tool", status: "deprecated" },
-    { path: "/logCheckerBeta", label: "Log Checker - TEST", category: "tool", status: "deprecated" },
-    { path: "/logCheckerNew", label: "Log Checker - NEW", category: "tool", status: "active" },
-    { path: "/spamCalculator", label: "Spam Calculator", category: "tool", status: "active" },
-    { path: "/ramadanTask", label: "Next Day Login", category: "tool", status: "deprecated" },
-    { path: "/addSessionBeta", label: "Add Session Beta", category: "tool", status: "active" },
-    { path: "/spliterBeta", label: "Spliter Beta", category: "tool", status: "active" },
-    { path: "/updateTask", label: "Remove TO Tasks", category: "tool", status: "active" },
-    { path: "/sheduleGenerator", label: "Schedule Generator", category: "tool", status: "active" },
-    { path: "/spamCalculatorBeta", label: "Spam Calculator -Noureddin", category: "tool", status: "active" },
-    
+    {
+      path: "/readAndShow",
+      label: "Read and Show",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/removeTags",
+      label: "Remove Sessions",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/addUsingTags",
+      label: "Add Session",
+      category: "tool",
+      status: "deprecated",
+    },
+    {
+      path: "/delimiterSwitch",
+      label: "Delimiter Switch",
+      category: "tool",
+      status: "deprecated",
+    },
+    {
+      path: "/spliter",
+      label: "Drive Spliter",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/logChecker",
+      label: "Log Checker",
+      category: "tool",
+      status: "deprecated",
+    },
+    {
+      path: "/logCheckerBeta",
+      label: "Log Checker - TEST",
+      category: "tool",
+      status: "deprecated",
+    },
+    {
+      path: "/logCheckerNew",
+      label: "Log Checker - NEW",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/spamCalculator",
+      label: "Spam Calculator",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/ramadanTask",
+      label: "Next Day Login",
+      category: "tool",
+      status: "deprecated",
+    },
+    {
+      path: "/addSessionBeta",
+      label: "Add Session Beta",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/spliterBeta",
+      label: "Spliter Beta",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/updateTask",
+      label: "Remove TO Tasks",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/sheduleGenerator",
+      label: "Schedule Generator",
+      category: "tool",
+      status: "active",
+    },
+    {
+      path: "/spamCalculatorBeta",
+      label: "Spam Calculator -Noureddin",
+      category: "tool",
+      status: "active",
+    },
+
     // Desktop links
-    { path: "/logAnalyser", label: "Log Analyse", category: "desktop", status: "active" },
-    { path: "/emailDuplicateChecker", label: "Email Duplicate Checker", category: "desktop", status: "active" },
-    { path: "/compareTwoLists", label: "Compare Two Lists", category: "desktop", status: "active" },
-    { path: "/notExistingProfiles", label: "Not Existing Profiles", category: "desktop", status: "active" },
-    { path: "/emailsOfProfiles", label: "Emails of Profiles", category: "desktop", status: "active" },
-    { path: "/profilesOfEmails", label: "Profiles of Emails", category: "desktop", status: "active" },
+    {
+      path: "/logAnalyser",
+      label: "Log Analyser",
+      category: "desktop",
+      status: "active",
+    },
+
+
+    {
+      path: "/emailDuplicateChecker",
+      label: "Email Duplicate Checker",
+      category: "desktop",
+      status: "active",
+    },
+    {
+      path: "/compareTwoLists",
+      label: "Compare Two Lists",
+      category: "desktop",
+      status: "active",
+    },
+    {
+      path: "/notExistingProfiles",
+      label: "Not Existing Profiles",
+      category: "desktop",
+      status: "active",
+    },
+    {
+      path: "/emailsOfProfiles",
+      label: "Emails of Profiles",
+      category: "desktop",
+      status: "active",
+    },
+    {
+      path: "/profilesOfEmails",
+      label: "Profiles of Emails",
+      category: "desktop",
+      status: "active",
+    },
   ];
 
   const categories = ["tool", "desktop"];
@@ -61,7 +168,7 @@ export default function Sidebar({ isOpen, toggle }) {
             to={link.path}
             className={({ isActive }) =>
               `block text-sm px-4 py-2.5 rounded-lg transition-all duration-200 ${
-                isActive 
+                isActive
                   ? "bg-white text-blue-600 font-semibold shadow-sm"
                   : "text-blue-100 hover:bg-blue-700 hover:text-white"
               }`
@@ -79,9 +186,11 @@ export default function Sidebar({ isOpen, toggle }) {
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      <div className="sticky top-0 bg-blue-600 pt-2  -mx-5 px-5">
-        <h2 className="text-white text-2xl font-bold mb-2 text-center">Admin Dashboard</h2>
-        
+      <div className="sticky top-0 bg-blue-600 pt-2  px-5">
+        <h2 className="text-white text-2xl font-bold mb-2 text-center">
+          Admin Dashboard
+        </h2>
+
         <button
           onClick={() => {
             localStorage.removeItem("token");
@@ -109,7 +218,11 @@ export default function Sidebar({ isOpen, toggle }) {
                 <span className="flex items-center gap-2">
                   <span className="capitalize">{category}</span>
                   <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">
-                    {links.filter(l => l.category === category && l.status === "active").length}
+                    {
+                      links.filter(
+                        (l) => l.category === category && l.status === "active"
+                      ).length
+                    }
                   </span>
                 </span>
                 {categoryOpen[category] ? (
@@ -134,7 +247,13 @@ export default function Sidebar({ isOpen, toggle }) {
                         <span className="flex items-center gap-2">
                           <span>Deprecated Tools</span>
                           <span className="text-xs bg-blue-600/70 text-blue-100 px-2 py-0.5 rounded-full">
-                            {links.filter(l => l.category === category && l.status === "deprecated").length}
+                            {
+                              links.filter(
+                                (l) =>
+                                  l.category === category &&
+                                  l.status === "deprecated"
+                              ).length
+                            }
                           </span>
                         </span>
                         {deprecatedOpen[category] ? (
