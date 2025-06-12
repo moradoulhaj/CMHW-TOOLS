@@ -147,7 +147,6 @@ export const splitSessionsByDrops = (
   });
 };
 
-
 // // function to calcumate propportion
 // export const calcProportion = (collectedData, totalMorningSeeds) => {
 //   const totalSeeds = collectedData.reduce(
@@ -280,7 +279,6 @@ export const downloadZip = async (
   } else if (delimiter === ";") {
     delimiter = ";";
   }
-  console.log(selectedEntityName)
   // ✅ Logic for Next Day
   if (loginNextDay) {
     const firstLine = nextDaySeeds.split("\n")[0];
@@ -344,7 +342,9 @@ export const downloadZip = async (
 
   // ✅ Add text files for each drop
   combinedDrops.forEach((tags, dropIndex) => {
-    const fileName = `${selectedEntityName.split("-")[0]}_file_${dropIndex + 1}.txt`;
+    const fileName = `${selectedEntityName.split("-")[0]}_file_${
+      dropIndex + 1
+    }.txt`;
     const fileContent = tags.join(delimiter);
     zip.file(fileName, fileContent);
   });
@@ -357,9 +357,24 @@ export const downloadZip = async (
   const rawArrayTxt = JSON.stringify(seedsBySessionPerDrop, null, 2); // pretty-printed JSON
   zip.file("Excels/seedsBySessionPerDrop.txt", rawArrayTxt);
 
-  // ✅ Store the main Excel file inside "Excels" folder
-  const excelBlob = generateExcelBlob(seedsBySessionPerDrop);
+  const { excelBlob, worksheetData } = generateExcelBlobWithCSVData(
+    seedsBySessionPerDrop
+  );
+
+  // Add Excel file
   zip.file(`Excels/${selectedEntityName}.xlsx`, excelBlob);
+
+  // Convert worksheetData to custom CSV format
+  const csvString = worksheetData
+    .map((row) =>
+      row.map((cell) => (cell != null ? String(cell) : "")).join(";")
+    )
+    .join("\n");
+
+  const csvBlob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+
+  // Add CSV file
+  zip.file(`Excels/${selectedEntityName}_CSV.csv`, csvBlob);
 
   // ✅ Generate the zip file
   setTimeout(async () => {
@@ -483,6 +498,78 @@ export const generateExcelBlob = (seedsBySessionPerDrop) => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 };
+export const generateExcelBlobWithCSVData = (seedsBySessionPerDrop) => {
+  const worksheetData = [];
+  const profileSheetData = [];
+  const headerRow = ["Drop"];
+
+  seedsBySessionPerDrop.forEach((_, sessionIndex) => {
+    headerRow.push(`Session ${sessionIndex + 1}`, "");
+  });
+  worksheetData.push(headerRow);
+
+  const merges = [];
+  let currentRow = 1;
+  const maxDrops = Math.max(
+    ...seedsBySessionPerDrop.map((session) => session.length)
+  );
+
+  for (let dropIndex = 0; dropIndex < maxDrops; dropIndex++) {
+    let maxPairsInDrop = Math.max(
+      ...seedsBySessionPerDrop.map((session) => session[dropIndex]?.length || 0)
+    );
+
+    if (maxPairsInDrop > 0) {
+      merges.push({
+        s: { r: currentRow, c: 0 },
+        e: { r: currentRow + maxPairsInDrop - 1, c: 0 },
+      });
+
+      for (let pairIndex = 0; pairIndex < maxPairsInDrop; pairIndex++) {
+        const row = [pairIndex === 0 ? dropIndex + 1 : ""];
+        seedsBySessionPerDrop.forEach((session) => {
+          const pair = session[dropIndex]?.[pairIndex];
+          row.push(pair ? `${pair[0]}` : "", pair ? `${pair[1]}` : "");
+        });
+        worksheetData.push(row);
+        currentRow++;
+      }
+
+      worksheetData.push([]);
+      currentRow++;
+    }
+
+    const profileRow = [dropIndex + 1];
+    seedsBySessionPerDrop.forEach((session) => {
+      const profiles =
+        session[dropIndex]?.map((pair) => pair[0]).join("|") || "";
+      profileRow.push(profiles);
+    });
+    profileSheetData.push(profileRow);
+  }
+
+  const profileSheetHeader = ["Drop"];
+  seedsBySessionPerDrop.forEach((_, sessionIndex) =>
+    profileSheetHeader.push(`Session ${sessionIndex + 1}`)
+  );
+  profileSheetData.unshift(profileSheetHeader);
+
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  worksheet["!merges"] = merges;
+  const profileSheet = XLSX.utils.aoa_to_sheet(profileSheetData);
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sessions");
+  XLSX.utils.book_append_sheet(workbook, profileSheet, "Profiles by Drop");
+
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const excelBlob = new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  return { excelBlob, worksheetData };
+};
+
 export const generateSchedule = async (
   profilesByDrop,
   dropTimes,
@@ -515,7 +602,7 @@ export const generateSchedule = async (
       allProfiles.push(...dropProfiles);
 
       let [hours, minutes] = dropTimes[index].split(":").map(Number);
-      if (hours >= 0 && hours<=9) lastDropDate.setDate(today.getDate() + 1);
+      if (hours >= 0 && hours <= 9) lastDropDate.setDate(today.getDate() + 1);
       lastDropDate.setHours(hours, minutes + 5, 0);
 
       let formattedDate = lastDropDate

@@ -140,6 +140,7 @@ const Login = () => {
               <input
                 type="password"
                 placeholder="Enter password"
+
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
