@@ -358,7 +358,7 @@ export const downloadZip = async (
   zip.file("Excels/seedsBySessionPerDrop.txt", rawArrayTxt);
 
   const { excelBlob, worksheetData } = generateExcelBlobWithCSVData(
-    seedsBySessionPerDrop
+    seedsBySessionPerDrop , sessions
   );
 
   // Add Excel file
@@ -498,13 +498,13 @@ export const generateExcelBlob = (seedsBySessionPerDrop) => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 };
-export const generateExcelBlobWithCSVData = (seedsBySessionPerDrop) => {
+export const generateExcelBlobWithCSVData = (seedsBySessionPerDrop , sessions ) => {
   const worksheetData = [];
   const profileSheetData = [];
   const headerRow = ["Drop"];
 
   seedsBySessionPerDrop.forEach((_, sessionIndex) => {
-    headerRow.push(`Session ${sessionIndex + 1}`, "");
+    headerRow.push(sessions[sessionIndex].name, "");
   });
   worksheetData.push(headerRow);
 
