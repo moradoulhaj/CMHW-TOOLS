@@ -123,6 +123,7 @@ export const handleExcel = (processedContents) => {
     return;
   }
 
+
   const excelData = [];
   const startHour = 11;
 
@@ -161,5 +162,6 @@ export const handleExcel = (processedContents) => {
   const fileName = `Seeds CMH5 - ${currentDate}.xlsx`;
   XLSX.writeFile(wb, fileName);
 };
+
 
 

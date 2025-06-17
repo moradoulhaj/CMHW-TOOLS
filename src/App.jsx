@@ -29,6 +29,7 @@ import TwoListsComparetor from "./components/Desktop/TwoListsComparetor";
 import SheduleGenerator from "./components/SheduleGenerator";
 import SpamCalculatorBeta from "./components/SpamCalculatorBeta";
 import LogAnalyseV2 from "./components/Desktop/LogAnalyseV2";
+import OfferRanges from "./components/OfferRanges";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -88,6 +89,8 @@ export default function App() {
                 <Route path="/cleanChecker" element={<CleanChecker />} />
                 <Route path="/spliterBeta" element={<SpliterBeta />} />
                 <Route path="/updateTask" element={<UpdateTask />} />
+                <Route path="/offerRanges" element={<OfferRanges />} />
+
                 <Route
                   path="/sheduleGenerator"
                   element={<SheduleGenerator />}

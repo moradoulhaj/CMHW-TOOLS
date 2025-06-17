@@ -99,6 +99,12 @@ export default function Sidebar({ isOpen, toggle }) {
       path: "/spamCalculatorBeta",
       label: "Spam Calculator -Noureddin",
       category: "tool",
+      status: "deprecated",
+    },
+    {
+      path: "/offerRanges",
+      label: "Formatting Ranges",
+      category: "tool",
       status: "active",
     },
 
