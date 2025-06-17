@@ -369,7 +369,7 @@ export const downloadZip = async (
     .map((row) =>
       row.map((cell) => (cell != null ? String(cell) : "")).join(";")
     )
-    .join("\n");
+    .join("--");
 
   const csvBlob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
 
