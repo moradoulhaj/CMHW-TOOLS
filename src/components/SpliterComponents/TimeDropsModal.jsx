@@ -26,16 +26,17 @@ const TimeDropsModal = ({
       name: entityName,
       timedrops: editedTimeDrops.replace(/\n/g, ","),
     };
-
-    try {
-      const response = await updateEntity(entityId, formattedData);
-      toast.success("Time drops updated successfully!");
-      setTimeDrops(response.timedrops.split(","));
-      onClose();
-    } catch (error) {
-      console.error("Error updating time drops:", error);
-      toast.error("Failed to update time drops.");
-    }
+    setTimeDrops(formattedData.timedrops.split(","));
+    onClose();
+    // try {
+    //   const response = await updateEntity(entityId, formattedData);
+    //   toast.success("Time drops updated successfully!");
+    //   setTimeDrops(response.timedrops.split(","));
+    //   onClose();
+    // } catch (error) {
+    //   console.error("Error updating time drops:", error);
+    //   toast.error("Failed to update time drops.");
+    // }
   };
 
   return (
@@ -78,13 +79,16 @@ const TimeDropsModal = ({
             Cancel
           </button>
           {IstimeDropsChanged && (
-            <button
-              onClick={handleSaveChanges}
-              className="flex items-center gap-2 px-5 py-2 text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition-colors"
-            >
-              <Save className="w-4 h-4" />
-              Save Changes
-            </button>
+            <>
+              {" "}
+              <button
+                onClick={handleSaveChanges}
+                className="flex items-center gap-2 px-5 py-2 text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition-colors"
+              >
+                <Save className="w-4 h-4" />
+                Save Locally
+              </button>
+            </>
           )}
         </div>
       </div>

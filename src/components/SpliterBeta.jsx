@@ -145,6 +145,7 @@ export default function SpliterBeta() {
   };
 
   const handleSplit = async () => {
+    console.log("dferzer",timeDrops)
     if (tagsToSplit === "") {
       toast.error("No tags");
       return;
