@@ -30,6 +30,7 @@ import SheduleGenerator from "./components/SheduleGenerator";
 import SpamCalculatorBeta from "./components/SpamCalculatorBeta";
 import LogAnalyseV2 from "./components/Desktop/LogAnalyseV2";
 import OfferRanges from "./components/OfferRanges";
+import ProxiesHelper from "./components/useless/ProxiesHelper";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -90,6 +91,8 @@ export default function App() {
                 <Route path="/spliterBeta" element={<SpliterBeta />} />
                 <Route path="/updateTask" element={<UpdateTask />} />
                 <Route path="/offerRanges" element={<OfferRanges />} />
+                <Route path="/proxiesHelper" element={<ProxiesHelper />} />
+
 
                 <Route
                   path="/sheduleGenerator"

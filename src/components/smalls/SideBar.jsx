@@ -106,6 +106,11 @@ export default function Sidebar({ isOpen, toggle }) {
       label: "Formatting Ranges",
       category: "tool",
       status: "active",
+    },    {
+      path: "/proxiesHelper",
+      label: "Proxies Helper v2",
+      category: "tool",
+      status: "active",
     },
 
     // Desktop links

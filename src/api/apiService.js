@@ -68,6 +68,16 @@ export const deleteSession = async (sessionId) => {
     throw error;
   }
 };
+// to delete session
+
+export const deletePlan = async (planId) => {
+  try {
+    const response = await axiosInstance.delete(`/dep/${planId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 
 // to create session

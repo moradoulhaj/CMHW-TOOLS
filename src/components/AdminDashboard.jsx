@@ -8,6 +8,7 @@ import {
   fetchEntityId,
   fetchEntities,
   updateEntity,
+  deletePlan,
 } from "../api/apiService";
 import MoveSessionModal from "./DashboardComponents/MoveSessionModal ";
 import EntityModal from "./DashboardComponents/EntityModal";
@@ -74,8 +75,24 @@ const AdminDashboard = () => {
       }
     };
     fetchData();
-  }, [selectedEntity,entityModalOpen]);
+  }, [selectedEntity, entityModalOpen]);
+  const handleEntityDelete = async (id) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete the plan: ${selectedEntityName}?`
+      )
+    ) {
+      try {
+        console.log(id);
+        const res = await deletePlan(id);
+        entities.filter((en))
 
+        toast.success("Plan deleted successfully!");
+      } catch {
+        toast.error("Failed to delete Plan.");
+      }
+    }
+  };
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this session?")) {
       try {
@@ -125,12 +142,18 @@ const AdminDashboard = () => {
             ))}
           </select>
         </div>
-        <div>
+        <div className="flex gap-5">
           <button
             onClick={() => setModalOpen(true)}
             className="flex items-center bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition"
           >
             <Plus className="w-5 h-5 mr-2" /> Add Session
+          </button>
+          <button
+            onClick={() => handleEntityDelete(selectedEntity)}
+            className="flex items-center bg-red-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-red-700 transition"
+          >
+            <Trash className="w-5 h-5 mr-2" /> Delete Plan
           </button>
         </div>
       </div>
