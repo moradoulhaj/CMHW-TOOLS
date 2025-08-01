@@ -152,15 +152,52 @@ export const removeDup = async (emailList) => {
 export const handleLogin = async (credentials) => {
   try {
     const response = await axiosInstance.post("/user/login", credentials);
-    const token = response.data.token;
+    const { token, user } = response.data;
+
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user)); // Convert object to string
+
   } catch (err) {
-    throw new Error("Login failed");  // <-- add this line
+    throw new Error("Login failed");
   }
 };
 
 
 
+export const getUsers = async () => {
+  try {
+    const response = await axiosInstance.get("/user");
+    return response.data
+ 
+  } catch (err) {
+    throw new Error("Can't get Users");  // <-- add this line
+  }
+};
 
+export const createUser = async (userData) => {
+  try {
+    const response = await axiosInstance.post("/user", userData);
+    return response.data;
+  } catch (err) {
+    throw new Error("Can't create User");
+  }
+};
+
+export const deleteUser = async (id) => {
+  try {
+    await axiosInstance.delete(`/user/${id}`);
+  } catch (err) {
+    throw new Error("Can't delete User");
+  }
+};
+
+export const editUser = async (id, userData) => {
+  try {
+    const response = await axiosInstance.put(`/user/${id}`, userData);
+    return response.data;
+  } catch (err) {
+    throw new Error("Can't edit User");
+  }
+};
 
 

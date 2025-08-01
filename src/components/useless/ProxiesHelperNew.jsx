@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import * as XLSX from 'xlsx';
 
-function ProxiesHelper() {
+function ProxiesHelperNew() {
   const [sessionProfiles, setSessionProfiles] = useState({});
   const [totalProfiles, setTotalProfiles] = useState(0);
   const [manualInput, setManualInput] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [prefix, setPrefix] = useState('');
+  const [fileGenerated, setFileGenerated] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -27,12 +28,12 @@ function ProxiesHelper() {
   const parseSessions = (text) => {
     const lines = text
       .split('\n')
-      .map((line) => line.trim().replace(/^"+|"+$/g, '')) // Remove quotes
-      .filter(Boolean); // Skip empty lines
-  
+      .map((line) => line.trim().replace(/^"+|"+$/g, ''))
+      .filter(Boolean);
+
     const sessions = {};
     let currentSession = null;
-  
+
     lines.forEach((line) => {
       if (/^[A-Za-z0-9_]+$/.test(line) && isNaN(Number(line))) {
         currentSession = line;
@@ -41,49 +42,57 @@ function ProxiesHelper() {
         sessions[currentSession].push(line);
       }
     });
-  
+
     return sessions;
   };
-  
 
-  const generateExcel = () => {
+  const generatePrefix = (sessions) => {
+    const entityName = sessions[0].split("_")[0];
+    const randomPart = Math.random().toString(36).substring(2, 8);
+    return `${entityName}_${randomPart}`;
+  };
+
+  const generateTxtFile = () => {
     const proxies = manualInput.split('\n').map(p => p.trim()).filter(Boolean);
     const sessions = Object.keys(sessionProfiles);
     const profilesBySession = sessionProfiles;
-  
-    const totalProfilesCount = sessions.reduce(
-      (sum, s) => sum + (profilesBySession[s]?.length || 0),
+
+    const nonEmptySessions = sessions.filter(s => (profilesBySession[s] || []).length > 0);
+    const totalProfilesCount = nonEmptySessions.reduce(
+      (sum, s) => sum + profilesBySession[s].length,
       0
     );
-  
+
     if (proxies.length !== totalProfilesCount) {
       alert(`Number of proxies (${proxies.length}) does not match number of profiles (${totalProfilesCount})`);
       return;
     }
-  
+
     let proxyIndex = 0;
-    const sessionData = sessions.map(session => {
-      const profiles = profilesBySession[session] || [];
-      return profiles.map(profile => `${profile}#${proxies[proxyIndex++]}`);
+    let content = '';
+
+    nonEmptySessions.forEach(session => {
+      content += `${session}\n`;
+      const profiles = profilesBySession[session];
+      profiles.forEach(profile => {
+        content += `${profile}#${proxies[proxyIndex++]}\n`;
+      });
     });
 
-    
-  
-    const maxLength = Math.max(...sessionData.map(arr => arr.length));
-  
-    const rows = [];
-    rows.push(sessions);
-  
-    for (let i = 0; i < maxLength; i++) {
-      const row = sessions.map((_, colIndex) => sessionData[colIndex][i] || '');
-      rows.push(row);
-    }
-  
-    const worksheet = XLSX.utils.aoa_to_sheet(rows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Session Mapping');
-  
-    XLSX.writeFile(workbook, 'session_profiles.xlsx');
+    const blob = new Blob([content.trim()], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const Rndmprefix = generatePrefix(sessions);
+    link.download = `${Rndmprefix}.txt`;
+
+    setPrefix(Rndmprefix);
+    setFileGenerated(true);
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -105,7 +114,10 @@ function ProxiesHelper() {
           </label>
 
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setShowModal(true);
+              setFileGenerated(false);
+            }}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition-colors"
             disabled={totalProfiles === 0}
           >
@@ -151,6 +163,26 @@ function ProxiesHelper() {
                 </div>
               </div>
 
+              {fileGenerated && (
+                <div className="bg-green-50 border border-green-300 text-green-800 rounded-md p-3 mb-4">
+                  <p className="font-semibold">Generated Prefix:</p>
+                  <div className="flex items-center mt-1">
+                    <input
+                      type="text"
+                      readOnly
+                      value={prefix}
+                      className="bg-white border border-gray-300 rounded px-2 py-1 text-sm w-full mr-2"
+                    />
+                    <button
+                      onClick={() => navigator.clipboard.writeText(prefix)}
+                      className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowModal(false)}
@@ -159,11 +191,11 @@ function ProxiesHelper() {
                   Cancel
                 </button>
                 <button
-                  onClick={generateExcel}
+                  onClick={generateTxtFile}
                   disabled={manualInput.split('\n').filter(Boolean).length !== totalProfiles}
                   className={`px-4 py-2 rounded-lg text-white transition-colors ${manualInput.split('\n').filter(Boolean).length === totalProfiles ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-400 cursor-not-allowed'}`}
                 >
-                  Generate Excel
+                  Generate File
                 </button>
               </div>
             </div>
@@ -174,4 +206,4 @@ function ProxiesHelper() {
   );
 }
 
-export default ProxiesHelper;
+export default ProxiesHelperNew;
