@@ -111,7 +111,7 @@ export default function Sidebar({ isOpen, toggle }) {
       path: "/proxiesHelper",
       label: "Proxies Helper v2",
       category: "tool",
-      status: "active",
+      status: "deprecated",
     },
     {
       path: "/proxiesHelperNew",
@@ -287,7 +287,7 @@ export default function Sidebar({ isOpen, toggle }) {
                       )}
                     </>
                   )}
-                <
+                </>
               )}
             </div>
           );
