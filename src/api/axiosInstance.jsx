@@ -29,6 +29,8 @@ axiosInstance.interceptors.response.use(
     if (error.response && error.response.status === 403) {
       // If server responds with 401, clear token and redirect to login
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
       window.location.href = "/CMHW-TOOLS/#/login";
     }
     return Promise.reject(error);

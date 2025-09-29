@@ -127,7 +127,12 @@ export default function Sidebar({ isOpen, toggle }) {
       category: "desktop",
       status: "active",
     },
-
+    {
+      path: "/proxiesListing",
+      label: "Khadija Tool",
+      category: "desktop",
+      status: "active",
+    },
     {
       path: "/emailDuplicateChecker",
       label: "Email Duplicate Checker",
@@ -157,9 +162,10 @@ export default function Sidebar({ isOpen, toggle }) {
       label: "Profiles of Emails",
       category: "desktop",
       status: "active",
-    },
+    }
+ 
   ];
-
+  
   const categories = ["tool", "desktop"];
 
   const toggleCategory = (category) => {
@@ -211,6 +217,8 @@ export default function Sidebar({ isOpen, toggle }) {
         <button
           onClick={() => {
             localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
             window.location.reload();
           }}
           className="flex items-center justify-center w-full gap-2 text-sm text-white px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition-all mb-6"

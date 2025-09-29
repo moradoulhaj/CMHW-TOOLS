@@ -53,7 +53,17 @@ function ProxiesHelperNew() {
   };
 
   const generateTxtFile = () => {
-    const proxies = manualInput.split('\n').map(p => p.trim()).filter(Boolean);
+    
+    const Simpleproxies = manualInput.split('\n').map(p => p.trim()).filter(Boolean);
+    const proxies=Simpleproxies.map((p)=>{
+      if(p.includes(":")){
+        return p
+      }else {
+        return `${p}:92`
+      }
+
+    })
+    // console.log(proxies)
     const sessions = Object.keys(sessionProfiles);
     const profilesBySession = sessionProfiles;
 

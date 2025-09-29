@@ -33,6 +33,7 @@ import OfferRanges from "./components/OfferRanges";
 import ProxiesHelper from "./components/useless/ProxiesHelper";
 import ProxiesHelperNew from "./components/useless/ProxiesHelperNew";
 import Users from "./components/DashboardComponents/Users";
+import ProxiesListing from "./components/ProxiesListing";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -66,7 +67,7 @@ export default function App() {
               <h1 className="mr-3 text-lg font-semibold">
                 {user
                   ? `SIMPLIFY - ${user}`.toUpperCase()
-                  : "CMHW - SIMPLIFY V1.6"}
+                  : "CMHW - SIMPLIFY V1.8"}
               </h1>
             </nav>
           )}
@@ -76,6 +77,7 @@ export default function App() {
             <Routes>
               {/* Public route */}
               <Route path="/login" element={<Login />} />
+              <Route path="/proxiesHelperNew" element={<ProxiesHelperNew />} />
 
               {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
@@ -96,7 +98,7 @@ export default function App() {
                 <Route path="/updateTask" element={<UpdateTask />} />
                 <Route path="/offerRanges" element={<OfferRanges />} />
                 <Route path="/proxiesHelper" element={<ProxiesHelper />} />
-                <Route path="/proxiesHelperNew" element={<ProxiesHelperNew />} />
+                <Route path="/proxiesListing" element={<ProxiesListing />} />
 
 
 
