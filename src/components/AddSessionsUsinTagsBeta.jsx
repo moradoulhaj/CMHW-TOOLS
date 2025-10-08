@@ -42,16 +42,7 @@ export default function AddSessionUsingTagsBeta() {
     // scheduleTasks : true
   });
 
-  // const entities = [
-  //   ...Array.from({ length: 15 }, (_, i) => ({
-  //     id: i + 1,
-  //     name: `CMH${i + 1}`,
-  //   })),
-  //   { id: 30, name: "CMH3-Offer" },
-  //   { id: 60, name: "CMH6-Offer" },
-  //   { id: 150, name: "CMH15-Offer" },
-  //   { id: 16, name: "CMH16" },
-  // ];
+
      // Fetch all entities on mount
      useEffect(() => {
       const loadEntities = async () => {

@@ -1,7 +1,6 @@
 import JSZip from "jszip";
 import { BookTemplate } from "lucide-react";
 import * as XLSX from "xlsx";
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:1752201820.
 export const readFileContent = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

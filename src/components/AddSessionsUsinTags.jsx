@@ -20,8 +20,7 @@ export default function AddSessionUsingTags() {
   const [profilesByDrop, setProfilesByDrop] = useState([]);
   const [excelBlob, setExcelBlob] = useState(null); // State to hold the Excel blob
   const oldFileInputRef = useRef(null);
-  // Suggested code may be subject to a license. Learn more: ~LicenseLog:1145596097.
-  //   useEffect(()=>{("profilesByDrop",profilesByDrop);},[profilesByDrop])
+
   const HandleOpenSettings = () => {
     setIsSettingsOpen(true);
   };
